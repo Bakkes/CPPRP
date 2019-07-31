@@ -1,0 +1,9 @@
+*
+!.gitignore
+!main.c
+!main.h
+!bench.h
+!*.c
+!*.h
+!*.cpp
+!build.sh
