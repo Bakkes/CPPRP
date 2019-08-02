@@ -20,7 +20,8 @@ std::shared_ptr<void> createInstance(CPPBitReader<uint32_t>& reader)
 class NetworkStreamParser
 {
 private:
-	std::unordered_map<std::string, createFunc> parseFunctions;
+	std::vector<createFunc> parseFunctions;
+	std::unordered_map<std::string, uint32_t> functionToIndexMapping;
 public:
 	NetworkStreamParser();
 	~NetworkStreamParser();
@@ -32,17 +33,18 @@ public:
 	{
 		for (auto str : props)
 		{
-			parseFunctions[str] = &createInstance<T>;
+			RegisterParsers<T>(str);
 		}
 	}
 
 	template<typename T>
 	void RegisterParsers(const std::string prop)
 	{
-		parseFunctions[prop] = &createInstance<T>;
+		parseFunctions[functionToIndexMapping[prop]] = &createInstance<T>;
 	}
 
-	void RegisterParsers();
+	void RegisterParsers(const std::shared_ptr<ReplayFileData>& rfd);
+	void Parse(const std::uint32_t name, CPPBitReader<uint32_t>& br);
 	void Parse(const std::string& name, CPPBitReader<uint32_t>& br);
 };
 

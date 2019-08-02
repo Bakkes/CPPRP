@@ -12,8 +12,14 @@ NetworkStreamParser::~NetworkStreamParser()
 {
 }
 
-void NetworkStreamParser::RegisterParsers()
+void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>& rfd)
 {
+	const size_t size = rfd->objects.size();
+	parseFunctions.resize(size);
+	for (size_t i = 0; i < size; ++i)
+	{
+		functionToIndexMapping[rfd->objects.at(i)] = i;
+	}
 	RegisterParsers<ReplicatedRBState>("TAGame.RBActor_TA:ReplicatedRBState");
 
 	RegisterParsers<LogoData>("TAGame.Team_TA:LogoData");
@@ -159,13 +165,19 @@ void NetworkStreamParser::RegisterParsers()
 	//RegisterParsers<>({  });
 }
 
+void NetworkStreamParser::Parse(const uint32_t propertyIdx, CPPBitReader<uint32_t>& br)
+{
+	auto inst = parseFunctions[propertyIdx](br);
+	//printf("Result: %s\n", inst->ToString().c_str());
+}
+
 void NetworkStreamParser::Parse(const std::string & name, CPPBitReader<uint32_t>& br)
 {
-	if (parseFunctions.find(name) == parseFunctions.end())
+	if (functionToIndexMapping.find(name) == functionToIndexMapping.end())
 	{
 		printf("Could not find parser for %s\n", name.c_str());
 		return;
 	}
-	auto inst = parseFunctions[name](br);
+	auto inst = parseFunctions[functionToIndexMapping[name]](br);
 	//printf("Result: %s\n", inst->ToString().c_str());
 }
