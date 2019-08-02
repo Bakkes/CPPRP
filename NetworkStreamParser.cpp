@@ -1,5 +1,6 @@
 #include "NetworkStreamParser.h"
-
+#include "NetworkData.h"
+#include "generated.h"
 
 
 NetworkStreamParser::NetworkStreamParser()
@@ -13,11 +14,11 @@ NetworkStreamParser::~NetworkStreamParser()
 
 void NetworkStreamParser::RegisterParsers()
 {
-	RegisterParsers<NetworkStreamItemParserRBState>("TAGame.RBActor_TA:ReplicatedRBState");
+	RegisterParsers<ReplicatedRBState>("TAGame.RBActor_TA:ReplicatedRBState");
 
-	RegisterParsers<NetworkStreamItemParserLogoData>("TAGame.Team_TA:LogoData");
+	RegisterParsers<LogoData>("TAGame.Team_TA:LogoData");
 
-	RegisterParsers<NetworkStreamItemParserActiveActor>({ "TAGame.CrowdManager_TA:GameEvent",
+	RegisterParsers<ActiveActor>({ "TAGame.CrowdManager_TA:GameEvent",
 		"TAGame.CrowdActor_TA:GameEvent", "TAGame.PRI_TA:PersistentCamera",
 		"TAGame.Team_TA:GameEvent", "TAGame.Ball_TA:GameEvent",
 		"Engine.Pawn:PlayerReplicationInfo", "TAGame.PRI_TA:ReplicatedGameEvent",
@@ -26,17 +27,17 @@ void NetworkStreamParser::RegisterParsers()
 		"TAGame.GameEvent_Soccar_TA:MVP", "TAGame.GameEvent_Soccar_TA:MatchWinner",
 		"Engine.PlayerReplicationInfo:Team", "TAGame.GameEvent_Soccar_TA:GameWinner" });
 
-	RegisterParsers<NetworkStreamItemParserObjectTarget>({"TAGame.CrowdManager_TA:ReplicatedGlobalOneShotSound", 
+	RegisterParsers<ObjectTarget>({"TAGame.CrowdManager_TA:ReplicatedGlobalOneShotSound", 
 		"TAGame.CrowdActor_TA:ReplicatedOneShotSound", "TAGame.GameEvent_TA:MatchTypeClass", 
 		"Engine.GameReplicationInfo:GameClass", "TAGame.GameEvent_Soccar_TA:SubRulesArchetype", 
 		"TAGame.Ball_TA:ReplicatedPhysMatOverride" });
 
-	RegisterParsers<NetworkStreamItemParserString>({"Engine.GameReplicationInfo:ServerName",
+	RegisterParsers<std::string>({"Engine.GameReplicationInfo:ServerName",
 		"Engine.PlayerReplicationInfo:PlayerName", "TAGame.Team_TA:CustomTeamName",
 		"Engine.PlayerReplicationInfo:RemoteUserData", "TAGame.GRI_TA:NewDedicatedServerIP",
 		"ProjectX.GRI_X:MatchGUID" });
 
-	RegisterParsers<NetworkStreamItemParserUint32_t>({ "TAGame.GameEvent_Soccar_TA:SecondsRemaining", 
+	RegisterParsers<uint32_t>({ "TAGame.GameEvent_Soccar_TA:SecondsRemaining", 
 		"TAGame.GameEvent_TA:ReplicatedGameStateTimeRemaining", "TAGame.CrowdActor_TA:ReplicatedCountDownNumber", 
 		"TAGame.GameEvent_Team_TA:MaxTeamSize", "Engine.PlayerReplicationInfo:PlayerID", 
 		"TAGame.PRI_TA:TotalXP", "TAGame.PRI_TA:MatchScore", 
@@ -53,7 +54,7 @@ void NetworkStreamParser::RegisterParsers()
 		"TAGame.GameEvent_Soccar_TA:SeriesLength", 
 		"TAGame.PRI_TA:SpectatorShortcut", "Engine.Pawn:HealthMax" });
 
-	RegisterParsers<NetworkStreamItemParserBool>({ "Engine.Actor:bCollideWorld", 
+	RegisterParsers<bool>({ "Engine.Actor:bCollideWorld", 
 		"Engine.Pawn:bIsCrouched", "Engine.PlayerReplicationInfo:bReadyToPlay", 
 		"TAGame.Vehicle_TA:bReplicatedHandbrake", "TAGame.Vehicle_TA:bDriving", 
 		"Engine.Actor:bNetOwner", "Engine.Actor:bBlockActors", 
@@ -78,11 +79,11 @@ void NetworkStreamParser::RegisterParsers()
 		"TAGame.GameEvent_TA:bAllowReadyUp", "Engine.Actor:bTearOff", 
 		"Engine.PlayerReplicationInfo:bTimedOut" });
 
-	RegisterParsers<NetworkStreamItemParserUint64_t>({
+	RegisterParsers<uint64_t>({
 		"ProjectX.GRI_X:GameServerID", "TAGame.Team_TA:ClubID", "TAGame.PRI_TA:ClubID"
 		});
 
-	RegisterParsers<NetworkStreamItemParserUint8_t>({
+	RegisterParsers<uint8_t>({
 		"Engine.PlayerReplicationInfo:Ping", "TAGame.Vehicle_TA:ReplicatedSteer", 
 		"TAGame.Vehicle_TA:ReplicatedThrottle", "TAGame.PRI_TA:CameraYaw", 
 		"TAGame.PRI_TA:CameraPitch", "TAGame.Ball_TA:HitTeamNum", 
@@ -94,7 +95,7 @@ void NetworkStreamParser::RegisterParsers()
 		"TAGame.CarComponent_TA:ReplicatedActive"
 		});
 
-	RegisterParsers<NetworkStreamItemParserFloat>({
+	RegisterParsers<float>({
 		"TAGame.CarComponent_FlipCar_TA:FlipCarTime", "TAGame.Ball_TA:ReplicatedBallScale", 
 		"TAGame.CarComponent_Boost_TA:RechargeDelay", "TAGame.CarComponent_Boost_TA:RechargeRate", 
 		"TAGame.Ball_TA:ReplicatedAddedCarBounceScale", "TAGame.Ball_TA:ReplicatedBallMaxLinearSpeedScale", 
@@ -106,27 +107,56 @@ void NetworkStreamParser::RegisterParsers()
 		"TAGame.PRI_TA:SteeringSensitivity", "TAGame.Car_TA:ReplicatedCarScale"
 		});
 
-	RegisterParsers<NetworkStreamItemParserReservation>("ProjectX.GRI_X:Reservations");
+	RegisterParsers<Reservation>("ProjectX.GRI_X:Reservations");
 
-	RegisterParsers<NetworkStreamItemParserUniqueId>({
+	RegisterParsers<UniqueId>({
 		"Engine.PlayerReplicationInfo:UniqueId", "TAGame.PRI_TA:PartyLeader"
 		});
 
-	RegisterParsers<NetworkStreamItemParserInt32_t>({
+	RegisterParsers<int32_t>({
 		"ProjectX.GRI_X:ReplicatedGameMutatorIndex", 
 		"TAGame.PRI_TA:TimeTillItem"
 		});
 
-	RegisterParsers<NetworkStreamItemParserPickupData>({
+	RegisterParsers<ReplicatedPickupData>({
 		"TAGame.VehiclePickup_TA:ReplicatedPickupData"
 		});
 
-	RegisterParsers< NetworkStreamItemParserSkillTier>({
+	RegisterParsers<SkillTier>({
 		"TAGame.PRI_TA:SkillTier"
 		});
-	RegisterParsers< NetworkStreamItemParserVector3I>({
+	RegisterParsers<Vector3I>({
 		"Engine.Actor:Location", "TAGame.CarComponent_Dodge_TA:DodgeTorque"
 		});
+
+	RegisterParsers<OnlineLoadout>({ "TAGame.PRI_TA:ClientLoadoutOnline" });
+	RegisterParsers<ClientLoadoutsOnline>({ "TAGame.PRI_TA:ClientLoadoutsOnline" });
+	RegisterParsers<ClientLoadouts>({ "TAGame.PRI_TA:ClientLoadouts" });
+
+	RegisterParsers<CameraSettings>({ 
+		"TAGame.PRI_TA:CameraSettings", "TAGame.CameraSettingsActor_TA:ProfileSettings" 
+		});
+
+	RegisterParsers<TeamPaint>({
+		"TAGame.Car_TA:TeamPaint"
+		});
+
+	RegisterParsers<ReplicatedDemolish>({ "TAGame.Car_TA:ReplicatedDemolish" });
+
+	RegisterParsers<ReplicatedMusicStringer>({ "TAGame.GameEvent_Soccar_TA:ReplicatedMusicStinger" });
+	RegisterParsers<PrivateMatchSettings>({ "TAGame.GameEvent_SoccarPrivate_TA:MatchSettings" });
+	RegisterParsers<ClubColors>({ "TAGame.Team_TA:ClubColors", "TAGame.Car_TA:ClubColors" });
+	RegisterParsers<WeldedInfo>({ "TAGame.RBActor_TA:WeldedInfo" });
+	RegisterParsers<DamageState>({ "TAGame.BreakOutActor_Platform_TA:DamageState" });
+	RegisterParsers<AppliedDamage>({ "TAGame.Ball_Breakout_TA:AppliedDamage" });
+	RegisterParsers<ReplicatedExplosionData>({ "TAGame.Ball_TA:ReplicatedExplosionData" });
+	RegisterParsers<ReplicatedExplosionDataExtended>({ "TAGame.Ball_TA:ReplicatedExplosionDataExtended" });
+	RegisterParsers<ReplicatedTitle>({ "TAGame.PRI_TA:SecondaryTitle", "TAGame.PRI_TA:PrimaryTitle" });
+	RegisterParsers<HistoryKey>({ "TAGame.PRI_TA:PlayerHistoryKey" });
+	RegisterParsers<ReplicatedStatEvent>({ "TAGame.GameEvent_Soccar_TA:ReplicatedStatEvent" });
+	RegisterParsers<RepStatTitle>({ "TAGame.PRI_TA:RepStatTitles" });
+	//RegisterParsers<>({  });
+	//RegisterParsers<>({  });
 }
 
 void NetworkStreamParser::Parse(const std::string & name, CPPBitReader<uint32_t>& br)
@@ -136,7 +166,6 @@ void NetworkStreamParser::Parse(const std::string & name, CPPBitReader<uint32_t>
 		printf("Could not find parser for %s\n", name.c_str());
 		return;
 	}
-	auto inst = parseFunctions[name]();
-	inst->Consume(br);
-	printf("Result: %s\n", inst->ToString().c_str());
+	auto inst = parseFunctions[name](br);
+	//printf("Result: %s\n", inst->ToString().c_str());
 }

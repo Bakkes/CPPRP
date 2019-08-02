@@ -3,89 +3,8 @@
 #include <sstream>
 #include <stdint.h>
 #include <assert.h>
+#include "ReplayFileData.h"
 
-struct Vector3
-{
-	float x, y, z;
-
-	std::string ToString()
-	{
-		return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);
-	}
-};
-
-struct Vector3I
-{
-	int x, y, z;
-
-	explicit operator Vector3() const 
-	{
-		return Vector3
-		{
-			static_cast<float>(x),
-			static_cast<float>(y),
-			static_cast<float>(z)
-		};
-	};
-
-	std::string ToString()
-	{
-		return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);
-	}
-};
-
-struct Rotator
-{
-	int pitch, yaw, roll;
-
-	std::string ToString()
-	{
-		return std::to_string(pitch) + ", " + std::to_string(yaw) + ", " + std::to_string(roll);
-	}
-};
-
-struct Quat
-{
-	float w, x, y, z;
-
-	std::string ToString()
-	{
-		return std::to_string(w) + ", " + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);
-	}
-};
-
-enum Platform
-{
-	Platform_Unknown = 0,
-	Platform_Steam = 1,
-	Platform_PS4 = 2,
-	Platform_PS3 = 3,
-	Platform_Dingo = 4,
-	Platform_QQ = 5,
-	Platform_WeGame = 6,
-	Platform_NNX = 7,
-	Platform_PsyNet = 8,
-	Platform_MAX = 9
-};
-
-struct UniqueId
-{
-	uint8_t platform;
-	uint8_t playerNumber;
-	uint64_t uniqueID;
-
-	std::string ToString() const
-	{
-		return std::to_string(platform) + "|" + std::to_string(uniqueID) + "|" + std::to_string(playerNumber);
-	}
-
-	friend std::ostream& operator<<(std::ostream& os, UniqueId& foo)
-	{
-		os << foo.ToString();
-		return os;
-	}
-
-} ;
 
 #define QUAT_NUM_BITS (18)
 #define MAX_QUAT_VALUE (0.7071067811865475244f)
@@ -129,6 +48,7 @@ public:
 	uint32_t size;
 	uint32_t t_position;
 	uint32_t bit_position;
+	std::shared_ptr<ReplayFileData> owner;
 
 private:
 	template<typename X>
@@ -214,13 +134,14 @@ private:
 	}
 public:
 
-	CPPBitReader(const T * data, uint32_t size)
+	CPPBitReader(const T * data, uint32_t size, std::shared_ptr<ReplayFileData> owner_)
 	{
 		this->start = data;
 		this->data = data;
 		this->size = size;
 		this->t_position = 0;
 		this->bit_position = 0;
+		this->owner = owner_;
 	}
 
 	CPPBitReader()

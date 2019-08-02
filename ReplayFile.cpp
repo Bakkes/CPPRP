@@ -28,16 +28,16 @@ bool ReplayFile::Load()
 void ReplayFile::DeserializeHeader()
 {
 	const uint32_t dataSize = data.size() / 4;
-	fullReplayBitReader = CPPBitReader<uint32_t>((const uint32_t*)data.data(), dataSize); //They're read as bytes, since we're retrieving them in memory as uint32_t, divide size by 4 (bytes)
-	
-	//replayFile.header.crc = fullReplayBitReader.read<uint32_t>();
-	replayFile.header = {
+	replayFile = std::make_shared<ReplayFileData>();
+	fullReplayBitReader = CPPBitReader<uint32_t>((const uint32_t*)data.data(), dataSize, replayFile); //They're read as bytes, since we're retrieving them in memory as uint32_t, divide size by 4 (bytes)
+	//replayFile->header.crc = fullReplayBitReader.read<uint32_t>();
+	replayFile->header = {
 		fullReplayBitReader.read<uint32_t>(),	//Size
 		fullReplayBitReader.read<uint32_t>(),	//CRC
 		fullReplayBitReader.read<uint32_t>(),	//version1
 		fullReplayBitReader.read<uint32_t>()	//Version2
 	};
-	if (replayFile.header.version1 >= 868 && replayFile.header.version2 >= 18)
+	if (replayFile->header.version1 >= 868 && replayFile->header.version2 >= 18)
 	{
 		fullReplayBitReader.skip(4*8);
 	}
@@ -51,22 +51,22 @@ void ReplayFile::DeserializeHeader()
 		{
 			break;
 		}
-		replayFile.properties[baseProperty->property_name] = baseProperty;
+		replayFile->properties[baseProperty->property_name] = baseProperty;
 	}
-	//replayFile.properties = baseProperty;
-	replayFile.body_size = fullReplayBitReader.read<uint32_t>();
-	replayFile.crc2 = fullReplayBitReader.read<uint32_t>();
+	//replayFile->properties = baseProperty;
+	replayFile->body_size = fullReplayBitReader.read<uint32_t>();
+	replayFile->crc2 = fullReplayBitReader.read<uint32_t>();
 
 	const uint32_t levelCount = fullReplayBitReader.read<uint32_t>();
 	for (uint32_t i = 0; i < levelCount; ++i)
 	{
-		replayFile.levels.push_back(fullReplayBitReader.read<std::string>());
+		replayFile->levels.push_back(fullReplayBitReader.read<std::string>());
 	}
 
 	const uint32_t keyframeCount = fullReplayBitReader.read<uint32_t>();
 	for (uint32_t i = 0; i < keyframeCount; ++i)
 	{
-		replayFile.keyframes.push_back(
+		replayFile->keyframes.push_back(
 			{
 				fullReplayBitReader.read<float>(),	//Time
 				fullReplayBitReader.read<uint32_t>(),	//Frame
@@ -75,16 +75,16 @@ void ReplayFile::DeserializeHeader()
 	}
 
 	const uint32_t netstreamCount = fullReplayBitReader.read<uint32_t>();
-	replayFile.netstream_data = data.data() + fullReplayBitReader.GetBytePosition(); //We know this is always aligned, so valid
+	replayFile->netstream_data = data.data() + fullReplayBitReader.GetBytePosition(); //We know this is always aligned, so valid
 	fullReplayBitReader.skip(netstreamCount*8); //TODO: implement proper skip
-	replayFile.netstream_size = netstreamCount;
+	replayFile->netstream_size = netstreamCount;
 
 	fullReplayBitReader.skip(4*8); //debug_log apparently
 
 	const uint32_t replayTickCount = fullReplayBitReader.read<uint32_t>();
 	for (uint32_t i = 0; i < replayTickCount; ++i)
 	{
-		replayFile.replayticks.push_back(
+		replayFile->replayticks.push_back(
 			{
 				fullReplayBitReader.read<std::string>(),	//Type
 				fullReplayBitReader.read<uint32_t>()		//Frame
@@ -95,7 +95,7 @@ void ReplayFile::DeserializeHeader()
 	const uint32_t replicatedPackagesCount = fullReplayBitReader.read<uint32_t>();
 	for (uint32_t i = 0; i < replicatedPackagesCount; ++i)
 	{
-		replayFile.replicated_packages.push_back(
+		replayFile->replicated_packages.push_back(
 			{
 				fullReplayBitReader.read<std::string>()
 			});
@@ -104,7 +104,7 @@ void ReplayFile::DeserializeHeader()
 	const uint32_t objectsCount = fullReplayBitReader.read<uint32_t>();
 	for (uint32_t i = 0; i < objectsCount; ++i)
 	{
-		replayFile.objects.push_back(
+		replayFile->objects.push_back(
 			{
 				fullReplayBitReader.read<std::string>()
 			});
@@ -113,7 +113,7 @@ void ReplayFile::DeserializeHeader()
 	const uint32_t namesCount = fullReplayBitReader.read<uint32_t>();
 	for (uint32_t i = 0; i < namesCount; ++i)
 	{
-		replayFile.names.push_back(
+		replayFile->names.push_back(
 			{
 				fullReplayBitReader.read<std::string>()
 			});
@@ -122,7 +122,7 @@ void ReplayFile::DeserializeHeader()
 	const uint32_t classIndexCount = fullReplayBitReader.read<uint32_t>();
 	for (uint32_t i = 0; i < classIndexCount; ++i)
 	{
-		replayFile.class_indices.push_back(
+		replayFile->class_indices.push_back(
 			{
 				fullReplayBitReader.read<std::string>(),	//Class_name
 				fullReplayBitReader.read<uint32_t>()		//Index
@@ -130,7 +130,7 @@ void ReplayFile::DeserializeHeader()
 	}
 
 	const uint32_t classNetsCount = fullReplayBitReader.read<uint32_t>();
-	replayFile.classnets.resize(classNetsCount);
+	replayFile->classnets.resize(classNetsCount);
 	for (uint32_t i = 0; i < classNetsCount; ++i)
 	{
 		ClassNet cn = {
@@ -155,14 +155,14 @@ void ReplayFile::DeserializeHeader()
 				});
 		}
 		std::shared_ptr<ClassNet> classNet = std::make_shared<ClassNet>(cn);
-		replayFile.classnets[i] = (classNet);
+		replayFile->classnets[i] = (classNet);
 
 		//Set parent class if exists
 		for (int32_t k = (int32_t)i - 1; k >= 0; --k)
 		{
-			if (replayFile.classnets[i]->parent == replayFile.classnets[k]->id)
+			if (replayFile->classnets[i]->parent == replayFile->classnets[k]->id)
 			{
-				replayFile.classnets[i]->parent_class = replayFile.classnets[k];
+				replayFile->classnets[i]->parent_class = replayFile->classnets[k];
 				break;
 			}
 		}
@@ -208,7 +208,7 @@ void ReplayFile::FixParents()
 			clas->parent_class = classBase;
 		}
 	}
-	for (auto cn : replayFile.classnets)
+	for (auto cn : replayFile->classnets)
 	{
 		uint32_t i = 0;
 		uint32_t result = GetPropertyIndexById(cn, i);
@@ -224,7 +224,7 @@ void ReplayFile::FixParents()
 void ReplayFile::Parse()
 {
 	//Divide by 4 since netstream_data is bytes, but we read uint32_ts
-	CPPBitReader<uint32_t> networkReader((uint32_t*)replayFile.netstream_data, replayFile.netstream_size / 4);
+	CPPBitReader<uint32_t> networkReader((uint32_t*)replayFile->netstream_data, replayFile->netstream_size / 4, replayFile);
 
 	const int32_t maxChannels = GetProperty<int32_t>("MaxChannels");
 	
@@ -247,7 +247,7 @@ void ReplayFile::Parse()
 				//Is new state
 				if (networkReader.read<bool>())
 				{
-					if (replayFile.header.version1 > 868 || (replayFile.header.version1 == 868 && replayFile.header.version2 >= 14))
+					if (replayFile->header.version1 > 868 || (replayFile->header.version1 == 868 && replayFile->header.version2 >= 14))
 					{
 						actorState.name_id = networkReader.read<uint32_t>();
 					}
@@ -256,12 +256,12 @@ void ReplayFile::Parse()
 
 					//const uint32_t bit_pos = networkReader.GetAbsoluteBitPosition();
 
-					const std::string typeName = replayFile.objects.at(typeId);
+					const std::string typeName = replayFile->objects.at(typeId);
 
 					actorState.classNet = GetClassnetByNameWithLookup(typeName);
 					
 					const uint32_t classId = actorState.classNet->index;
-					const std::string className = replayFile.objects.at(classId);
+					const std::string className = replayFile->objects.at(classId);
 
 					if (HasInitialPosition(className))
 					{
@@ -280,8 +280,8 @@ void ReplayFile::Parse()
 						const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
 						const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
 						const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
-						printf("Calling parser for %s\n", replayFile.objects[propertyIndex].c_str());
-						networkParser.Parse(replayFile.objects[propertyIndex], networkReader);
+						printf("Calling parser for %s\n", replayFile->objects[propertyIndex].c_str());
+						networkParser.Parse(replayFile->objects[propertyIndex], networkReader);
 					}
 				}
 			}
@@ -413,13 +413,13 @@ const std::shared_ptr<ClassNet>& ReplayFile::GetClassnetByName(const std::string
 {
 	if (!classNetMapCached)
 	{
-		for (uint32_t i = 0; i < replayFile.classnets.size(); ++i)
+		for (uint32_t i = 0; i < replayFile->classnets.size(); ++i)
 		{
-			const uint32_t index = replayFile.classnets.at(i)->index;
-			const std::string objectName = replayFile.objects.at(index);
+			const uint32_t index = replayFile->classnets.at(i)->index;
+			const std::string objectName = replayFile->objects.at(index);
 			if (objectName.compare(objectName) == 0)
 			{
-				classnetMap[objectName] = replayFile.classnets.at(i);
+				classnetMap[objectName] = replayFile->classnets.at(i);
 			}
 		}
 

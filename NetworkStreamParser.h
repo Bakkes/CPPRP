@@ -5,12 +5,14 @@
 #include <unordered_map>
 #include <initializer_list>
 #include "NetworkData.h"
-typedef std::shared_ptr<NetworkStreamItemParser<uint32_t>>(*createFunc)();
+#include "NetworkParsers.h"
+#include <any>
+typedef std::shared_ptr<void>(*createFunc)(CPPBitReader<uint32_t>& reader);
 
 template<typename T>
-std::shared_ptr<NetworkStreamItemParser<uint32_t>> createInstance()
+std::shared_ptr<void> createInstance(CPPBitReader<uint32_t>& reader)
 {
-	return std::static_pointer_cast<NetworkStreamItemParser<uint32_t>>(std::make_shared<T>());
+	return std::static_pointer_cast<void>(std::make_shared<T>(Consume<T>(reader)));
 }
 
 class NetworkStreamParser

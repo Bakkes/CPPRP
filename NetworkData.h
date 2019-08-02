@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <sstream>
+#include <vector>
 #include "CPPBitReader.h"
 
 #define __ParserAttribute__(...)
@@ -16,12 +17,21 @@
 //};
 //
 
-//__ParserAttribute__(Consume, false)
-struct ReplicatedRBState {
-	Quat rotation; //16 bytes
-	Vector3 position; //12 bytes
-	Vector3 linear_velocity; //12 bytes
-	Vector3 angular_velocity; //12 bytes
+
+__ParserAttribute__(Consume, false)
+struct ReplicatedRBState 
+{
+	__ParserAttribute__(CallToString, true)
+	Quat rotation;
+
+	__ParserAttribute__(CallToString, true)
+	Vector3 position;
+
+	__ParserAttribute__(CallToString, true)
+	Vector3 linear_velocity;
+
+	__ParserAttribute__(CallToString, true)
+	Vector3 angular_velocity;
 	bool sleeping;
 };
 
@@ -44,22 +54,26 @@ struct ObjectTarget
 };
 
 //__ParserAttribute__(Consume, false)
-struct UniqueId
-{
-	uint8_t platform;
-	uint8_t player_number;
-	uint8_t* id;
-};
+//struct UniqueId
+//{
+//	uint8_t platform;
+//	uint8_t player_number;
+//	uint8_t* id;
+//};
 
+__ParserAttribute__(Consume, false)
 struct Reservation
 {
-	uint32_t unknown;
+	__ParserAttribute__(NumBits, 3)
+	uint8_t unknown;
+
+	__ParserAttribute__(CallToString, true)
 	UniqueId player_id;
 	std::string player_name;
 	uint8_t unknown2;
 };
 
-//__ParserAttribute__(Consume, false)
+__ParserAttribute__(Consume, false)
 struct ClientLoadout
 {
 	uint8_t version;
@@ -115,7 +129,9 @@ struct ReplicatedDemolish
 	int32_t attacker_actor_id;
 	bool unknown2;
 	int32_t victim_actor_id;
+	__ParserAttribute__(CallToString, true)
 	Vector3 attacker_velocity;
+	__ParserAttribute__(CallToString, true)
 	Vector3 victim_velocity;
 };
 
@@ -137,7 +153,7 @@ struct PrivateMatchSettings
 	bool is_public;
 };
 
-//__ParserAttribute__(Consume, false)
+__ParserAttribute__(Consume, false)
 struct ProductAttribute
 {
 	uint32_t class_index;
@@ -149,40 +165,49 @@ struct ProductAttribute
 
 struct Attributes
 {
-	uint8_t attributes_count;
-
+	//uint8_t attributes_count; //Is automatically read when consuming vector
+	__ParserAttribute__(CallToString, true)
 	__ParserAttribute__(CallConsume, true)
 	std::vector<ProductAttribute> product_attributes;
 };
 
 struct OnlineLoadout
 {
-	uint8_t attributes_list_count;
-
+	//uint8_t attributes_list_count;//Is automatically read when consuming vector
+	__ParserAttribute__(CallToString, true)
 	__ParserAttribute__(CallConsume, true)
 	std::vector<Attributes> attributes_list;
 };
 
 struct UserColorAttribute
 {
-	uint8_t r, g, b, a;
+	uint8_t r;
+	uint8_t g;
+	uint8_t b;
+	uint8_t a;
 };
 
-//__ParserAttribute__(Consume, false)
 struct ClientLoadoutsOnline
 {
+	__ParserAttribute__(CallToString, true)
 	__ParserAttribute__(CallConsume, true)
 	OnlineLoadout online_one;
+
+	__ParserAttribute__(CallToString, true)
 	__ParserAttribute__(CallConsume, true)
 	OnlineLoadout online_two;
+
 	bool loadout_set;
 	bool is_deprecated;
 };
 
 struct ClientLoadouts
 {
+	__ParserAttribute__(CallToString, true)
 	__ParserAttribute__(CallConsume, true)
 	ClientLoadout loadout_one;
+
+	__ParserAttribute__(CallToString, true)
 	__ParserAttribute__(CallConsume, true)
 	ClientLoadout loadout_two;
 };
@@ -199,8 +224,10 @@ struct WeldedInfo
 {
 	bool active;
 	int32_t actor_id;
+	__ParserAttribute__(CallToString, true)
 	Vector3 offset;
 	float mass;
+	__ParserAttribute__(CallToString, true)
 	Rotator rotation;
 };
 
@@ -217,6 +244,8 @@ struct DamageState
 	uint8_t damage_state;
 	bool unknown2;
 	int32_t causer_actor_id;
+
+	__ParserAttribute__(CallToString, true)
 	Vector3 damage_location;
 	bool direct_damage;
 	bool immediate;
@@ -225,6 +254,7 @@ struct DamageState
 struct AppliedDamage
 {
 	uint8_t id;
+	__ParserAttribute__(CallToString, true)
 	Vector3 position;
 	int32_t damage_index;
 	int32_t total_damage;
@@ -234,13 +264,17 @@ struct ReplicatedExplosionData
 {
 	bool unknown1;
 	uint32_t actor_id;
+	__ParserAttribute__(CallToString, true)
 	Vector3 position;
 };
 
 struct ReplicatedExplosionDataExtended
 {
-	ReplicatedExplosionData red;
-	uint8_t unknown3;
+	bool unknown1;
+	uint32_t actor_id;
+	__ParserAttribute__(CallToString, true)
+	Vector3 position;
+	bool unknown3;
 	uint32_t unknown4;
 };
 
@@ -273,8 +307,14 @@ struct RepStatTitle
 	bool unknown1;
 	std::string name;
 
+	__ParserAttribute__(CallToString, true)
 	__ParserAttribute__(CallConsume, true)
 	ObjectTarget object_target;
 	uint32_t value;
-	
+};
+
+struct SkillTier
+{
+	__ParserAttribute__(MaxBits, 500)
+	uint32_t tier;
 };
