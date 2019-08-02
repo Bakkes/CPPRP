@@ -16,3 +16,19 @@ void NetworkStreamItemParserRBState::Consume(CPPBitReader<uint32_t>& reader)
 		this->angularVelocity = { 0 };
 	}
 }
+
+void NetworkStreamItemParserReservation::Consume(CPPBitReader<uint32_t>& reader)
+{
+	this->unknown = reader.read<uint8_t>(3);
+	this->playerId = reader.read<UniqueId>();
+	if (this->playerId.platform != Platform_Unknown)
+	{
+		this->playerName = reader.read<std::string>();
+	}
+	this->unknown2 = reader.read<uint8_t>();
+}
+
+void NetworkStreamItemParserSkillTier::Consume(CPPBitReader<uint32_t>& reader)
+{
+	this->skillTier = reader.readBitsMax<uint32_t>(500);
+}

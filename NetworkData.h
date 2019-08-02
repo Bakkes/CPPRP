@@ -1,177 +1,280 @@
 #pragma once
 #include <stdint.h>
 #include <sstream>
-#include "reflect.h"
 #include "CPPBitReader.h"
-#define exp(...) __VA_ARGS__
-#define ALLEH_ZEG(_1, _2) _1##_2
-#define COMBINE(_1,_2) ALLEH_ZEG(_1, _2)
 
-#define MEMBER_TYPE(type, name) type name;
-#define READ_TYPE(type, name) name = reader.read<type>();
-#define WRITE_TYPE(type, name) /*this->##name.Write(writer);*/
-#define WRITE_TO_SS(type, name) ss << sep << #name" = " << std::to_string(##name);  sep = ", ";
+#define __ParserAttribute__(...)
 
-#define MEMBERS_0()
-#define MEMBERS_2(a, _1, _2)  a(_1, _2) 
-#define MEMBERS_4(a, _1, _2, _3, _4)  MEMBERS_2(a, _1, _2)  MEMBERS_2( a, _3, _4) 
-#define MEMBERS_6(a, _1, _2, _3, _4, _5, _6)  MEMBERS_4(a, _1, _2, _3, _4) MEMBERS_2(a, _5, _6) 
-#define MEMBERS_8(a, _1, _2, _3, _4, _5, _6, _7, _8)  MEMBERS_6(a, _1, _2, _3, _4, _5, ##_6) MEMBERS_2(a, _7, _8) 
-#define MEMBERS_10(a, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10)  MEMBERS_8(a, _1, _2, _3, _4, _5, _6, _7, _8) MEMBERS_2(a, _9, _10) 
-#define MEMBERS_12(a, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12)  MEMBERS_10(a, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10) MEMBERS_2(a, _11, _12) 
-
-template<typename T>
-class NetworkStreamItemParser
-{
-public:
-	//std::shared_ptr<T> val;
-public:
-	
-	//template<typename T>
-	virtual void Consume(CPPBitReader<T>& reader) {}
-	virtual std::string ToString() { return ""; }
-	//virtual const std::string ToString() = 0;
-};
-
-
-#define _NetworkStreamItem(networkStreamItemName, ...)\
-class NetworkStreamItemParser##networkStreamItemName : public NetworkStreamItemParser<uint32_t>\
-{\
-public:\
-exp(COMBINE(COMBINE(MEMBERS_, _PP_COUNT_VA(__VA_ARGS__)),(##MEMBER_TYPE,  __VA_ARGS__)))\
-public:\
-\
-std::string ToString() {\
-std::stringstream ss;\
-std::string sep = "";\
-exp(COMBINE(COMBINE(MEMBERS_, _PP_COUNT_VA(__VA_ARGS__)),(##WRITE_TO_SS,  __VA_ARGS__)))\
-return ss.str();\
-}\
-
-
-#define NetworkStreamItem(networkStreamItemName, ...)\
-	_NetworkStreamItem(networkStreamItemName, __VA_ARGS__)\
-\
-\
-void Consume(CPPBitReader<uint32_t>& reader)\
-{\
-exp(COMBINE(COMBINE(MEMBERS_, _PP_COUNT_VA(__VA_ARGS__)),(##READ_TYPE,  __VA_ARGS__)))\
-}\
-};
-
-#define NetworkStreamItemNoConsume(networkStreamItemName, ...) \
-	_NetworkStreamItem(networkStreamItemName, __VA_ARGS__)\
-\
-\
-void Consume(CPPBitReader<uint32_t>& reader);\
-};
-
-namespace std
-{
-	static inline std::string to_string(std::string s) { return s; }
-	static inline std::string to_string(Quat q) { return q.ToString(); }
-	static inline std::string to_string(Vector3 v) { return v.ToString(); }
-	static inline std::string to_string(Vector3I v) { return v.ToString(); }
-	static inline std::string to_string(UniqueId v) { return v.ToString(); }
-}
-
-NetworkStreamItemNoConsume(RBState, bool, sleeping, Vector3, position, Quat, rotation, Vector3, linearVelocity, Vector3, angularVelocity);
-
-//NetworkStreamItem(RBState, bool, sleeping, Vector3, position, Quat, rotation);
-NetworkStreamItem(LogoData, bool, unknown, uint32_t, logoId);
-NetworkStreamItem(ActiveActor, bool, active, int32_t, actorId);
-NetworkStreamItem(ObjectTarget, bool, active, int32_t, object_index);
-NetworkStreamItem(String, std::string, str);
-
-NetworkStreamItem(Bool, bool, value);
-NetworkStreamItem(Uint8_t, uint8_t, value);
-NetworkStreamItem(Uint32_t, uint32_t, value);
-NetworkStreamItem(Uint64_t, uint64_t, value);
-NetworkStreamItem(Int32_t, int32_t, value);
-NetworkStreamItem(Float, float, value);
-
-NetworkStreamItem(Vector3I, Vector3I, vector);
-NetworkStreamItem(UniqueId, UniqueId, id);
-NetworkStreamItem(PickupData, bool, unknown1, uint32_t, actorId, bool, pickedUp);
-
-
-
-//
-//class NetworkStreamItemParserRBState : public NetworkStreamItemParser<uint32_t>
+//__ParserAttribute__(Consume, false)
+//struct abc
 //{
-//public:
-//	bool sleeping;
-//	Vector3 position;
-//	Quat rotation;
-//	Vector3 linearVelocity;
-//	Vector3 angularVelocity;
-//public:
-//	void Consume(CPPBitReader<uint32_t>& reader) override
-//	{
-//		//this->val = std::make_shared<ASDF>();
-//		this->sleeping = reader.read<bool>();
-//		this->position = reader.read<Vector3>();
-//		this->rotation = reader.read<Quat>();
-//		if (!this->sleeping)
-//		{
-//			this->linearVelocity = reader.read<Vector3>();
-//			this->angularVelocity = reader.read<Vector3>();
-//		}
-//	}
+//	uint8_t test;
+//	uint32_t test2;
 //
-//	std::string ToString()
-//	{
-//		std::stringstream ss;
-//		ss << "sleeping = " << sleeping << ", position = " << position.ToString()
-//			<< ", rotation = " << rotation.ToString()
-//			<< ", linearVelocity = " << linearVelocity.ToString()
-//			<< ", angularVelocity = " << angularVelocity.ToString();
-//		return ss.str();
-//	}
+//	__ParserAttribute__(MaxBits, 500)
+//	uint16_t test3;
 //};
+//
 
-class NetworkStreamItemParserReservation : public NetworkStreamItemParser<uint32_t>
-{
-public:
-	uint8_t unknown;
-	UniqueId playerId;
-	std::string playerName;
-	uint8_t unknown2;
-public:
-	void Consume(CPPBitReader<uint32_t>& reader) override
-	{
-		//this->val = std::make_shared<ASDF>();
-		this->unknown = reader.read<uint8_t>(3);
-		this->playerId = reader.read<UniqueId>();
-		if (this->playerId.platform != Platform_Unknown)
-		{
-			this->playerName = reader.read<std::string>();
-		}
-		this->unknown2 = reader.read<uint8_t>();
-	}
-
-	std::string ToString()
-	{
-		std::stringstream ss;
-		ss << playerId.ToString() + "|" + playerName;
-		return ss.str();
-	}
+//__ParserAttribute__(Consume, false)
+struct ReplicatedRBState {
+	Quat rotation; //16 bytes
+	Vector3 position; //12 bytes
+	Vector3 linear_velocity; //12 bytes
+	Vector3 angular_velocity; //12 bytes
+	bool sleeping;
 };
 
-class NetworkStreamItemParserSkillTier : public NetworkStreamItemParser<uint32_t>
+struct LogoData
 {
-public:
-	uint32_t skillTier;
-public:
-	void Consume(CPPBitReader<uint32_t>& reader) override
-	{
-		this->skillTier = reader.readBitsMax<uint32_t>(500);
-	}
+	uint8_t unknown;
+	uint32_t logo_id;
+};
 
-	std::string ToString()
-	{
-		std::stringstream ss;
-		ss << "Skill: " << std::to_string(skillTier);
-		return ss.str();
-	}
+struct ActiveActor
+{
+	bool active;
+	int32_t actor_id;
+};
+
+struct ObjectTarget
+{
+	bool unknown;
+	int32_t object_index;
+};
+
+//__ParserAttribute__(Consume, false)
+struct UniqueId
+{
+	uint8_t platform;
+	uint8_t player_number;
+	uint8_t* id;
+};
+
+struct Reservation
+{
+	uint32_t unknown;
+	UniqueId player_id;
+	std::string player_name;
+	uint8_t unknown2;
+};
+
+//__ParserAttribute__(Consume, false)
+struct ClientLoadout
+{
+	uint8_t version;
+	uint32_t body;
+	uint32_t skin;
+	uint32_t wheels;
+	uint32_t boost;
+	uint32_t antenna;
+	uint32_t hat;
+	uint32_t unknown2;
+
+	uint32_t unknown3;
+	uint32_t engine_audio;
+	uint32_t trail;
+	uint32_t goal_explosion;
+	uint32_t banner;
+	uint32_t unknown4;
+	uint32_t unknown5;
+	uint32_t unknown6;
+	uint32_t unknown7;
+};
+
+struct CameraSettings
+{
+	float FOV;
+	float height;
+	float pitch;
+	float distance;
+	float stiffness;
+	float swivelspeed;
+	float transitionspeed;
+};
+
+struct ReplicatedPickupData
+{
+	bool unknown1;
+	int32_t actor_id;
+	bool picked_up;
+};
+
+struct TeamPaint
+{
+	uint8_t team_number;
+	uint8_t team_color_id;
+	uint8_t custom_color_id;
+	uint32_t team_finish_id;
+	uint32_t custom_finish_id;
+};
+
+struct ReplicatedDemolish
+{
+	bool unknown1;
+	int32_t attacker_actor_id;
+	bool unknown2;
+	int32_t victim_actor_id;
+	Vector3 attacker_velocity;
+	Vector3 victim_velocity;
+};
+
+struct ReplicatedMusicStringer
+{
+	bool unknown1;
+	uint32_t object_index;
+	uint8_t trigger;
+	
+};
+
+struct PrivateMatchSettings
+{
+	std::string mutators;
+	uint32_t map_name;
+	uint32_t max_player_count;
+	std::string game_name;
+	std::string password;
+	bool is_public;
+};
+
+//__ParserAttribute__(Consume, false)
+struct ProductAttribute
+{
+	uint32_t class_index;
+	std::string class_name;
+	void* value;
+	bool has_value;
+	bool unknown1;
+};
+
+struct Attributes
+{
+	uint8_t attributes_count;
+
+	__ParserAttribute__(CallConsume, true)
+	std::vector<ProductAttribute> product_attributes;
+};
+
+struct OnlineLoadout
+{
+	uint8_t attributes_list_count;
+
+	__ParserAttribute__(CallConsume, true)
+	std::vector<Attributes> attributes_list;
+};
+
+struct UserColorAttribute
+{
+	uint8_t r, g, b, a;
+};
+
+//__ParserAttribute__(Consume, false)
+struct ClientLoadoutsOnline
+{
+	__ParserAttribute__(CallConsume, true)
+	OnlineLoadout online_one;
+	__ParserAttribute__(CallConsume, true)
+	OnlineLoadout online_two;
+	bool loadout_set;
+	bool is_deprecated;
+};
+
+struct ClientLoadouts
+{
+	__ParserAttribute__(CallConsume, true)
+	ClientLoadout loadout_one;
+	__ParserAttribute__(CallConsume, true)
+	ClientLoadout loadout_two;
+};
+
+struct ClubColors
+{
+	bool team_color_set;
+	uint8_t team_color_id;
+	bool custom_color_set;
+	uint8_t custom_color_id;
+};
+
+struct WeldedInfo
+{
+	bool active;
+	int32_t actor_id;
+	Vector3 offset;
+	float mass;
+	Rotator rotation;
+};
+
+enum EBreakoutDamageState
+{
+	DamageState_Start,
+	DamageState_Damaged,
+	DamageState_Broken,
+	DamageState_MAX
+};
+
+struct DamageState
+{
+	uint8_t damage_state;
+	bool unknown2;
+	int32_t causer_actor_id;
+	Vector3 damage_location;
+	bool direct_damage;
+	bool immediate;
+};
+
+struct AppliedDamage
+{
+	uint8_t id;
+	Vector3 position;
+	int32_t damage_index;
+	int32_t total_damage;
+};
+
+struct ReplicatedExplosionData
+{
+	bool unknown1;
+	uint32_t actor_id;
+	Vector3 position;
+};
+
+struct ReplicatedExplosionDataExtended
+{
+	ReplicatedExplosionData red;
+	uint8_t unknown3;
+	uint32_t unknown4;
+};
+
+struct ReplicatedTitle
+{
+	bool unknown1;
+	bool unknown2;
+	uint32_t unknown3;
+	uint32_t unknown4;
+	uint32_t unknown5;
+	uint32_t unknown6;
+	uint32_t unknown7;
+	bool unknown8;
+};
+
+struct HistoryKey
+{
+	__ParserAttribute__(NumBits, 14)
+	uint16_t data;
+};
+
+struct ReplicatedStatEvent
+{
+	bool unknown1;
+	int32_t object_id;
+};
+
+struct RepStatTitle
+{
+	bool unknown1;
+	std::string name;
+
+	__ParserAttribute__(CallConsume, true)
+	ObjectTarget object_target;
+	uint32_t value;
+	
 };
