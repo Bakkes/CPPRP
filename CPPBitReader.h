@@ -45,7 +45,7 @@ class CPPBitReader
 public:
 	const T *start;
 	const T *data;
-	uint32_t size;
+	uint32_t size; //Should be in bits?
 	uint32_t t_position;
 	uint32_t bit_position;
 	std::shared_ptr<ReplayFileData> owner;
@@ -336,7 +336,7 @@ public:
 
 	inline const bool canRead()
 	{
-		return t_position < size;
+		return GetAbsoluteBitPosition() < size;
 	}
 
 	//Not yet implemented

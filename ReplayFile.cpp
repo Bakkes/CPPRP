@@ -1,6 +1,8 @@
 #include "ReplayFile.h"
 #include <fstream>
 #include "networkdata.h"
+#include "rapidjson/filewritestream.h"
+#include <rapidjson/writer.h>
 
 ReplayFile::ReplayFile(std::filesystem::path path_) : path(path_)
 {
@@ -222,73 +224,128 @@ void ReplayFile::FixParents()
 
 }
 
-void ReplayFile::Parse()
+uint32_t val = 0;
+void ReplayFile::Parse(const uint32_t startPos, int32_t endPos)
 {
+	if (endPos < 0)
+	{
+		endPos = replayFile->netstream_size / 4 * 8;
+	}
 	//Divide by 4 since netstream_data is bytes, but we read uint32_ts
-	CPPBitReader<uint32_t> networkReader((uint32_t*)replayFile->netstream_data, replayFile->netstream_size / 4, replayFile);
+	CPPBitReader<uint32_t> networkReader((uint32_t*)(replayFile->netstream_data), ((uint32_t)endPos), replayFile);
 
+	++val;
+	FILE* fp = fopen(("./json/" + std::to_string(val) + ".json").c_str(), "wb");
+	char writeBuffer[65536*5];
+	rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+
+	rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+	networkReader.skip(startPos);
+
+	writer.StartObject();
+	writer.String("frames");
 	const int32_t maxChannels = GetProperty<int32_t>("MaxChannels");
-	
+	writer.StartArray();
 	while (networkReader.canRead())
 	{
+		writer.StartObject();
 		Frame f;
 		f.time = networkReader.read<float>();
 		f.delta = networkReader.read<float>();
+
+		writer.String("time");
+		writer.Double(f.time);
+		writer.String("delta");
+		writer.Double(f.delta);
 		int k = 5;
 
+		writer.String("actors");
+		writer.StartArray();
 		//While there are actors in buffer (this frame)
 		while (networkReader.read<bool>())
 		{
+			writer.StartObject();
 			const uint32_t actorId = networkReader.readBitsMax<uint32_t>(maxChannels);
 			ActorState& actorState = actorStates[actorId];
+			writer.String("actorid");
+			writer.Uint(actorId);
 
 			//Not sure, but needs to be true to proceed, probably for aligning things?
 			if (networkReader.read<bool>())
 			{
+				writer.String("status");
 				//Is new state
 				if (networkReader.read<bool>())
 				{
+					writer.String("created");
 					if (replayFile->header.version1 > 868 || (replayFile->header.version1 == 868 && replayFile->header.version2 >= 14))
 					{
+						
 						actorState.name_id = networkReader.read<uint32_t>();
+						writer.String("nameid");
+						writer.Uint(actorState.name_id);
 					}
 					const bool unknownBool = networkReader.read<bool>();
 					const uint32_t typeId = networkReader.read<uint32_t>();
-
+					writer.String("typeid");
+					writer.Uint(typeId);
 					//const uint32_t bit_pos = networkReader.GetAbsoluteBitPosition();
 
 					const std::string typeName = replayFile->objects.at(typeId);
-
+					writer.String("typename");
+					writer.String(typeName.c_str(), typeName.size());
 					actorState.classNet = GetClassnetByNameWithLookup(typeName);
 					
 					const uint32_t classId = actorState.classNet->index;
 					const std::string className = replayFile->objects.at(classId);
 
+					writer.String("classname");
+					writer.String(className.c_str(), className.size());
+
 					if (HasInitialPosition(className))
 					{
 						actorState.position = static_cast<Vector3>(networkReader.read<Vector3I>());
+						writer.String("initialposition");
+						Serialize(writer, actorState.position);
 					}
 					if (HasRotation(className))
 					{
 						actorState.rotation = networkReader.read<Rotator>();
+						writer.String("initialrotation");
+						Serialize(writer, actorState.rotation);
 					}
 				}
 				else //Is existing state
 				{
+					writer.String("updated");
+					writer.String("updates");
+					writer.StartArray();
 					//While there's data for this state to be updated
 					while (networkReader.read<bool>())
 					{
+						writer.StartObject();
 						const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
 						const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
 						const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
 						//printf("Calling parser for %s\n", replayFile->objects[propertyIndex].c_str());
-						networkParser.Parse(propertyIndex, networkReader);
+						writer.String("class");
+						writer.String(replayFile->objects[propertyIndex].c_str(), replayFile->objects[propertyIndex].size());
+						
+						writer.String("data");
+						networkParser.Parse(propertyIndex, networkReader, writer);
+						writer.EndObject();
 					}
+					writer.EndArray();
 				}
 			}
+			writer.EndObject();
 		}
+		writer.EndArray();
+		writer.EndObject();
 	}
-
+	writer.EndArray();
+	writer.EndObject();
+	//printf("Parsed\n");
 }
 
 const bool ReplayFile::HasInitialPosition(const std::string & name) const

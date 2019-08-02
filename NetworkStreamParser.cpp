@@ -165,11 +165,12 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 	//RegisterParsers<>({  });
 }
 
-void NetworkStreamParser::Parse(const uint32_t propertyIdx, CPPBitReader<uint32_t>& br)
-{
-	auto inst = parseFunctions[propertyIdx](br);
-	//printf("Result: %s\n", inst->ToString().c_str());
-}
+//template<typename Writer>
+//void NetworkStreamParser::Parse(const uint32_t propertyIdx, CPPBitReader<uint32_t>& br, Writer& writer) const
+//{
+//	auto inst = parseFunctions[propertyIdx](br);
+//	//printf("Result: %s\n", inst->ToString().c_str());
+//}
 
 void NetworkStreamParser::Parse(const std::string & name, CPPBitReader<uint32_t>& br)
 {
@@ -178,6 +179,6 @@ void NetworkStreamParser::Parse(const std::string & name, CPPBitReader<uint32_t>
 		printf("Could not find parser for %s\n", name.c_str());
 		return;
 	}
-	auto inst = parseFunctions[functionToIndexMapping[name]](br);
+	//auto inst = parseFunctions[functionToIndexMapping[name]](br);
 	//printf("Result: %s\n", inst->ToString().c_str());
 }

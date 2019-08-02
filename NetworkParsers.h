@@ -2,6 +2,120 @@
 #include "CPPBitReader.h"
 #include "NetworkData.h"
 #include <sstream>
+#include "rapidjson/prettywriter.h"
+
+template<typename Writer, typename T>
+inline const void Serialize(Writer& writer, const T& item) 
+{ 
+	std::stringstream ss;
+	ss << "unsupported " << typeid(T).name();
+	std::string o = ss.str();
+	writer.String(o.c_str(), o.size()); 
+}
+
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const std::string& item) 
+{ 
+	writer.String(item.c_str(), item.size()); 
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const Vector3& item) 
+{ 
+	writer.StartObject();
+	writer.String("X");
+	writer.Double(item.x);
+	writer.String("Y");
+	writer.Double(item.y);
+	writer.String("Z");
+	writer.Double(item.z);
+	writer.EndObject(); 
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const Vector3I& item)
+{
+	writer.StartObject();
+	writer.String("X");
+	writer.Int(item.x);
+	writer.String("Y");
+	writer.Int(item.y);
+	writer.String("Z");
+	writer.Int(item.z);
+	writer.EndObject();
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const struct Quat& item)
+{
+	writer.StartObject();
+	writer.String("X");
+	writer.Double(item.x);
+	writer.String("Y");
+	writer.Double(item.y);
+	writer.String("Z");
+	writer.Double(item.z);
+	writer.String("W");
+	writer.Double(item.w);
+	writer.EndObject();
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const Rotator& item)
+{
+	writer.StartObject();
+	writer.String("Pitch");
+	writer.Int(item.pitch);
+	writer.String("Yaw");
+	writer.Int(item.yaw);
+	writer.String("Roll");
+	writer.Int(item.roll);
+	writer.EndObject();
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const bool& item)
+{
+	writer.Bool(item);
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, uint8_t& item)
+{
+	writer.Uint(item);
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const uint16_t& item)
+{
+	writer.Uint(item);
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const uint32_t& item)
+{
+	writer.Uint(item);
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const int8_t& item)
+{
+	writer.Int(item);
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const int16_t& item)
+{
+	writer.Int(item);
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const int32_t& item)
+{
+	writer.Int(item);
+}
+
 template<typename T>
 inline const T Consume(CPPBitReader<uint32_t>& reader) { return reader.read<T>(); }
 
@@ -110,6 +224,11 @@ inline const ReplicatedRBState Consume(CPPBitReader<uint32_t>& reader) {
 	{
 		item.linear_velocity = reader.read<Vector3>();
 		item.angular_velocity = reader.read<Vector3>();
+	}
+	else
+	{
+		item.linear_velocity = { 0 };
+		item.angular_velocity = { 0 };
 	}
 	return item;
 }

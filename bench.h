@@ -29,7 +29,7 @@ double get_time()
 #define BENCHMARK(name, func, iterations) \
 {\
 double start_time = get_time();\
-for(int i = 0; i < iterations; i++) {\
+for(int aaaa = 0; aaaa < iterations; aaaa++) {\
 func;\
 }\
 double end_time = get_time();\

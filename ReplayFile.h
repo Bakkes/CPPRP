@@ -29,7 +29,7 @@ public:
 	bool Load();
 	void DeserializeHeader();
 	void FixParents();
-	void Parse();
+	void Parse(const uint32_t startPos = 0, int32_t endPos = -1);
 protected:
 	const bool HasInitialPosition(const std::string& name) const;
 	const bool HasRotation(const std::string& name) const;
