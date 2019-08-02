@@ -161,6 +161,8 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 	RegisterParsers<HistoryKey>({ "TAGame.PRI_TA:PlayerHistoryKey" });
 	RegisterParsers<ReplicatedStatEvent>({ "TAGame.GameEvent_Soccar_TA:ReplicatedStatEvent" });
 	RegisterParsers<RepStatTitle>({ "TAGame.PRI_TA:RepStatTitles" });
+
+	RegisterParsers<GameMode>({ "TAGame.GameEvent_TA:GameMode" });
 	//RegisterParsers<>({  });
 	//RegisterParsers<>({  });
 }

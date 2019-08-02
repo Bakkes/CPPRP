@@ -80,7 +80,7 @@ int main()
 //			printf("[%s] Ran %i iterations in %.5f ms (avg: %.5f ms)\n", name, iterations, elapsed, (elapsed / (double)iterations));
 //		}
 
-		const uint32_t iterations = 100;
+		const uint32_t iterations = 1;
 		{
 			const char* name = "threading test2";
 			double start_time = get_time();

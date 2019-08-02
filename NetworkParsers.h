@@ -155,8 +155,18 @@ inline const ProductAttribute Consume(CPPBitReader<uint32_t>& reader) {
 		item.b = reader.read<uint8_t>();
 		item.a = reader.read<uint8_t>();
 	}
+	else if (className.compare("TAGame.ProductAttribute_Painted_TA") == 0)
+	{
+		if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 18)
+		{
+			reader.read<uint32_t>(31);
+		}
+		else
+		{
+			reader.readBitsMax<uint32_t>(14);
+		}
+	}
 	else if (className.compare("TAGame.ProductAttribute_TeamEdition_TA") == 0
-		|| className.compare("TAGame.ProductAttribute_Painted_TA") == 0
 		|| className.compare("TAGame.ProductAttribute_SpecialEdition_TA") == 0)
 	{
 		//TODO: assign
@@ -233,6 +243,19 @@ inline const ReplicatedRBState Consume(CPPBitReader<uint32_t>& reader) {
 	return item;
 }
 
+template<>
+inline const GameMode Consume(CPPBitReader<uint32_t>& reader) {
+	GameMode item;
+	if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 12)
+	{
+		item.gamemode = reader.read<uint8_t>();
+	}
+	else
+	{
+		item.gamemode = reader.read<uint32_t>(4);
+	}
+	return item;
+}
 
 template<>
 inline const Reservation Consume(CPPBitReader<uint32_t>& reader) {
@@ -243,7 +266,16 @@ inline const Reservation Consume(CPPBitReader<uint32_t>& reader) {
 	{
 		item.player_name = reader.read<std::string>();
 	}
-	item.unknown2 = reader.read<uint8_t>();
+
+	if (reader.owner->header.engineVersion < 868 || reader.owner->header.licenseeVersion < 12)
+	{
+		item.unknown2 = reader.read<uint8_t>(2);
+	}
+	else 
+	{
+		item.unknown2 = reader.read<uint8_t>();
+	}
+	
 	return item;
 }
 

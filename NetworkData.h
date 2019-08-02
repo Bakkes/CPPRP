@@ -104,8 +104,11 @@ struct CameraSettings
 	float distance;
 	float stiffness;
 	float swivelspeed;
+	__ParserAttribute__(EngineVersion, 868)
+	__ParserAttribute__(LicenseeVersion, 20)
 	float transitionspeed;
 };
+
 
 struct ReplicatedPickupData
 {
@@ -140,7 +143,12 @@ struct ReplicatedMusicStringer
 	bool unknown1;
 	uint32_t object_index;
 	uint8_t trigger;
-	
+};
+
+__ParserAttribute__(Consume, false)
+struct GameMode
+{
+	uint8_t gamemode;
 };
 
 struct PrivateMatchSettings

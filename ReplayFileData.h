@@ -99,8 +99,9 @@ struct FileHeader
 {
 	uint32_t size;
 	uint32_t crc;
-	uint32_t version1;
-	uint32_t version2;
+	uint32_t engineVersion;
+	uint32_t licenseeVersion;
+	uint32_t netVersion = 0;
 };
 
 typedef struct
@@ -156,6 +157,7 @@ struct ReplayFileData
 {
 	//All header props
 	FileHeader header;
+	std::string replayType;
 	std::unordered_map<std::string, std::shared_ptr<Property>> properties;
 	uint32_t body_size;
 	uint32_t crc2;

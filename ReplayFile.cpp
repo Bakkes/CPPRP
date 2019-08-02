@@ -36,14 +36,15 @@ void ReplayFile::DeserializeHeader()
 	replayFile->header = {
 		fullReplayBitReader.read<uint32_t>(),	//Size
 		fullReplayBitReader.read<uint32_t>(),	//CRC
-		fullReplayBitReader.read<uint32_t>(),	//version1
-		fullReplayBitReader.read<uint32_t>()	//Version2
+		fullReplayBitReader.read<uint32_t>(),	//engineVersion
+		fullReplayBitReader.read<uint32_t>()	//licenseeVersion
 	};
-	if (replayFile->header.version1 >= 868 && replayFile->header.version2 >= 18)
+
+	if (replayFile->header.engineVersion >= 868 && replayFile->header.licenseeVersion >= 18)
 	{
-		fullReplayBitReader.skip(4*8);
+		replayFile->header.netVersion = fullReplayBitReader.read<uint32_t>();
 	}
-	std::string replayType = fullReplayBitReader.read<std::string>(); //Not sure what this is
+	replayFile->replayType = fullReplayBitReader.read<std::string>(); //Not sure what this is
 
 
 	while (true) {
@@ -278,7 +279,7 @@ void ReplayFile::Parse(const uint32_t startPos, int32_t endPos)
 				if (networkReader.read<bool>())
 				{
 					writer.String("created");
-					if (replayFile->header.version1 > 868 || (replayFile->header.version1 == 868 && replayFile->header.version2 >= 14))
+					if (replayFile->header.engineVersion > 868 || (replayFile->header.engineVersion == 868 && replayFile->header.licenseeVersion >= 14))
 					{
 						
 						actorState.name_id = networkReader.read<uint32_t>();
@@ -337,7 +338,8 @@ void ReplayFile::Parse(const uint32_t startPos, int32_t endPos)
 					}
 					writer.EndArray();
 				}
-			}
+			} 
+			else
 			{
 				writer.String("deleted");
 			}
