@@ -6,7 +6,11 @@ template<typename T>
 inline const T Consume(CPPBitReader<uint32_t>& reader) { return reader.read<T>(); }
 
 template<typename T>
-inline const std::string ToString(T& item) { return "ERR"; }
+inline const std::string ToString(const T& item) { 
+	std::stringstream ss;
+	ss << "ERR. ToString not declared for " << typeid(T).name() << "\n";
+	return ss.str(); 
+}
 
 template<typename T>
 inline const std::vector<T> ConsumeVector(CPPBitReader<uint32_t>& reader) {
@@ -124,4 +128,38 @@ inline const Reservation Consume(CPPBitReader<uint32_t>& reader) {
 	return item;
 }
 
+template<>
+inline const std::string ToString(const Vector3I& item) { return item.ToString(); }
+
+template<>
+inline const std::string ToString(const Vector3& item) { return item.ToString(); }
+template<>
+inline const std::string ToString(const Quat& item) { return item.ToString(); }
+template<>
+inline const std::string ToString(const Rotator& item) { return item.ToString(); }
+template<>
+inline const std::string ToString(const std::string& item) { return item; }
+template<>
+inline const std::string ToString(const bool& item) { return item ? "true" : "false"; }
+template<>
+inline const std::string ToString(const uint8_t& item) { return std::to_string((int)item); }
+
+template<typename T, class Alloc>
+inline const std::string ToString(const std::vector<T, Alloc>& item) { 
+	const size_t size = item.size();
+	std::stringstream ss;
+	for (size_t i = 0; i < size; ++i)
+	{
+		ss << "[" << i << "] - " << ToString(item.at(i)) << "\n";
+	}
+	return ss.str(); 
+}
+
+#define ToStringStd(type)\
+template<>\
+inline const std::string ToString(const type & item) { return std::to_string(item); }
+
+
+ToStringStd(uint16_t)
+ToStringStd(uint32_t)
 #include "generated.h"

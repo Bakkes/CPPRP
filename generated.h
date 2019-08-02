@@ -3,7 +3,7 @@
 #include "NetworkData.h"
 #include <sstream>
 template<>
-inline const std::string ToString(ReplicatedRBState& item) { 
+inline const std::string ToString(const ReplicatedRBState& item) { 
 	std::stringstream ss;
 	ss << "rotation = " << ToString<Quat>(item.rotation);
 	ss << ",\n " << "position = " << ToString<Vector3>(item.position);
@@ -22,7 +22,7 @@ inline const LogoData Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(LogoData& item) { 
+inline const std::string ToString(const LogoData& item) { 
 	std::stringstream ss;
 	ss << "unknown = " << item.unknown;
 	ss << ",\n " << "logo_id = " << item.logo_id;
@@ -38,7 +38,7 @@ inline const ActiveActor Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(ActiveActor& item) { 
+inline const std::string ToString(const ActiveActor& item) { 
 	std::stringstream ss;
 	ss << "active = " << item.active;
 	ss << ",\n " << "actor_id = " << item.actor_id;
@@ -54,7 +54,7 @@ inline const ObjectTarget Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(ObjectTarget& item) { 
+inline const std::string ToString(const ObjectTarget& item) { 
 	std::stringstream ss;
 	ss << "unknown = " << item.unknown;
 	ss << ",\n " << "object_index = " << item.object_index;
@@ -62,7 +62,7 @@ inline const std::string ToString(ObjectTarget& item) {
 }
 
 template<>
-inline const std::string ToString(Reservation& item) { 
+inline const std::string ToString(const Reservation& item) { 
 	std::stringstream ss;
 	ss << "unknown = " << item.unknown;
 	ss << ",\n " << "player_id = " << ToString<UniqueId>(item.player_id);
@@ -72,7 +72,7 @@ inline const std::string ToString(Reservation& item) {
 }
 
 template<>
-inline const std::string ToString(ClientLoadout& item) { 
+inline const std::string ToString(const ClientLoadout& item) { 
 	std::stringstream ss;
 	ss << "version = " << item.version;
 	ss << ",\n " << "body = " << item.body;
@@ -108,7 +108,7 @@ inline const CameraSettings Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(CameraSettings& item) { 
+inline const std::string ToString(const CameraSettings& item) { 
 	std::stringstream ss;
 	ss << "FOV = " << item.FOV;
 	ss << ",\n " << "height = " << item.height;
@@ -130,7 +130,7 @@ inline const ReplicatedPickupData Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(ReplicatedPickupData& item) { 
+inline const std::string ToString(const ReplicatedPickupData& item) { 
 	std::stringstream ss;
 	ss << "unknown1 = " << item.unknown1;
 	ss << ",\n " << "actor_id = " << item.actor_id;
@@ -150,7 +150,7 @@ inline const TeamPaint Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(TeamPaint& item) { 
+inline const std::string ToString(const TeamPaint& item) { 
 	std::stringstream ss;
 	ss << "team_number = " << item.team_number;
 	ss << ",\n " << "team_color_id = " << item.team_color_id;
@@ -173,7 +173,7 @@ inline const ReplicatedDemolish Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(ReplicatedDemolish& item) { 
+inline const std::string ToString(const ReplicatedDemolish& item) { 
 	std::stringstream ss;
 	ss << "unknown1 = " << item.unknown1;
 	ss << ",\n " << "attacker_actor_id = " << item.attacker_actor_id;
@@ -194,7 +194,7 @@ inline const ReplicatedMusicStringer Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(ReplicatedMusicStringer& item) { 
+inline const std::string ToString(const ReplicatedMusicStringer& item) { 
 	std::stringstream ss;
 	ss << "unknown1 = " << item.unknown1;
 	ss << ",\n " << "object_index = " << item.object_index;
@@ -215,7 +215,7 @@ inline const PrivateMatchSettings Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(PrivateMatchSettings& item) { 
+inline const std::string ToString(const PrivateMatchSettings& item) { 
 	std::stringstream ss;
 	ss << "mutators = " << item.mutators;
 	ss << ",\n " << "map_name = " << item.map_name;
@@ -227,7 +227,7 @@ inline const std::string ToString(PrivateMatchSettings& item) {
 }
 
 template<>
-inline const std::string ToString(ProductAttribute& item) { 
+inline const std::string ToString(const ProductAttribute& item) { 
 	std::stringstream ss;
 	ss << "class_index = " << item.class_index;
 	ss << ",\n " << "class_name = " << item.class_name;
@@ -245,7 +245,7 @@ inline const Attributes Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(Attributes& item) { 
+inline const std::string ToString(const Attributes& item) { 
 	std::stringstream ss;
 	ss << "product_attributes = " << ToString<std::vector<ProductAttribute>>(item.product_attributes);
 	return ss.str();
@@ -259,7 +259,7 @@ inline const OnlineLoadout Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(OnlineLoadout& item) { 
+inline const std::string ToString(const OnlineLoadout& item) { 
 	std::stringstream ss;
 	ss << "attributes_list = " << ToString<std::vector<Attributes>>(item.attributes_list);
 	return ss.str();
@@ -276,7 +276,7 @@ inline const UserColorAttribute Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(UserColorAttribute& item) { 
+inline const std::string ToString(const UserColorAttribute& item) { 
 	std::stringstream ss;
 	ss << "r = " << item.r;
 	ss << ",\n " << "g = " << item.g;
@@ -296,7 +296,7 @@ inline const ClientLoadoutsOnline Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(ClientLoadoutsOnline& item) { 
+inline const std::string ToString(const ClientLoadoutsOnline& item) { 
 	std::stringstream ss;
 	ss << "online_one = " << ToString<OnlineLoadout>(item.online_one);
 	ss << ",\n " << "online_two = " << ToString<OnlineLoadout>(item.online_two);
@@ -314,7 +314,7 @@ inline const ClientLoadouts Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(ClientLoadouts& item) { 
+inline const std::string ToString(const ClientLoadouts& item) { 
 	std::stringstream ss;
 	ss << "loadout_one = " << ToString<ClientLoadout>(item.loadout_one);
 	ss << ",\n " << "loadout_two = " << ToString<ClientLoadout>(item.loadout_two);
@@ -332,7 +332,7 @@ inline const ClubColors Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(ClubColors& item) { 
+inline const std::string ToString(const ClubColors& item) { 
 	std::stringstream ss;
 	ss << "team_color_set = " << item.team_color_set;
 	ss << ",\n " << "team_color_id = " << item.team_color_id;
@@ -353,7 +353,7 @@ inline const WeldedInfo Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(WeldedInfo& item) { 
+inline const std::string ToString(const WeldedInfo& item) { 
 	std::stringstream ss;
 	ss << "active = " << item.active;
 	ss << ",\n " << "actor_id = " << item.actor_id;
@@ -376,7 +376,7 @@ inline const DamageState Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(DamageState& item) { 
+inline const std::string ToString(const DamageState& item) { 
 	std::stringstream ss;
 	ss << "damage_state = " << item.damage_state;
 	ss << ",\n " << "unknown2 = " << item.unknown2;
@@ -398,7 +398,7 @@ inline const AppliedDamage Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(AppliedDamage& item) { 
+inline const std::string ToString(const AppliedDamage& item) { 
 	std::stringstream ss;
 	ss << "id = " << item.id;
 	ss << ",\n " << "position = " << ToString<Vector3>(item.position);
@@ -417,7 +417,7 @@ inline const ReplicatedExplosionData Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(ReplicatedExplosionData& item) { 
+inline const std::string ToString(const ReplicatedExplosionData& item) { 
 	std::stringstream ss;
 	ss << "unknown1 = " << item.unknown1;
 	ss << ",\n " << "actor_id = " << item.actor_id;
@@ -437,7 +437,7 @@ inline const ReplicatedExplosionDataExtended Consume(CPPBitReader<uint32_t>& rea
 }
 
 template<>
-inline const std::string ToString(ReplicatedExplosionDataExtended& item) { 
+inline const std::string ToString(const ReplicatedExplosionDataExtended& item) { 
 	std::stringstream ss;
 	ss << "unknown1 = " << item.unknown1;
 	ss << ",\n " << "actor_id = " << item.actor_id;
@@ -462,7 +462,7 @@ inline const ReplicatedTitle Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(ReplicatedTitle& item) { 
+inline const std::string ToString(const ReplicatedTitle& item) { 
 	std::stringstream ss;
 	ss << "unknown1 = " << item.unknown1;
 	ss << ",\n " << "unknown2 = " << item.unknown2;
@@ -483,7 +483,7 @@ inline const HistoryKey Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(HistoryKey& item) { 
+inline const std::string ToString(const HistoryKey& item) { 
 	std::stringstream ss;
 	ss << "data = " << item.data;
 	return ss.str();
@@ -498,7 +498,7 @@ inline const ReplicatedStatEvent Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(ReplicatedStatEvent& item) { 
+inline const std::string ToString(const ReplicatedStatEvent& item) { 
 	std::stringstream ss;
 	ss << "unknown1 = " << item.unknown1;
 	ss << ",\n " << "object_id = " << item.object_id;
@@ -516,7 +516,7 @@ inline const RepStatTitle Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(RepStatTitle& item) { 
+inline const std::string ToString(const RepStatTitle& item) { 
 	std::stringstream ss;
 	ss << "unknown1 = " << item.unknown1;
 	ss << ",\n " << "name = " << item.name;
@@ -533,7 +533,7 @@ inline const SkillTier Consume(CPPBitReader<uint32_t>& reader) {
 }
 
 template<>
-inline const std::string ToString(SkillTier& item) { 
+inline const std::string ToString(const SkillTier& item) { 
 	std::stringstream ss;
 	ss << "tier = " << item.tier;
 	return ss.str();

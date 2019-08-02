@@ -9,7 +9,7 @@ struct Vector3
 {
 	float x, y, z;
 
-	std::string ToString()
+	std::string ToString() const
 	{
 		return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);
 	}
@@ -29,7 +29,7 @@ struct Vector3I
 		};
 	};
 
-	std::string ToString()
+	std::string ToString() const
 	{
 		return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);
 	}
@@ -39,7 +39,7 @@ struct Rotator
 {
 	int pitch, yaw, roll;
 
-	std::string ToString()
+	std::string ToString() const
 	{
 		return std::to_string(pitch) + ", " + std::to_string(yaw) + ", " + std::to_string(roll);
 	}
@@ -49,7 +49,7 @@ struct Quat
 {
 	float w, x, y, z;
 
-	std::string ToString()
+	std::string ToString() const
 	{
 		return std::to_string(w) + ", " + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);
 	}
