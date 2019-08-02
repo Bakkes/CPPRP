@@ -1,9 +1,10 @@
 #include "ReplayFile.h"
 #include <fstream>
-
+#include "networkdata.h"
 
 ReplayFile::ReplayFile(std::filesystem::path path_) : path(path_)
 {
+	networkParser.RegisterParsers();
 }
 
 
@@ -262,7 +263,6 @@ void ReplayFile::Parse()
 					const uint32_t classId = actorState.classNet->index;
 					const std::string className = replayFile.objects.at(classId);
 
-					
 					if (HasInitialPosition(className))
 					{
 						actorState.position = static_cast<Vector3>(networkReader.read<Vector3I>());
@@ -281,7 +281,7 @@ void ReplayFile::Parse()
 						const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
 						const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
 						printf("Calling parser for %s\n", replayFile.objects[propertyIndex].c_str());
-						
+						networkParser.Parse(replayFile.objects[propertyIndex], networkReader);
 					}
 				}
 			}

@@ -1,11 +1,17 @@
 #pragma once
-#pragma once
+#include <string>
+#include <sstream>
 #include <stdint.h>
 #include <assert.h>
 
 struct Vector3
 {
 	float x, y, z;
+
+	std::string ToString()
+	{
+		return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);
+	}
 };
 
 struct Vector3I
@@ -21,16 +27,31 @@ struct Vector3I
 			static_cast<float>(z)
 		};
 	};
+
+	std::string ToString()
+	{
+		return std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);
+	}
 };
 
 struct Rotator
 {
 	int pitch, yaw, roll;
+
+	std::string ToString()
+	{
+		return std::to_string(pitch) + ", " + std::to_string(yaw) + ", " + std::to_string(roll);
+	}
 };
 
 struct Quat
 {
 	float w, x, y, z;
+
+	std::string ToString()
+	{
+		return std::to_string(w) + ", " + std::to_string(x) + ", " + std::to_string(y) + ", " + std::to_string(z);
+	}
 };
 
 enum Platform
@@ -46,6 +67,25 @@ enum Platform
 	Platform_PsyNet = 8,
 	Platform_MAX = 9
 };
+
+struct UniqueId
+{
+	uint8_t platform;
+	uint8_t playerNumber;
+	uint64_t uniqueID;
+
+	std::string ToString() const
+	{
+		return std::to_string(platform) + "|" + std::to_string(uniqueID) + "|" + std::to_string(playerNumber);
+	}
+
+	friend std::ostream& operator<<(std::ostream& os, UniqueId& foo)
+	{
+		os << foo.ToString();
+		return os;
+	}
+
+} ;
 
 #define QUAT_NUM_BITS (18)
 #define MAX_QUAT_VALUE (0.7071067811865475244f)
@@ -306,6 +346,37 @@ public:
 			break;
 		};
 		return q;
+	}
+
+	template<>
+	const UniqueId read()
+	{
+		UniqueId id;
+		id.platform = read<uint8_t>();
+		switch (id.platform)
+		{
+		case Platform_Steam:
+		case Platform_Dingo:
+			id.uniqueID = read<uint64_t>(8 * 8);
+			break;
+		case Platform_PS4:
+			id.uniqueID = read<uint64_t>(40 * 8);
+			break;
+		case Platform_NNX:
+		case Platform_PsyNet:
+			id.uniqueID = read<uint64_t>(32 * 8);
+			break;
+		case Platform_Unknown:
+			id.uniqueID = read<uint64_t>(3 * 8);
+			printf("Unknown platform found!\n");
+			break;
+		default:
+			printf("Unknown platform %i", id.platform);
+			assert(1 == 2);
+			break;
+		}
+		id.playerNumber = read<uint8_t>();
+		return id;
 	}
 
 	template<>

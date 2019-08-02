@@ -5,8 +5,9 @@
 #include <any>
 #include <vector>
 #include <unordered_map>
-
+#include "NetworkStreamParser.h"
 #include "CPPBitReader.h"
+
 typedef struct
 {
 	std::string property_name;
@@ -114,6 +115,7 @@ private:
 public:
 	std::unordered_map<int, ActorState> actorStates;
 	ReplayFileData replayFile;
+	NetworkStreamParser networkParser;
 public:
 	ReplayFile(std::filesystem::path path_);
 	~ReplayFile();
