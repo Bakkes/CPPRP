@@ -270,10 +270,10 @@ void ReplayFile::Parse(const uint32_t startPos, int32_t endPos)
 			writer.String("actorid");
 			writer.Uint(actorId);
 
-			//Not sure, but needs to be true to proceed, probably for aligning things?
+			writer.String("status");
 			if (networkReader.read<bool>())
 			{
-				writer.String("status");
+				
 				//Is new state
 				if (networkReader.read<bool>())
 				{
@@ -337,6 +337,9 @@ void ReplayFile::Parse(const uint32_t startPos, int32_t endPos)
 					}
 					writer.EndArray();
 				}
+			}
+			{
+				writer.String("deleted");
 			}
 			writer.EndObject();
 		}
