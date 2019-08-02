@@ -280,7 +280,7 @@ void ReplayFile::Parse()
 						const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
 						const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
 						const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
-						printf("Calling parser for %s\n", replayFile->objects[propertyIndex].c_str());
+						//printf("Calling parser for %s\n", replayFile->objects[propertyIndex].c_str());
 						networkParser.Parse(replayFile->objects[propertyIndex], networkReader);
 					}
 				}

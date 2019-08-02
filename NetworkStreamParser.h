@@ -13,7 +13,7 @@ template<typename T>
 std::shared_ptr<void> createInstance(CPPBitReader<uint32_t>& reader)
 {
 	auto consumed = Consume<T>(reader);
-	printf("%s\n", ToString(consumed).c_str());
+	//printf("%s\n", ToString(consumed).c_str());
 	return std::static_pointer_cast<void>(std::make_shared<T>());
 }
 
