@@ -20,7 +20,7 @@ bool ReplayFile::Load()
 		return false;
 	std::ifstream file(path, std::ios::binary | std::ios::ate);
 	std::streamsize size = file.tellg();
-	data.reserve((size_t)size);
+	data.resize((size_t)size);
 	file.seekg(0, std::ios::beg);
 	if (file.bad())
 		return false;
@@ -79,7 +79,7 @@ void ReplayFile::DeserializeHeader()
 
 	const uint32_t netstreamCount = fullReplayBitReader.read<uint32_t>();
 	replayFile->netstream_data = data.data() + fullReplayBitReader.GetBytePosition(); //We know this is always aligned, so valid
-	fullReplayBitReader.skip(netstreamCount*8); //TODO: implement proper skip
+	fullReplayBitReader.skip(netstreamCount*8);
 	replayFile->netstream_size = netstreamCount;
 
 	fullReplayBitReader.skip(4*8); //debug_log apparently
@@ -169,6 +169,10 @@ void ReplayFile::DeserializeHeader()
 				break;
 			}
 		}
+	}
+	if (replayFile->header.netVersion >= 10)
+	{
+		fullReplayBitReader.read<int32_t>();
 	}
 	networkParser.RegisterParsers(replayFile);
 }
@@ -328,11 +332,12 @@ void ReplayFile::Parse(const uint32_t startPos, int32_t endPos)
 						const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
 						const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
 						const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
-						//printf("Calling parser for %s\n", replayFile->objects[propertyIndex].c_str());
+						printf("Calling parser for %s\n", replayFile->objects[propertyIndex].c_str());
 						writer.String("class");
 						writer.String(replayFile->objects[propertyIndex].c_str(), replayFile->objects[propertyIndex].size());
 						
 						writer.String("data");
+						//printf("Calling parse for %s", )
 						networkParser.Parse(propertyIndex, networkReader, writer);
 						writer.EndObject();
 					}
@@ -643,6 +648,8 @@ const uint16_t ReplayFile::GetPropertyIndexById(const std::shared_ptr<ClassNet>&
 
 const uint16_t ReplayFile::GetMaxPropertyId(const std::shared_ptr<ClassNet>& cn)
 {
+	/*if (cn == nullptr)
+		return 0;*/
 	if (cn->max_prop_id == 0)
 	{
 		cn->max_prop_id = FindMaxPropertyId(cn, 0);

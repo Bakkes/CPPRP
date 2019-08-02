@@ -10,6 +10,7 @@
 #define MAX_QUAT_VALUE (0.7071067811865475244f)
 #define MAX_QUAT_VALUE_INVERSE (1.0f / MAX_QUAT_VALUE)
 
+
 static inline float uncompress_quat(uint32_t val)
 {
 	const int MaxValue = (1 << QUAT_NUM_BITS) - 1;
@@ -189,8 +190,8 @@ public:
 	template<>
 	const Vector3I read()
 	{
-		
-		const uint32_t num_bits = readBitsMax<int32_t>(22);
+		const uint32_t maxbits = owner->header.netVersion >= 7 ? 22 : 20;
+		const uint32_t num_bits = readBitsMax<uint32_t>(maxbits);
 
 		const int32_t bias = 1 << (int)(num_bits + 1);
 		const int32_t max = (int)num_bits + 2;
@@ -328,6 +329,38 @@ public:
 		return str;
 	}
 
+	/*
+	Source from this is from the C# replay parser
+	*/
+	const float readFixedCompressedFloat(const int32_t maxValue, int32_t numBits)
+	{
+		float value = 0;
+		
+		int32_t maxBitValue = (1 << (numBits - 1)) - 1; 
+		int32_t bias = (1 << (numBits - 1));    
+		int32_t serIntMax = (1 << (numBits - 0));   
+		int32_t maxDelta = (1 << (numBits - 0)) - 1;
+
+		int32_t delta = readBitsMax<int32_t>(serIntMax);
+		float unscaledValue = static_cast<float>(delta - bias);
+
+		if (maxValue > maxBitValue)
+		{
+			// We have to scale down, scale needs to be a float:
+			float invScale = maxValue / (float)maxBitValue;
+			value = unscaledValue * invScale;
+		}
+		else
+		{
+			float scale = maxBitValue / (float)maxValue;
+			float invScale = 1.0f / (float)scale;
+
+			value = unscaledValue * invScale;
+		}
+
+		return value;
+	}
+
 	template<typename T>
 	const T readBitsMax(const uint32_t max)
 	{
@@ -359,8 +392,10 @@ public:
 
 	const size_t GetBytePosition()
 	{
-		return t_position * sizeof(T);
+		return t_position * sizeof(T) + (bit_position / 8);
 	}
+
+
 
 	const size_t GetAbsoluteBitPosition()
 	{

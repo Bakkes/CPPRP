@@ -226,9 +226,29 @@ inline const ClientLoadout Consume(CPPBitReader<uint32_t>& reader) {
 template<>
 inline const ReplicatedRBState Consume(CPPBitReader<uint32_t>& reader) {
 	ReplicatedRBState item;
+	const uint32_t netVersion = reader.owner->header.netVersion;
+	
 	item.sleeping = reader.read<bool>();
-	item.position = reader.read<Vector3>();
-	item.rotation = reader.read<Quat>();
+	
+	if (netVersion >= 5)
+	{
+		item.position = reader.read<Vector3>();
+	}
+	else
+	{
+		item.position = static_cast<Vector3>(reader.read<Vector3I>());
+	}
+
+	if (netVersion >= 7)
+	{
+		item.rotation = reader.read<Quat>();
+	}
+	else
+	{
+		item.rotation.x = reader.readFixedCompressedFloat(1, 16);
+		item.rotation.y = reader.readFixedCompressedFloat(1, 16);
+		item.rotation.z = reader.readFixedCompressedFloat(1, 16);
+	}
 
 	if (!item.sleeping)
 	{
