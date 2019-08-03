@@ -2,7 +2,7 @@
 #include <fstream>
 #include "networkdata.h"
 #include "rapidjson/filewritestream.h"
-#include <rapidjson/writer.h>
+#include <rapidjson///writer.h>
 
 ReplayFile::ReplayFile(std::filesystem::path path_) : path(path_)
 {
@@ -299,116 +299,119 @@ void ReplayFile::Parse(const uint32_t startPos, int32_t endPos)
 	rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
 
 	rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+
+	std::unordered_map<uint32_t, std::string> test;
+	
 	networkReader.skip(startPos);
 
-	writer.StartObject();
-	writer.String("frames");
+	//writer.StartObject();
+	//writer.String("frames");
 	const int32_t maxChannels = GetProperty<int32_t>("MaxChannels");
-	writer.StartArray();
+	//writer.StartArray();
 	while (networkReader.canRead())
 	{
-		writer.StartObject();
+		//writer.StartObject();
 		Frame f;
 		f.time = networkReader.read<float>();
 		f.delta = networkReader.read<float>();
 
-		writer.String("time");
-		writer.Double(f.time);
-		writer.String("delta");
-		writer.Double(f.delta);
+		//writer.String("time");
+		//writer.Double(f.time);
+		//writer.String("delta");
+		//writer.Double(f.delta);
 		int k = 5;
 
-		writer.String("actors");
-		writer.StartArray();
+		//writer.String("actors");
+		//writer.StartArray();
 		//While there are actors in buffer (this frame)
 		while (networkReader.read<bool>())
 		{
-			writer.StartObject();
+			//writer.StartObject();
 			const uint32_t actorId = networkReader.readBitsMax<uint32_t>(maxChannels);
 			ActorState& actorState = actorStates[actorId];
-			writer.String("actorid");
-			writer.Uint(actorId);
+			//writer.String("actorid");
+			//writer.Uint(actorId);
 
-			writer.String("status");
+			//writer.String("status");
 			if (networkReader.read<bool>())
 			{
 				
 				//Is new state
 				if (networkReader.read<bool>())
 				{
-					writer.String("created");
+					//writer.String("created");
 					if (replayFile->header.engineVersion > 868 || (replayFile->header.engineVersion == 868 && replayFile->header.licenseeVersion >= 14))
 					{
 						
 						actorState.name_id = networkReader.read<uint32_t>();
-						writer.String("nameid");
-						writer.Uint(actorState.name_id);
+						//writer.String("nameid");
+						//writer.Uint(actorState.name_id);
 					}
 					const bool unknownBool = networkReader.read<bool>();
 					const uint32_t typeId = networkReader.read<uint32_t>();
-					writer.String("typeid");
-					writer.Uint(typeId);
+					//writer.String("typeid");
+					//writer.Uint(typeId);
 					//const uint32_t bit_pos = networkReader.GetAbsoluteBitPosition();
 
 					const std::string typeName = replayFile->objects.at(typeId);
-					writer.String("typename");
-					writer.String(typeName.c_str(), typeName.size());
+					//writer.String("typename");
+					//writer.String(typeName.c_str(), typeName.size());
 					actorState.classNet = GetClassnetByNameWithLookup(typeName);
 					
 					const uint32_t classId = actorState.classNet->index;
 					const std::string className = replayFile->objects.at(classId);
 
-					writer.String("classname");
-					writer.String(className.c_str(), className.size());
+					//writer.String("classname");
+					//writer.String(className.c_str(), className.size());
 
 					if (HasInitialPosition(className))
 					{
 						actorState.position = static_cast<Vector3>(networkReader.read<Vector3I>());
-						writer.String("initialposition");
+						//writer.String("initialposition");
 						Serialize(writer, actorState.position);
 					}
 					if (HasRotation(className))
 					{
 						actorState.rotation = networkReader.read<Rotator>();
-						writer.String("initialrotation");
+						//writer.String("initialrotation");
 						Serialize(writer, actorState.rotation);
 					}
 				}
 				else //Is existing state
 				{
-					writer.String("updated");
-					writer.String("updates");
-					writer.StartArray();
+					//writer.String("updated");
+					//writer.String("updates");
+					//writer.StartArray();
 					//While there's data for this state to be updated
 					while (networkReader.read<bool>())
 					{
-						writer.StartObject();
+						//writer.StartObject();
 						const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
 						const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
 						const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
 						//printf("Calling parser for %s (%i, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId);
-						writer.String("class");
-						writer.String(replayFile->objects[propertyIndex].c_str(), replayFile->objects[propertyIndex].size());
+						//writer.String("class");
+						//writer.String(replayFile->objects[propertyIndex].c_str(), replayFile->objects[propertyIndex].size());
 						
-						writer.String("data");
+						//writer.String("data");
 						//printf("Calling parse for %s", )
 						networkParser.Parse(propertyIndex, networkReader, writer);
-						writer.EndObject();
+						//writer.EndObject();
 					}
-					writer.EndArray();
+					//writer.EndArray();
 				}
 			} 
 			else
 			{
-				writer.String("deleted");
+				//writer.String("deleted");
 			}
-			writer.EndObject();
+			//writer.EndObject();
 		}
-		writer.EndArray();
-		writer.EndObject();
+		//writer.EndArray();
+		//writer.EndObject();
 	}
-	writer.EndArray();
-	writer.EndObject();
+	//writer.EndArray();
+	//writer.EndObject();
 	//printf("Parsed\n");
 }
 
@@ -428,6 +431,28 @@ const bool ReplayFile::HasRotation(const std::string & name) const
 		|| name.compare("TAGame.Car_TA") == 0
 		|| name.compare("TAGame.Car_Season_TA") == 0
 		|| name.compare("TAGame.Ball_Breakout_TA") == 0;
+}
+
+const std::pair<const uint32_t, const KeyFrame> ReplayFile::GetNearestKeyframe(uint32_t frame) const
+{
+	if (replayFile->keyframes.size() == 0)
+	{
+		return std::make_pair<const uint32_t, KeyFrame>(0, { 0.f, 0,0 });
+	}
+	
+	const size_t size = replayFile->keyframes.size();
+	size_t currentKeyframeIndex = 0;
+	for (currentKeyframeIndex; currentKeyframeIndex < size; ++currentKeyframeIndex)
+	{
+		if (replayFile->keyframes.at(currentKeyframeIndex).frame > frame)
+		{
+			break;
+		}
+	}
+	
+	const KeyFrame nearestKeyFrame = replayFile->keyframes.at(currentKeyframeIndex);
+	const uint32_t frameNumber = nearestKeyFrame.frame;
+	return std::make_pair(frameNumber, nearestKeyFrame);
 }
 
 const bool ReplayFile::ParseProperty(const std::shared_ptr<Property>& currentProperty)

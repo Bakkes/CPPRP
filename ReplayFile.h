@@ -35,7 +35,7 @@ protected:
 	const bool HasInitialPosition(const std::string& name) const;
 	const bool HasRotation(const std::string& name) const;
 	
-
+	const std::pair<const uint32_t, const KeyFrame> GetNearestKeyframe(uint32_t frame) const;
 	const bool ParseProperty(const std::shared_ptr<Property>& currentProperty);
 	const std::shared_ptr<ClassNet>& GetClassnetByName(const std::string& name);
 	const std::shared_ptr<ClassNet>& GetClassnetByNameWithLookup(const std::string& name);

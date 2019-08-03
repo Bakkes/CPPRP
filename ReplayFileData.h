@@ -88,12 +88,12 @@ struct UniqueId
 
 };
 
-typedef struct
+struct Property
 {
 	std::string property_name;
 	std::string property_type;
 	std::any value;
-} Property;
+} ;
 
 struct FileHeader
 {
@@ -104,32 +104,32 @@ struct FileHeader
 	uint32_t netVersion = 0;
 };
 
-typedef struct
+struct KeyFrame
 {
 	float time;
 	uint32_t frame;
 	uint32_t filepos;
-} KeyFrame;
+};
 
-typedef struct
+struct ReplayTick
 {
 	std::string type;
 	uint32_t frame;
-} ReplayTick;
+};
 
-typedef struct
+struct ClassIndex
 {
 	std::string class_name;
 	uint32_t index;
-} ClassIndex;
+};
 
-typedef struct
+struct PropIndexId
 {
 	int32_t prop_index;
 	int32_t prop_id;
-} PropIndexId;
+} ;
 
-typedef struct ClassNet
+struct ClassNet
 {
 	int32_t index;
 	int32_t parent;
@@ -139,13 +139,13 @@ typedef struct ClassNet
 	std::vector<PropIndexId> prop_indexes;
 	uint16_t max_prop_id;
 	std::vector<uint16_t> property_id_cache;
-} ClassNet;
+};
 
-typedef struct
+struct Frame
 {
 	float time;
 	float delta;
-} Frame;
+};
 
 struct EnumProperty
 {
@@ -176,11 +176,11 @@ struct ReplayFileData
 	std::vector<std::shared_ptr<ClassNet>> classnets;
 };
 
-typedef struct
+struct ActorState
 {
 	std::shared_ptr<ClassNet> classNet;
 	uint32_t actor_id;
 	uint32_t name_id;
 	Vector3 position;
 	Rotator rotation;
-} ActorState;
+};

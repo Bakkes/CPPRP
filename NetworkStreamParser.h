@@ -7,7 +7,7 @@
 #include "NetworkData.h"
 #include "NetworkParsers.h"
 #include <any>
-#include "rapidjson/writer.h"
+#include "rapidjson///writer.h"
 #include "rapidjson/filewritestream.h"
 
 typedef std::shared_ptr<void>(*createFunc)(CPPBitReader<uint32_t>& reader, rapidjson::Writer<rapidjson::FileWriteStream>& writer);
@@ -16,8 +16,8 @@ template<typename T>
 static inline std::shared_ptr<void> createInstance(CPPBitReader<uint32_t>& reader, rapidjson::Writer<rapidjson::FileWriteStream>& writer)
 {
 	auto consumed = Consume<T>(reader);
-	Serialize(writer, consumed);
-	printf("%s\n", ToString(consumed).c_str());
+	//Serialize(writer, consumed);
+	//printf("%s\n", ToString(consumed).c_str());
 	return std::static_pointer_cast<void>(std::make_shared<T>());
 }
 
@@ -54,6 +54,6 @@ public:
 	{
 		auto inst = parseFunctions[propertyIdx](br, writer);
 	}
-	void Parse(const std::string& name, CPPBitReader<uint32_t>& br);
+	//void Parse(const std::string& name, CPPBitReader<uint32_t>& br);
 };
 

@@ -116,7 +116,7 @@ int main()
 			//std::thread t{ [replayName]() {
 
 			//auto replayData = replaysToTest[replayName];
-			//printf("Parsing replay \"%s\"\n", replayName.filename().u8string().c_str());
+				//printf("Parsing replay \"%s\"\n", replayName.filename().u8string().c_str());
 				std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>(replayName);
 				
 				if (!rf->Load())
@@ -128,8 +128,9 @@ int main()
 				rf->DeserializeHeader();
 				rf->FixParents();
 				rf->Parse();
+				iterations++;
 				//printf("Parsed replay \"%s\"\n", replayName.filename().u8string().c_str());
-			//},  };
+			//}  };
 			//threads.emplace_back(std::move(t));
 			//printf("Parsed\n\n");
 		}
@@ -252,7 +253,6 @@ int main()
 	//BENCHMARK("KeyFrame parse", , 10);
 
 	//BENCHMARK("Parse", rf.Parse(), 10);
-	int o = 5;
 	system("pause");
 	return 0;
 }

@@ -34,7 +34,7 @@ static inline const uint32_t msbDeBruijn32(uint32_t v)
 	v |= v >> 8;
 	v |= v >> 16;
 
-	return MultiplyDeBruijnBitPosition[(const uint32_t)(v * 0x07C4ACDDU) >> 27];
+	return static_cast<uint32_t>(MultiplyDeBruijnBitPosition[(const uint32_t)(v * 0x07C4ACDDU) >> 27]);
 }
 
 
@@ -371,7 +371,6 @@ public:
 		int32_t maxBitValue = (1 << (numBits - 1)) - 1; 
 		int32_t bias = (1 << (numBits - 1));    
 		int32_t serIntMax = (1 << (numBits - 0));   
-		int32_t maxDelta = (1 << (numBits - 0)) - 1;
 
 		int32_t delta = readBitsMax<int32_t>(serIntMax);
 		float unscaledValue = static_cast<float>(delta - bias);

@@ -178,13 +178,13 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 //	//printf("Result: %s\n", inst->ToString().c_str());
 //}
 
-void NetworkStreamParser::Parse(const std::string & name, CPPBitReader<uint32_t>& br)
-{
-	if (functionToIndexMapping.find(name) == functionToIndexMapping.end())
-	{
-		printf("Could not find parser for %s\n", name.c_str());
-		return;
-	}
-	//auto inst = parseFunctions[functionToIndexMapping[name]](br);
-	//printf("Result: %s\n", inst->ToString().c_str());
-}
+//void NetworkStreamParser::Parse(const std::string & name, CPPBitReader<uint32_t>& br)
+//{
+//	if (functionToIndexMapping.find(name) == functionToIndexMapping.end())
+//	{
+//		printf("Could not find parser for %s\n", name.c_str());
+//		return;
+//	}
+//	auto inst = parseFunctions[functionToIndexMapping[0]](br, rapid);
+//	//printf("Result: %s\n", inst->ToString().c_str());
+//}
