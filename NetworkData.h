@@ -65,17 +65,21 @@ __ParserAttribute__(Consume, false)
 struct Reservation
 {
 	__ParserAttribute__(NumBits, 3)
+	__ParserAttribute__(CallToString, true)
 	uint8_t unknown;
 
 	__ParserAttribute__(CallToString, true)
 	UniqueId player_id;
 	std::string player_name;
+
+	__ParserAttribute__(CallToString, true)
 	uint8_t unknown2;
 };
 
 __ParserAttribute__(Consume, false)
 struct ClientLoadout
 {
+	__ParserAttribute__(CallToString, true)
 	uint8_t version;
 	uint32_t body;
 	uint32_t skin;
@@ -119,8 +123,13 @@ struct ReplicatedPickupData
 
 struct TeamPaint
 {
+	__ParserAttribute__(CallToString, true)
 	uint8_t team_number;
+
+	__ParserAttribute__(CallToString, true)
 	uint8_t team_color_id;
+
+	__ParserAttribute__(CallToString, true)
 	uint8_t custom_color_id;
 	uint32_t team_finish_id;
 	uint32_t custom_finish_id;

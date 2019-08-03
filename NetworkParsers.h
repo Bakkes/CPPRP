@@ -259,6 +259,7 @@ inline const ReplicatedRBState Consume(CPPBitReader<uint32_t>& reader) {
 		item.rotation.x = reader.readFixedCompressedFloat(1, 16);
 		item.rotation.y = reader.readFixedCompressedFloat(1, 16);
 		item.rotation.z = reader.readFixedCompressedFloat(1, 16);
+		item.rotation.w = 0;
 	}
 
 	if (!item.sleeping)
@@ -298,16 +299,23 @@ inline const Reservation Consume(CPPBitReader<uint32_t>& reader) {
 		item.player_name = reader.read<std::string>();
 	}
 
-	if (reader.owner->header.engineVersion < 868 || reader.owner->header.licenseeVersion < 12)
+	if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 12)
 	{
-		item.unknown2 = reader.read<uint8_t>(2);
+		item.unknown2 = reader.read<uint8_t>();
+		
 	}
 	else 
 	{
-		item.unknown2 = reader.read<uint8_t>();
+		item.unknown2 = reader.read<uint8_t>(2);
 	}
 	
 	return item;
+}
+
+template<>
+inline const std::string ToString(const UniqueId& item) 
+{ 
+	return "UniqueID"; 
 }
 
 template<>
@@ -327,6 +335,8 @@ template<>
 inline const std::string ToString(const uint8_t& item) { return std::to_string((int)item); }
 template<>
 inline const std::string ToString(const float& item) { return std::to_string(item); }
+template<>
+inline const std::string ToString(const uint64_t& item) { return std::to_string(item); }
 
 template<typename T, class Alloc>
 inline const std::string ToString(const std::vector<T, Alloc>& item) { 

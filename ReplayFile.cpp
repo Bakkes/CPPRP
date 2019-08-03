@@ -89,7 +89,7 @@ void ReplayFile::DeserializeHeader()
 		uint32_t frame = fullReplayBitReader.read<uint32_t>();
 		std::string key = fullReplayBitReader.read<std::string>();
 		std::string value = fullReplayBitReader.read<std::string>();
-		printf("%s = %s", key.c_str(), value.c_str());
+		///printf("%s = %s", key.c_str(), value.c_str());
 	}
 	//fullReplayBitReader.skip(4*8); //debug_log apparently
 

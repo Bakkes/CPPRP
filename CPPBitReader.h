@@ -294,8 +294,23 @@ public:
 			}
 			break;
 		case Platform_Switch:
+			id.uniqueID = read<uint64_t>(64);
+			id.uniqueID = read<uint64_t>(64);
+			id.uniqueID = read<uint64_t>(64);
+			id.uniqueID = read<uint64_t>(64);
+			break;
 		case Platform_PsyNet:
-			id.uniqueID = read<uint64_t>(32 * 8);
+			if (owner->header.engineVersion >= 868 && owner->header.licenseeVersion >= 24 && owner->header.netVersion >= 10)
+			{
+				id.uniqueID = read<uint64_t>(64);
+			}
+			else
+			{
+				id.uniqueID = read<uint64_t>(64);
+				id.uniqueID = read<uint64_t>(64);
+				id.uniqueID = read<uint64_t>(64);
+				id.uniqueID = read<uint64_t>(64);
+			}
 			break;
 		case Platform_Unknown:
 			if (owner->header.licenseeVersion >= 18 && owner->header.netVersion == 0)

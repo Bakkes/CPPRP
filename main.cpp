@@ -5,7 +5,7 @@
 #include <thread>
 #include <vector>
 #include <mutex>
-std::vector<std::string> failingReplays = { "504e", "6688", "a128", "c23b","d044", "d236", "f811" };
+std::vector<std::string> failingReplays = {/* "6688", "a128", "c23b","d044", "d236", "f811" */};
 
 std::unordered_map<std::string, std::string> replaysToTest =
 {

@@ -122,10 +122,10 @@ template<>
 inline const std::string ToString(const Reservation& item) 
 {
 	std::stringstream ss;
-	ss << "unknown = " << item.unknown;
+	ss << "unknown = " << ToString<uint8_t>(item.unknown);
 	ss << ",\n " << "player_id = " << ToString<UniqueId>(item.player_id);
 	ss << ",\n " << "player_name = " << item.player_name;
-	ss << ",\n " << "unknown2 = " << item.unknown2;
+	ss << ",\n " << "unknown2 = " << ToString<uint8_t>(item.unknown2);
 	return ss.str();
 }
 
@@ -148,7 +148,7 @@ template<>
 inline const std::string ToString(const ClientLoadout& item) 
 {
 	std::stringstream ss;
-	ss << "version = " << item.version;
+	ss << "version = " << ToString<uint8_t>(item.version);
 	ss << ",\n " << "body = " << item.body;
 	ss << ",\n " << "skin = " << item.skin;
 	ss << ",\n " << "wheels = " << item.wheels;
@@ -312,9 +312,9 @@ template<>
 inline const std::string ToString(const TeamPaint& item) 
 {
 	std::stringstream ss;
-	ss << "team_number = " << item.team_number;
-	ss << ",\n " << "team_color_id = " << item.team_color_id;
-	ss << ",\n " << "custom_color_id = " << item.custom_color_id;
+	ss << "team_number = " << ToString<uint8_t>(item.team_number);
+	ss << ",\n " << "team_color_id = " << ToString<uint8_t>(item.team_color_id);
+	ss << ",\n " << "custom_color_id = " << ToString<uint8_t>(item.custom_color_id);
 	ss << ",\n " << "team_finish_id = " << item.team_finish_id;
 	ss << ",\n " << "custom_finish_id = " << item.custom_finish_id;
 	return ss.str();
