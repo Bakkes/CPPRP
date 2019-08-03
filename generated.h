@@ -6,10 +6,10 @@ template<>
 inline const std::string ToString(const ReplicatedRBState& item) 
 {
 	std::stringstream ss;
-	ss << "rotation = " << ToString<Quat>(item.rotation);
-	ss << ",\n " << "position = " << ToString<Vector3>(item.position);
-	ss << ",\n " << "linear_velocity = " << ToString<Vector3>(item.linear_velocity);
-	ss << ",\n " << "angular_velocity = " << ToString<Vector3>(item.angular_velocity);
+	ss << "rotation = " << ToString(item.rotation);
+	ss << ",\n " << "position = " << ToString(item.position);
+	ss << ",\n " << "linear_velocity = " << ToString(item.linear_velocity);
+	ss << ",\n " << "angular_velocity = " << ToString(item.angular_velocity);
 	ss << ",\n " << "sleeping = " << item.sleeping;
 	return ss.str();
 }
@@ -122,10 +122,10 @@ template<>
 inline const std::string ToString(const Reservation& item) 
 {
 	std::stringstream ss;
-	ss << "unknown = " << ToString<uint8_t>(item.unknown);
-	ss << ",\n " << "player_id = " << ToString<UniqueId>(item.player_id);
+	ss << "unknown = " << ToString(item.unknown);
+	ss << ",\n " << "player_id = " << ToString(item.player_id);
 	ss << ",\n " << "player_name = " << item.player_name;
-	ss << ",\n " << "unknown2 = " << ToString<uint8_t>(item.unknown2);
+	ss << ",\n " << "unknown2 = " << ToString(item.unknown2);
 	return ss.str();
 }
 
@@ -148,7 +148,7 @@ template<>
 inline const std::string ToString(const ClientLoadout& item) 
 {
 	std::stringstream ss;
-	ss << "version = " << ToString<uint8_t>(item.version);
+	ss << "version = " << ToString(item.version);
 	ss << ",\n " << "body = " << item.body;
 	ss << ",\n " << "skin = " << item.skin;
 	ss << ",\n " << "wheels = " << item.wheels;
@@ -312,9 +312,9 @@ template<>
 inline const std::string ToString(const TeamPaint& item) 
 {
 	std::stringstream ss;
-	ss << "team_number = " << ToString<uint8_t>(item.team_number);
-	ss << ",\n " << "team_color_id = " << ToString<uint8_t>(item.team_color_id);
-	ss << ",\n " << "custom_color_id = " << ToString<uint8_t>(item.custom_color_id);
+	ss << "team_number = " << ToString(item.team_number);
+	ss << ",\n " << "team_color_id = " << ToString(item.team_color_id);
+	ss << ",\n " << "custom_color_id = " << ToString(item.custom_color_id);
 	ss << ",\n " << "team_finish_id = " << item.team_finish_id;
 	ss << ",\n " << "custom_finish_id = " << item.custom_finish_id;
 	return ss.str();
@@ -358,8 +358,8 @@ inline const std::string ToString(const ReplicatedDemolish& item)
 	ss << ",\n " << "attacker_actor_id = " << item.attacker_actor_id;
 	ss << ",\n " << "unknown2 = " << item.unknown2;
 	ss << ",\n " << "victim_actor_id = " << item.victim_actor_id;
-	ss << ",\n " << "attacker_velocity = " << ToString<Vector3>(item.attacker_velocity);
-	ss << ",\n " << "victim_velocity = " << ToString<Vector3>(item.victim_velocity);
+	ss << ",\n " << "attacker_velocity = " << ToString(item.attacker_velocity);
+	ss << ",\n " << "victim_velocity = " << ToString(item.victim_velocity);
 	return ss.str();
 }
 
@@ -543,7 +543,7 @@ template<>
 inline const std::string ToString(const Attributes& item) 
 {
 	std::stringstream ss;
-	ss << "product_attributes = " << ToString<std::vector<ProductAttribute>>(item.product_attributes);
+	ss << "product_attributes = " << ToString(item.product_attributes);
 	return ss.str();
 }
 
@@ -568,7 +568,7 @@ template<>
 inline const std::string ToString(const OnlineLoadout& item) 
 {
 	std::stringstream ss;
-	ss << "attributes_list = " << ToString<std::vector<Attributes>>(item.attributes_list);
+	ss << "attributes_list = " << ToString(item.attributes_list);
 	return ss.str();
 }
 
@@ -633,8 +633,8 @@ template<>
 inline const std::string ToString(const ClientLoadoutsOnline& item) 
 {
 	std::stringstream ss;
-	ss << "online_one = " << ToString<OnlineLoadout>(item.online_one);
-	ss << ",\n " << "online_two = " << ToString<OnlineLoadout>(item.online_two);
+	ss << "online_one = " << ToString(item.online_one);
+	ss << ",\n " << "online_two = " << ToString(item.online_two);
 	ss << ",\n " << "loadout_set = " << item.loadout_set;
 	ss << ",\n " << "is_deprecated = " << item.is_deprecated;
 	return ss.str();
@@ -668,8 +668,8 @@ template<>
 inline const std::string ToString(const ClientLoadouts& item) 
 {
 	std::stringstream ss;
-	ss << "loadout_one = " << ToString<ClientLoadout>(item.loadout_one);
-	ss << ",\n " << "loadout_two = " << ToString<ClientLoadout>(item.loadout_two);
+	ss << "loadout_one = " << ToString(item.loadout_one);
+	ss << ",\n " << "loadout_two = " << ToString(item.loadout_two);
 	return ss.str();
 }
 
@@ -739,9 +739,9 @@ inline const std::string ToString(const WeldedInfo& item)
 	std::stringstream ss;
 	ss << "active = " << item.active;
 	ss << ",\n " << "actor_id = " << item.actor_id;
-	ss << ",\n " << "offset = " << ToString<Vector3>(item.offset);
+	ss << ",\n " << "offset = " << ToString(item.offset);
 	ss << ",\n " << "mass = " << item.mass;
-	ss << ",\n " << "rotation = " << ToString<Rotator>(item.rotation);
+	ss << ",\n " << "rotation = " << ToString(item.rotation);
 	return ss.str();
 }
 
@@ -782,7 +782,7 @@ inline const std::string ToString(const DamageState& item)
 	ss << "damage_state = " << item.damage_state;
 	ss << ",\n " << "unknown2 = " << item.unknown2;
 	ss << ",\n " << "causer_actor_id = " << item.causer_actor_id;
-	ss << ",\n " << "damage_location = " << ToString<Vector3>(item.damage_location);
+	ss << ",\n " << "damage_location = " << ToString(item.damage_location);
 	ss << ",\n " << "direct_damage = " << item.direct_damage;
 	ss << ",\n " << "immediate = " << item.immediate;
 	return ss.str();
@@ -823,7 +823,7 @@ inline const std::string ToString(const AppliedDamage& item)
 {
 	std::stringstream ss;
 	ss << "id = " << item.id;
-	ss << ",\n " << "position = " << ToString<Vector3>(item.position);
+	ss << ",\n " << "position = " << ToString(item.position);
 	ss << ",\n " << "damage_index = " << item.damage_index;
 	ss << ",\n " << "total_damage = " << item.total_damage;
 	return ss.str();
@@ -860,7 +860,7 @@ inline const std::string ToString(const ReplicatedExplosionData& item)
 	std::stringstream ss;
 	ss << "unknown1 = " << item.unknown1;
 	ss << ",\n " << "actor_id = " << item.actor_id;
-	ss << ",\n " << "position = " << ToString<Vector3>(item.position);
+	ss << ",\n " << "position = " << ToString(item.position);
 	return ss.str();
 }
 
@@ -895,7 +895,7 @@ inline const std::string ToString(const ReplicatedExplosionDataExtended& item)
 	std::stringstream ss;
 	ss << "unknown1 = " << item.unknown1;
 	ss << ",\n " << "actor_id = " << item.actor_id;
-	ss << ",\n " << "position = " << ToString<Vector3>(item.position);
+	ss << ",\n " << "position = " << ToString(item.position);
 	ss << ",\n " << "unknown3 = " << item.unknown3;
 	ss << ",\n " << "unknown4 = " << item.unknown4;
 	return ss.str();
@@ -1042,7 +1042,7 @@ inline const std::string ToString(const RepStatTitle& item)
 	std::stringstream ss;
 	ss << "unknown1 = " << item.unknown1;
 	ss << ",\n " << "name = " << item.name;
-	ss << ",\n " << "object_target = " << ToString<ObjectTarget>(item.object_target);
+	ss << ",\n " << "object_target = " << ToString(item.object_target);
 	ss << ",\n " << "value = " << item.value;
 	return ss.str();
 }

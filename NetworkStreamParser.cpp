@@ -111,7 +111,8 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 		"TAGame.CarComponent_TA:ReplicatedActivityTime", "TAGame.SpecialPickup_BallFreeze_TA:RepOrigSpeed", 
 		"TAGame.SpecialPickup_BallVelcro_TA:AttachTime", "TAGame.SpecialPickup_BallVelcro_TA:BreakTime", 
 		"TAGame.Car_TA:AddedCarForceMultiplier", "TAGame.Car_TA:AddedBallForceMultiplier",
-		"TAGame.PRI_TA:SteeringSensitivity", "TAGame.Car_TA:ReplicatedCarScale"
+		"TAGame.PRI_TA:SteeringSensitivity", "TAGame.Car_TA:ReplicatedCarScale",
+		"Engine.WorldInfo:WorldGravityZ"
 		});
 
 	RegisterParsers<Reservation>("ProjectX.GRI_X:Reservations");

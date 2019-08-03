@@ -101,20 +101,24 @@ std::unordered_map<std::string, std::string> replaysToTest =
 
 int main()
 {
+	std::vector<std::filesystem::path> replays;
+	for (const auto & entry : std::filesystem::directory_iterator("C:/Users/Chris/Documents/My Games/Rocket League/TAGame/Demos/"))
+		replays.push_back(entry.path());
+
 	uint32_t iterations = 0;
 	{
 		const char* name = "OldReplays test";
 		double start_time = get_time();
 
 		std::vector<std::thread> threads;
-		for (auto replayName : failingReplays)
+		for (auto replayName : replays)
 		{
-			//std::thread t{ [replay]() {
+			//std::thread t{ [replayName]() {
 
-			auto replayData = replaysToTest[replayName];
-			printf("Parsing replay \"%s\"\n", replayData.c_str());
-				std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>("./replays/" + replayName + ".replay");
-			
+			//auto replayData = replaysToTest[replayName];
+			//printf("Parsing replay \"%s\"\n", replayName.filename().u8string().c_str());
+				std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>(replayName);
+				
 				if (!rf->Load())
 				{
 					printf("Error loading replay file");
@@ -124,7 +128,7 @@ int main()
 				rf->DeserializeHeader();
 				rf->FixParents();
 				rf->Parse();
-				printf("Parsed replay \"%s\"\n", replayData.c_str());
+				//printf("Parsed replay \"%s\"\n", replayName.filename().u8string().c_str());
 			//},  };
 			//threads.emplace_back(std::move(t));
 			//printf("Parsed\n\n");

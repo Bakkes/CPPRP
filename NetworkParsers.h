@@ -10,9 +10,47 @@ inline const void Serialize(Writer& writer, const T& item)
 	std::stringstream ss;
 	ss << "unsupported " << typeid(T).name();
 	std::string o = ss.str();
+	printf("%s\n", o.c_str());
+	assert(1 == 2);
 	writer.String(o.c_str(), o.size()); 
 }
 
+template<typename Writer>
+inline const void Serialize(Writer& writer, const UniqueId& item)
+{
+	writer.StartObject();
+	writer.String("platform");
+	writer.Uint(item.platform);
+	writer.String("playernumber");
+	writer.Uint(item.playerNumber);
+	writer.String("uniqueid");
+	writer.Uint64(item.uniqueID);
+	writer.EndObject();
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const uint64_t& item)
+{
+	writer.Uint64(item);
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const int64_t& item)
+{
+	writer.Int64(item);
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const uint8_t& item)
+{
+	writer.Uint(item);
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const float& item)
+{
+	writer.Double(item);
+}
 
 template<typename Writer>
 inline const void Serialize(Writer& writer, const std::string& item) 
@@ -74,6 +112,18 @@ inline const void Serialize(Writer& writer, const Rotator& item)
 	writer.EndObject();
 }
 
+
+template<typename Writer, typename T>
+inline const void Serialize(Writer& writer, const std::vector<T>& item) {
+	writer.StartArray();
+	const size_t size = item.size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		Serialize(writer, item.at(i));
+	}
+	writer.EndArray();
+}
+
 template<typename Writer>
 inline const void Serialize(Writer& writer, const bool& item)
 {
@@ -119,11 +169,24 @@ inline const void Serialize(Writer& writer, const int32_t& item)
 template<typename T>
 inline const T Consume(CPPBitReader<uint32_t>& reader) { return reader.read<T>(); }
 
+
 template<typename T>
 inline const std::string ToString(const T& item) { 
 	std::stringstream ss;
 	ss << "ERR. ToString not declared for " << typeid(T).name() << "\n";
 	return ss.str(); 
+}
+
+template<typename T>
+inline const std::string ToString(const std::vector<T>& item) {
+	std::stringstream ss;
+	const size_t size = item.size();
+	for (size_t i = 0; i < size; ++i)
+	{
+		ss << "\t[" << i << "] - " << ToString(item.at(i)) << "\n";
+	}
+	//ss << "ERR. ToString not declared for " << typeid(T).name() << "\n";
+	return ss.str();
 }
 
 template<typename T>
@@ -338,16 +401,16 @@ inline const std::string ToString(const float& item) { return std::to_string(ite
 template<>
 inline const std::string ToString(const uint64_t& item) { return std::to_string(item); }
 
-template<typename T, class Alloc>
-inline const std::string ToString(const std::vector<T, Alloc>& item) { 
-	const size_t size = item.size();
-	std::stringstream ss;
-	for (size_t i = 0; i < size; ++i)
-	{
-		ss << "[" << i << "] - " << ToString(item.at(i)) << "\n";
-	}
-	return ss.str(); 
-}
+//template<typename T>
+//inline const std::string ToString(const std::vector<T>& item) { 
+//	const size_t size = item.size();
+//	std::stringstream ss;
+//	for (size_t i = 0; i < size; ++i)
+//	{
+//		ss << "[" << i << "] - " << ToString(item.at(i)) << "\n";
+//	}
+//	return ss.str(); 
+//}
 
 #define ToStringStd(type)\
 template<>\
@@ -356,4 +419,5 @@ inline const std::string ToString(const type & item) { return std::to_string(ite
 
 ToStringStd(uint16_t)
 ToStringStd(uint32_t)
+ToStringStd(int)
 #include "generated.h"
