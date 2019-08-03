@@ -100,20 +100,41 @@ std::unordered_map<std::string, std::string> replaysToTest =
 
 int main()
 {
-	for (auto replay : replaysToTest)
+	uint32_t iterations = 0;
 	{
-		std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>("./replays/" + replay.first + ".replay");
-		printf("Parsing replay \"%s\"\n", replay.second.c_str());
-		if (!rf->Load())
+		const char* name = "OldReplays test";
+		double start_time = get_time();
+
+		std::vector<std::thread> threads;
+		for (auto replay : replaysToTest)
 		{
-			printf("Error loading replay file");
-			return 0;
+			std::thread t{ [replay]() {
+								
+				std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>("./replays/" + replay.first + ".replay");
+			
+				if (!rf->Load())
+				{
+					printf("Error loading replay file");
+					return 0;
+				}
+
+				rf->DeserializeHeader();
+				rf->FixParents();
+				rf->Parse();
+				printf("Parsed replay \"%s\"\n", replay.second.c_str());
+			},  };
+			threads.emplace_back(std::move(t));
+			//printf("Parsed\n\n");
 		}
 
-		rf->DeserializeHeader();
-		rf->FixParents();
-		rf->Parse();
-		//printf("Parsed\n\n");
+		for (auto & t : threads) 
+		{
+			iterations++;
+			t.join();
+		}
+		double end_time = get_time();
+		double elapsed = (end_time - start_time) * 1000.f;
+		printf("[%s] Ran %i iterations in %.5f ms (avg: %.5f ms)\n", name, iterations, elapsed, (elapsed / (double)iterations));
 	}
 	/*std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>("1BE973D44E656FCC97DCD1A4E9076C36.replay");
 	if (!rf->Load())
@@ -141,7 +162,7 @@ int main()
 		rf->Parse(wot1, wot2);
 	}*/
 
-	{
+	//{
 //		const uint32_t iterations = 1000;
 //		{
 //			const char* name = "OMP test";
@@ -188,39 +209,39 @@ int main()
 //			printf("[%s] Ran %i iterations in %.5f ms (avg: %.5f ms)\n", name, iterations, elapsed, (elapsed / (double)iterations));
 //		}
 
-		const uint32_t iterations = 1;
-		{
-			const char* name = "threading test2";
-			double start_time = get_time();
+	//	const uint32_t iterations = 1;
+	//	{
+	//		const char* name = "threading test2";
+	//		double start_time = get_time();
 
-			//auto l = 
-			std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>("1BE973D44E656FCC97DCD1A4E9076C36.replay");
-			if (!rf->Load())
-			{
-				printf("Error loading replay file");
-				return 0;
-			}
+	//		//auto l = 
+	//		std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>("1BE973D44E656FCC97DCD1A4E9076C36.replay");
+	//		if (!rf->Load())
+	//		{
+	//			printf("Error loading replay file");
+	//			return 0;
+	//		}
 
-			rf->DeserializeHeader();
-			rf->FixParents();
-			std::vector<std::thread> threads;
-			for (int aaaa = 0; aaaa < iterations; aaaa++)
-			{
-				
-				std::thread t{ [&rf]() {
-					
-					rf->Parse();
-				} };
-				threads.emplace_back(std::move(t));
-			}
-			for (auto & t : threads)
-				t.join();
+	//		rf->DeserializeHeader();
+	//		rf->FixParents();
+	//		std::vector<std::thread> threads;
+	//		for (int aaaa = 0; aaaa < iterations; aaaa++)
+	//		{
+	//			
+	//			std::thread t{ [&rf]() {
+	//				
+	//				rf->Parse();
+	//			} };
+	//			threads.emplace_back(std::move(t));
+	//		}
+	//		for (auto & t : threads)
+	//			t.join();
 
-			double end_time = get_time();
-			double elapsed = (end_time - start_time) * 1000.f;
-			printf("[%s] Ran %i iterations in %.5f ms (avg: %.5f ms)\n", name, iterations, elapsed, (elapsed / (double)iterations));
-		}
-	}
+	//		double end_time = get_time();
+	//		double elapsed = (end_time - start_time) * 1000.f;
+	//		printf("[%s] Ran %i iterations in %.5f ms (avg: %.5f ms)\n", name, iterations, elapsed, (elapsed / (double)iterations));
+	//	}
+	//}
 	//BENCHMARK("KeyFrame parse", , 10);
 
 	//BENCHMARK("Parse", rf.Parse(), 10);
