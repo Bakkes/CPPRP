@@ -17,7 +17,7 @@ static inline std::shared_ptr<void> createInstance(CPPBitReader<uint32_t>& reade
 {
 	auto consumed = Consume<T>(reader);
 	Serialize(writer, consumed);
-	//printf("%s\n", ToString(consumed).c_str());
+	printf("%s\n", ToString(consumed).c_str());
 	return std::static_pointer_cast<void>(std::make_shared<T>());
 }
 

@@ -218,10 +218,12 @@ public:
 		{
 			ret.pitch = static_cast<int>(read<int8_t>() * conversion);
 		}
+		
 		if (read<bool>())
 		{
 			ret.yaw = static_cast<int>(read<int8_t>()  * conversion);
 		}
+
 		if (read<bool>())
 		{
 			ret.roll = static_cast<int>(read<int8_t>()  * conversion);
@@ -238,7 +240,7 @@ public:
 		float c = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
 		float extra = sqrtf(1.f - (a*a) - (b*b) - (c * c));
 
-		Quat q;
+		Quat q = { 0 };
 		switch (largest)
 		{
 		case 0:

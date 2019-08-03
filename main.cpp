@@ -5,6 +5,7 @@
 #include <thread>
 #include <vector>
 #include <mutex>
+std::vector<std::string> failingReplays = { "504e", "6688", "a128", "c23b","d044", "d236", "f811" };
 
 std::unordered_map<std::string, std::string> replaysToTest =
 {
@@ -39,7 +40,7 @@ std::unordered_map<std::string, std::string> replaysToTest =
   , {"419a", "a club match"}
   , {"42f0", "reservations after Neo Tokyo"}
   , {"4bc3", "with timed out attribute"}
-  //, {"504e", "some messages"}
+  , {"504e", "some messages"}
   , {"520e", "no pickup attribute"}
   , {"524f", "quat edge case"}
   , {"52aa", "a match-ending attribute"}
@@ -48,7 +49,7 @@ std::unordered_map<std::string, std::string> replaysToTest =
   , {"5a06", "esports items"}
   , {"6210", "different player history key"}
   , {"6320", "a forfeit attribute"}
-  //, {"6688", "a malformed byte property"}
+  , {"6688", "a malformed byte property"}
   , {"6b0d", "patch 1.37"}
   , {"6d1b", "a flip right"}
   , {"6f7c", "a map with numbers"}
@@ -65,7 +66,7 @@ std::unordered_map<std::string, std::string> replaysToTest =
   , {"98e5", "a player using behind view"}
   , {"9eaa", "newer replay without trailing bytes"}
   , {"a09e", "a tournament"}
-  //, {"a128", "a round count down"}
+  , {"a128", "a round count down"}
   , {"a52f", "some more mutators"}
   , {"a558", "extended explosion data"}
   , {"a671", "a waiting player"}
@@ -76,11 +77,11 @@ std::unordered_map<std::string, std::string> replaysToTest =
   , {"afb1", "patch 1.37"}
   , {"b9f9", "a party leader"}
   , {"c14f", "some mutators"}
-  //, {"c23b", "new psynet id"}
+  , {"c23b", "new psynet id"}
   , {"c837", "a spectator"}
   , {"cc4c", "after Starbase ARC"}
-  //, {"d044", "hoops mutators"}
-  //, {"d236", "rlcs s2"}
+  , {"d044", "hoops mutators"}
+  , {"d236", "rlcs s2"}
   , {"d428", "a private hockey match"}
   , {"d52e", "psynet system id"}
   , {"d7fb", "an explosion attribute"}
@@ -93,7 +94,7 @@ std::unordered_map<std::string, std::string> replaysToTest =
   , {"edbb", "remote role"}
   , {"f299", "a location attribute"}
   , {"f7b9", "a hockey game event"}
-  //, {"f811", "no frames"}
+  , {"f811", "no frames"}
   , {"fdc7", "an MVP"}
 };
 
@@ -106,11 +107,13 @@ int main()
 		double start_time = get_time();
 
 		std::vector<std::thread> threads;
-		for (auto replay : replaysToTest)
+		for (auto replayName : failingReplays)
 		{
-			std::thread t{ [replay]() {
-								
-				std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>("./replays/" + replay.first + ".replay");
+			//std::thread t{ [replay]() {
+
+			auto replayData = replaysToTest[replayName];
+			printf("Parsing replay \"%s\"\n", replayData.c_str());
+				std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>("./replays/" + replayName + ".replay");
 			
 				if (!rf->Load())
 				{
@@ -121,9 +124,9 @@ int main()
 				rf->DeserializeHeader();
 				rf->FixParents();
 				rf->Parse();
-				printf("Parsed replay \"%s\"\n", replay.second.c_str());
-			},  };
-			threads.emplace_back(std::move(t));
+				printf("Parsed replay \"%s\"\n", replayData.c_str());
+			//},  };
+			//threads.emplace_back(std::move(t));
 			//printf("Parsed\n\n");
 		}
 

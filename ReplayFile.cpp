@@ -86,7 +86,10 @@ void ReplayFile::DeserializeHeader()
 	const int32_t debugStringSize = fullReplayBitReader.read<int32_t>();
 	for (int32_t i = 0; i < debugStringSize; ++i)
 	{
-		printf("%s",fullReplayBitReader.read<std::string>().c_str());
+		uint32_t frame = fullReplayBitReader.read<uint32_t>();
+		std::string key = fullReplayBitReader.read<std::string>();
+		std::string value = fullReplayBitReader.read<std::string>();
+		printf("%s = %s", key.c_str(), value.c_str());
 	}
 	//fullReplayBitReader.skip(4*8); //debug_log apparently
 
@@ -383,7 +386,7 @@ void ReplayFile::Parse(const uint32_t startPos, int32_t endPos)
 						const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
 						const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
 						const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
-						//printf("Calling parser for %s (%i, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId);
+						printf("Calling parser for %s (%i, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId);
 						writer.String("class");
 						writer.String(replayFile->objects[propertyIndex].c_str(), replayFile->objects[propertyIndex].size());
 						
