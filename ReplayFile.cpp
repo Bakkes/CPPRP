@@ -77,12 +77,18 @@ void ReplayFile::DeserializeHeader()
 			});
 	}
 
-	const uint32_t netstreamCount = fullReplayBitReader.read<uint32_t>();
+	const uint32_t netstreamCount = static_cast<uint32_t>(fullReplayBitReader.read<int32_t>());
 	replayFile->netstream_data = data.data() + fullReplayBitReader.GetBytePosition(); //We know this is always aligned, so valid
-	fullReplayBitReader.skip(netstreamCount*8);
+	uint32_t test = netstreamCount * 8;
+	fullReplayBitReader.skip(test);
 	replayFile->netstream_size = netstreamCount;
 
-	fullReplayBitReader.skip(4*8); //debug_log apparently
+	const int32_t debugStringSize = fullReplayBitReader.read<int32_t>();
+	for (int32_t i = 0; i < debugStringSize; ++i)
+	{
+		printf("%s",fullReplayBitReader.read<std::string>().c_str());
+	}
+	//fullReplayBitReader.skip(4*8); //debug_log apparently
 
 	const uint32_t replayTickCount = fullReplayBitReader.read<uint32_t>();
 	for (uint32_t i = 0; i < replayTickCount; ++i)
@@ -161,6 +167,7 @@ void ReplayFile::DeserializeHeader()
 		replayFile->classnets[i] = (classNet);
 
 		//Set parent class if exists
+		int ow = 0;
 		for (int32_t k = (int32_t)i - 1; k >= 0; --k)
 		{
 			if (replayFile->classnets[i]->parent == replayFile->classnets[k]->id)
@@ -177,43 +184,87 @@ void ReplayFile::DeserializeHeader()
 	networkParser.RegisterParsers(replayFile);
 }
 
+void ReplayFile::MergeDuplicates()
+{
+	GetClassnetByName("");
+	std::unordered_map<std::string, int> counts;
+	for (auto it : classnetMap)
+	{
+		if (it.second)
+		{
+			counts[replayFile->objects[it.second->index]]++;
+		}
+		else int p = 5;
+	}
+	int o = 5;
+}
+
 const std::unordered_map<std::string, std::string> class_extensions = 
 {
-	{"ProjectX.PRI_X", "Engine.PlayerReplicationInfo"},
-	{"TAGame.PRI_TA", "ProjectX.PRI_X"},
-	{"TAGame.CarComponent_Boost_TA", "TAGame.CarComponent_TA"},
-	{"TAGame.CarComponent_FlipCar_TA", "TAGame.CarComponent_TA"},
-	{"TAGame.CarComponent_Jump_TA", "TAGame.CarComponent_TA"},
-	{"TAGame.CarComponent_Dodge_TA", "TAGame.CarComponent_TA"},
-	{"TAGame.CarComponent_DoubleJump_TA", "TAGame.CarComponent_TA"},
-	{"TAGame.GameEvent_TA", "Engine.Actor"},
-	{"TAGame.SpecialPickup_TA", "TAGame.CarComponent_TA"},
-	{"TAGame.SpecialPickup_BallVelcro_TA", "TAGame.SpecialPickup_TA"},
-	{"TAGame.SpecialPickup_Targeted_TA", "TAGame.SpecialPickup_TA"},
-	{"TAGame.SpecialPickup_Spring_TA", "TAGame.SpecialPickup_Targeted_TA"},
-	{"TAGame.SpecialPickup_BallLasso_TA", "TAGame.SpecialPickup_Spring_TA"},
-	{"TAGame.SpecialPickup_BoostOverride_TA", "TAGame.SpecialPickup_Targeted_TA"},
-	{"TAGame.SpecialPickup_BallCarSpring_TA", "TAGame.SpecialPickup_Spring_TA"},
-	{"TAGame.SpecialPickup_BallFreeze_TA", "TAGame.SpecialPickup_Targeted_TA"},
-	{"TAGame.SpecialPickup_Swapper_TA", "TAGame.SpecialPickup_Targeted_TA"},
-	{"TAGame.SpecialPickup_GrapplingHook_TA", "TAGame.SpecialPickup_Targeted_TA"},
-	{"TAGame.SpecialPickup_BallGravity_TA", "TAGame.SpecialPickup_TA"},
-	{"TAGame.SpecialPickup_HitForce_TA", "TAGame.SpecialPickup_TA"},
-	{"TAGame.SpecialPickup_Tornado_TA", "TAGame.SpecialPickup_TA"},
-	{"Engine.Pawn", "Engine.Actor"},
-	{"Engine.TeamInfo", "Engine.ReplicationInfo"},
-	{"TAGame.Team_TA", "Engine.TeamInfo"}
+	{"Engine.Actor", "Core.Object"}
+  , {"Engine.GameReplicationInfo", "Engine.ReplicationInfo"}
+  , {"Engine.Info", "Engine.Actor"}
+  , {"Engine.Pawn", "Engine.Actor"}
+  , {"Engine.PlayerReplicationInfo", "Engine.ReplicationInfo"}
+  , {"Engine.ReplicationInfo", "Engine.Info"}
+  , {"Engine.TeamInfo", "Engine.ReplicationInfo"}
+  , {"ProjectX.GRI_X", "Engine.GameReplicationInfo"}
+  , {"ProjectX.Pawn_X", "Engine.Pawn"}
+  , {"ProjectX.PRI_X", "Engine.PlayerReplicationInfo"}
+  , {"TAGame.Ball_TA", "TAGame.RBActor_TA"}
+  , {"TAGame.CameraSettingsActor_TA", "Engine.ReplicationInfo"}
+  , {"TAGame.Car_Season_TA", "TAGame.PRI_TA"}
+  , {"TAGame.Car_TA", "TAGame.Vehicle_TA"}
+  , {"TAGame.CarComponent_Boost_TA", "TAGame.CarComponent_TA"}
+  , {"TAGame.CarComponent_Dodge_TA", "TAGame.CarComponent_TA"}
+  , {"TAGame.CarComponent_DoubleJump_TA", "TAGame.CarComponent_TA"}
+  , {"TAGame.CarComponent_FlipCar_TA", "TAGame.CarComponent_TA"}
+  , {"TAGame.CarComponent_Jump_TA", "TAGame.CarComponent_TA"}
+  , {"TAGame.CarComponent_TA", "Engine.ReplicationInfo"}
+  , {"TAGame.CrowdActor_TA", "Engine.ReplicationInfo"}
+  , {"TAGame.CrowdManager_TA", "Engine.ReplicationInfo"}
+  , {"TAGame.GameEvent_Season_TA", "TAGame.GameEvent_Soccar_TA"}
+  , {"TAGame.GameEvent_Soccar_TA", "TAGame.GameEvent_Team_TA"}
+  , {"TAGame.GameEvent_SoccarPrivate_TA", "TAGame.GameEvent_Soccar_TA"}
+  , {"TAGame.GameEvent_SoccarSplitscreen_TA", "TAGame.GameEvent_SoccarPrivate_TA"}
+  , {"TAGame.GameEvent_TA", "Engine.ReplicationInfo"}
+  , {"TAGame.GameEvent_Team_TA", "TAGame.GameEvent_TA"}
+  , {"TAGame.GRI_TA", "ProjectX.GRI_X"}
+  , {"TAGame.InMapScoreboard_TA", "Engine.Actor"}
+  , {"TAGame.PRI_TA", "ProjectX.PRI_X"}
+  , {"TAGame.RBActor_TA", "ProjectX.Pawn_X"}
+  , {"TAGame.SpecialPickup_BallCarSpring_TA", "TAGame.SpecialPickup_Spring_TA"}
+  , {"TAGame.SpecialPickup_BallFreeze_TA", "TAGame.SpecialPickup_Targeted_TA"}
+  , {"TAGame.SpecialPickup_BallGravity_TA", "TAGame.SpecialPickup_TA"}
+  , {"TAGame.SpecialPickup_BallLasso_TA", "TAGame.SpecialPickup_GrapplingHook_TA"}
+  , {"TAGame.SpecialPickup_BallVelcro_TA", "TAGame.SpecialPickup_TA"}
+  , {"TAGame.SpecialPickup_Batarang_TA", "TAGame.SpecialPickup_BallLasso_TA"}
+  , {"TAGame.SpecialPickup_BoostOverride_TA", "TAGame.SpecialPickup_Targeted_TA"}
+  , {"TAGame.SpecialPickup_GrapplingHook_TA", "TAGame.SpecialPickup_Targeted_TA"}
+  , {"TAGame.SpecialPickup_HitForce_TA", "TAGame.SpecialPickup_TA"}
+  , {"TAGame.SpecialPickup_Spring_TA", "TAGame.SpecialPickup_Targeted_TA"}
+  , {"TAGame.SpecialPickup_Swapper_TA", "TAGame.SpecialPickup_Targeted_TA"}
+  , {"TAGame.SpecialPickup_TA", "TAGame.CarComponent_TA"}
+  , {"TAGame.SpecialPickup_Targeted_TA", "TAGame.SpecialPickup_TA"}
+  , {"TAGame.SpecialPickup_Tornado_TA", "TAGame.SpecialPickup_TA"}
+  , {"TAGame.Team_Soccar_TA", "TAGame.Team_TA"}
+  , {"TAGame.Team_TA", "Engine.TeamInfo"}
+  , {"TAGame.Vehicle_TA", "TAGame.RBActor_TA"}
+  , {"TAGame.VehiclePickup_Boost_TA", "TAGame.VehiclePickup_TA"}
+  , {"TAGame.VehiclePickup_TA", "Engine.ReplicationInfo"}
 };
 
 void ReplayFile::FixParents()
 {
+	this->MergeDuplicates();
 	for (auto kv : class_extensions)
 	{
-		std::shared_ptr<ClassNet> clas = GetClassnetByName(kv.first);
-		std::shared_ptr<ClassNet> classBase = GetClassnetByName(kv.second);
-		if (clas != nullptr && classBase != nullptr && (clas->parent_class == nullptr || (clas->parent_class->id != classBase->id)))
+		
+		std::shared_ptr<ClassNet> childClass = GetClassnetByName(kv.first);
+		std::shared_ptr<ClassNet> parentClass = GetClassnetByName(kv.second);
+		if (parentClass != nullptr && childClass != nullptr && (childClass->parent_class == nullptr || (childClass->parent_class->id != parentClass->id)))
 		{
-			clas->parent_class = classBase;
+			childClass->parent_class = parentClass;
 		}
 	}
 	for (auto cn : replayFile->classnets)
@@ -332,7 +383,7 @@ void ReplayFile::Parse(const uint32_t startPos, int32_t endPos)
 						const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
 						const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
 						const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
-						printf("Calling parser for %s\n", replayFile->objects[propertyIndex].c_str());
+						//printf("Calling parser for %s (%i, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId);
 						writer.String("class");
 						writer.String(replayFile->objects[propertyIndex].c_str(), replayFile->objects[propertyIndex].size());
 						

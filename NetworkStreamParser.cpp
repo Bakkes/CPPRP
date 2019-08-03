@@ -83,7 +83,8 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 		"TAGame.PRI_TA:PlayerHistoryValid", "TAGame.GameEvent_Soccar_TA:bUnlimitedTime", 
 		"TAGame.GameEvent_Soccar_TA:bClubMatch", "TAGame.GameEvent_Soccar_TA:bMatchEnded", 
 		"TAGame.GameEvent_TA:bAllowReadyUp", "Engine.Actor:bTearOff", 
-		"Engine.PlayerReplicationInfo:bTimedOut" });
+		"Engine.PlayerReplicationInfo:bTimedOut", "TAGame.CameraSettingsActor_TA:bMouseCameraToggleEnabled",
+		"TAGame.CameraSettingsActor_TA:bUsingSwivel"});
 
 	RegisterParsers<uint64_t>({
 		"ProjectX.GRI_X:GameServerID", "TAGame.Team_TA:ClubID", "TAGame.PRI_TA:ClubID"
@@ -138,6 +139,7 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 	RegisterParsers<OnlineLoadout>({ "TAGame.PRI_TA:ClientLoadoutOnline" });
 	RegisterParsers<ClientLoadoutsOnline>({ "TAGame.PRI_TA:ClientLoadoutsOnline" });
 	RegisterParsers<ClientLoadouts>({ "TAGame.PRI_TA:ClientLoadouts" });
+	RegisterParsers<ClientLoadout>({ "TAGame.PRI_TA:ClientLoadout" });
 
 	RegisterParsers<CameraSettings>({ 
 		"TAGame.PRI_TA:CameraSettings", "TAGame.CameraSettingsActor_TA:ProfileSettings" 
@@ -163,6 +165,7 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 	RegisterParsers<RepStatTitle>({ "TAGame.PRI_TA:RepStatTitles" });
 
 	RegisterParsers<GameMode>({ "TAGame.GameEvent_TA:GameMode" });
+	RegisterParsers<ReplicatedStateIndex>({ "TAGame.GameEvent_TA:ReplicatedStateIndex" });
 	//RegisterParsers<>({  });
 	//RegisterParsers<>({  });
 }

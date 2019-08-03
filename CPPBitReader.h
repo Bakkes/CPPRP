@@ -282,13 +282,24 @@ public:
 			id.uniqueID = read<uint64_t>(8 * 8);
 			break;
 		case Platform_PS4:
-			id.uniqueID = read<uint64_t>(40 * 8);
+			if (owner->header.netVersion >= 1) 
+			{
+				id.uniqueID = read<uint64_t>(40 * 8);
+			}
+			else
+			{
+				id.uniqueID = read<uint64_t>(32 * 8);
+			}
 			break;
-		case Platform_NNX:
+		case Platform_Switch:
 		case Platform_PsyNet:
 			id.uniqueID = read<uint64_t>(32 * 8);
 			break;
 		case Platform_Unknown:
+			if (owner->header.licenseeVersion >= 18 && owner->header.netVersion == 0)
+			{
+				return id;
+			}
 			id.uniqueID = read<uint64_t>(3 * 8);
 			printf("Unknown platform found!\n");
 			break;
@@ -304,9 +315,13 @@ public:
 	template<>
 	const std::string read()
 	{
-		int32_t length = read<int32_t>();
+		const int32_t length = read<int32_t>();
 		const int32_t final_length = length * (length > 0 ? 1 : -2);
-		
+		if (final_length == 0)
+		{
+			return "";
+		}
+
 		std::string str;
 		str.resize(final_length-1);
 		//Possible optimization (but later)

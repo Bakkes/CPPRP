@@ -63,9 +63,9 @@ enum Platform
 	Platform_PS3 = 3,
 	Platform_Dingo = 4,
 	Platform_QQ = 5,
-	Platform_WeGame = 6,
-	Platform_NNX = 7,
-	Platform_PsyNet = 8,
+	Platform_Switch = 6, //Is in gamefiles as wegame..
+	//Platform_NNX = 7,
+	Platform_PsyNet = 7, //is 8 in gamefiles
 	Platform_MAX = 9
 };
 

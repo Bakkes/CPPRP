@@ -28,6 +28,7 @@ public:
 
 	bool Load();
 	void DeserializeHeader();
+	void MergeDuplicates();
 	void FixParents();
 	void Parse(const uint32_t startPos = 0, int32_t endPos = -1);
 protected:

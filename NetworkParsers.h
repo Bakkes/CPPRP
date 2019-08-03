@@ -149,11 +149,22 @@ inline const ProductAttribute Consume(CPPBitReader<uint32_t>& reader) {
 	{
 		//TODO: assign this
 		//const UserColorAttribute uca = Consume<UserColorAttribute>(reader);
-		UserColorAttribute item;
-		item.r = reader.read<uint8_t>();
-		item.g = reader.read<uint8_t>();
-		item.b = reader.read<uint8_t>();
-		item.a = reader.read<uint8_t>();
+		if (reader.owner->header.licenseeVersion >= 23) 
+		{
+			UserColorAttribute item;
+			item.r = reader.read<uint8_t>();
+			item.g = reader.read<uint8_t>();
+			item.b = reader.read<uint8_t>();
+			item.a = reader.read<uint8_t>();
+		}
+		else
+		{
+			item.has_value = reader.read<bool>();
+			if (item.has_value)
+			{
+				item.value = reader.read<uint32_t>(31);
+			}
+		}
 	}
 	else if (className.compare("TAGame.ProductAttribute_Painted_TA") == 0)
 	{
@@ -272,7 +283,7 @@ inline const GameMode Consume(CPPBitReader<uint32_t>& reader) {
 	}
 	else
 	{
-		item.gamemode = reader.read<uint32_t>(4);
+		item.gamemode = reader.readBitsMax<uint32_t>(4);
 	}
 	return item;
 }
@@ -314,6 +325,8 @@ template<>
 inline const std::string ToString(const bool& item) { return item ? "true" : "false"; }
 template<>
 inline const std::string ToString(const uint8_t& item) { return std::to_string((int)item); }
+template<>
+inline const std::string ToString(const float& item) { return std::to_string(item); }
 
 template<typename T, class Alloc>
 inline const std::string ToString(const std::vector<T, Alloc>& item) { 

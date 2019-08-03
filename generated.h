@@ -35,7 +35,7 @@ template<>
 inline const LogoData Consume(CPPBitReader<uint32_t>& reader) 
 {
 	LogoData item;
-	item.unknown = reader.read<uint8_t>();
+	item.unknown = reader.read<bool>();
 	item.logo_id = reader.read<uint32_t>();
 	return item;
 }
@@ -412,6 +412,48 @@ inline const void Serialize(Writer& writer, const ReplicatedMusicStringer& item)
 	Serialize(writer, item.object_index);
 	writer.String("trigger");
 	Serialize(writer, item.trigger);
+	writer.EndObject();
+}
+
+template<>
+inline const std::string ToString(const GameMode& item) 
+{
+	std::stringstream ss;
+	ss << "gamemode = " << item.gamemode;
+	return ss.str();
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const GameMode& item)
+{
+	writer.StartObject();
+	writer.String("gamemode");
+	Serialize(writer, item.gamemode);
+	writer.EndObject();
+}
+
+template<>
+inline const ReplicatedStateIndex Consume(CPPBitReader<uint32_t>& reader) 
+{
+	ReplicatedStateIndex item;
+	item.value = reader.readBitsMax<uint32_t>(140);
+	return item;
+}
+
+template<>
+inline const std::string ToString(const ReplicatedStateIndex& item) 
+{
+	std::stringstream ss;
+	ss << "value = " << item.value;
+	return ss.str();
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const ReplicatedStateIndex& item)
+{
+	writer.StartObject();
+	writer.String("value");
+	Serialize(writer, item.value);
 	writer.EndObject();
 }
 

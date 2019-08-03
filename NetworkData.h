@@ -37,7 +37,7 @@ struct ReplicatedRBState
 
 struct LogoData
 {
-	uint8_t unknown;
+	bool unknown;
 	uint32_t logo_id;
 };
 
@@ -151,6 +151,12 @@ struct GameMode
 	uint8_t gamemode;
 };
 
+struct ReplicatedStateIndex
+{
+	__ParserAttribute__(MaxBits, 140)
+	uint32_t value;
+};
+
 struct PrivateMatchSettings
 {
 	std::string mutators;
@@ -166,7 +172,7 @@ struct ProductAttribute
 {
 	uint32_t class_index;
 	std::string class_name;
-	void* value;
+	uint32_t value;
 	bool has_value;
 	bool unknown1;
 };
