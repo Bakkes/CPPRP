@@ -102,47 +102,81 @@ std::unordered_map<std::string, std::string> replaysToTest =
 int main()
 {
 	std::vector<std::filesystem::path> replays;
-	for (const auto & entry : std::filesystem::directory_iterator("C:/Users/Chris/Documents/My Games/Rocket League/TAGame/Demos/"))
-		replays.push_back(entry.path());
-
-	uint32_t iterations = 0;
+	//C:/Users/Chris/Documents/My Games/Rocket League/TAGame/Demos/
+	for (const auto & entry : std::filesystem::directory_iterator("F:/alpaca/"))
 	{
-		const char* name = "OldReplays test";
+		replays.push_back(entry.path());
+	}
+	const size_t numReplays = replays.size();
+	printf("Attempt to parse %i replays\n", numReplays);
+	uint32_t success = 0;
+	uint32_t fail = 0;
+	{
+		const char* name = "Alpaca replays";
 		double start_time = get_time();
 
 		std::vector<std::thread> threads;
+
+		uint32_t threads_active = 0;
 		for (auto replayName : replays)
 		{
-			//std::thread t{ [replayName]() {
+			
+			while(threads_active > 400)
+				std::this_thread::sleep_for(std::chrono::milliseconds(5));
+			threads_active++;
+			std::thread t{ [replayName, &success, &fail, &threads_active]() {
 
 			//auto replayData = replaysToTest[replayName];
 				//printf("Parsing replay \"%s\"\n", replayName.filename().u8string().c_str());
+			try 
+			{
 				std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>(replayName);
-				
+				std::string s = replayName.filename().u8string();
+				//printf("Calling load\n");
 				if (!rf->Load())
 				{
 					printf("Error loading replay file");
-					return 0;
+					return;
 				}
-
+				//printf("Called load");
 				rf->DeserializeHeader();
 				rf->FixParents();
-				rf->Parse();
-				iterations++;
+				rf->Parse(s);
+				success++;
+			}
+			catch(const std::exception &) //e
+			{
+				fail++;
+				//printf("Failed to parse %s (%s)'\n", replayName.filename().u8string().c_str(), e.what());
+			}
+			catch (...)
+			{
+				fail++;
+			}
+			threads_active--;
+			
 				//printf("Parsed replay \"%s\"\n", replayName.filename().u8string().c_str());
-			//}  };
-			//threads.emplace_back(std::move(t));
+			}  };
+			threads.emplace_back(std::move(t));
 			//printf("Parsed\n\n");
 		}
 
 		for (auto & t : threads) 
 		{
-			iterations++;
+		//	//iterations++;
+			//const size_t total = success + fail;
+			//if (total % 500 == 0)
+			//{
+			//	
+			//	printf("%i/%i (%.2f%%)\n", total, numReplays, ((double)total / (double)(numReplays)) * 100);
+			//}
 			t.join();
 		}
 		double end_time = get_time();
 		double elapsed = (end_time - start_time) * 1000.f;
-		printf("[%s] Ran %i iterations in %.5f ms (avg: %.5f ms)\n", name, iterations, elapsed, (elapsed / (double)iterations));
+		printf("Test %s\n", name);
+		printf("Attempted to parse %i replays in %.5f ms \n", success + fail, elapsed);
+		printf("Success: %i, fail: %i (%.2f%%). Average parse time %.5f ms (totaltime/attemptedparsecount)\n", success, fail, ((double)success/ (double)(success + fail))*100, (elapsed / (double)success));
 	}
 	/*std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>("1BE973D44E656FCC97DCD1A4E9076C36.replay");
 	if (!rf->Load())

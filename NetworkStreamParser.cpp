@@ -84,7 +84,10 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 		"TAGame.GameEvent_Soccar_TA:bClubMatch", "TAGame.GameEvent_Soccar_TA:bMatchEnded", 
 		"TAGame.GameEvent_TA:bAllowReadyUp", "Engine.Actor:bTearOff", 
 		"Engine.PlayerReplicationInfo:bTimedOut", "TAGame.CameraSettingsActor_TA:bMouseCameraToggleEnabled",
-		"TAGame.CameraSettingsActor_TA:bUsingSwivel"});
+		"TAGame.CameraSettingsActor_TA:bUsingSwivel"
+		"TAGame.Ball_Haunted_TA:bIsBallBeamed",
+		"TAGame.SpecialPickup_Rugby_TA:bBallWelded"
+		});
 
 	RegisterParsers<uint64_t>({
 		"ProjectX.GRI_X:GameServerID", "TAGame.Team_TA:ClubID", "TAGame.PRI_TA:ClubID"
@@ -99,7 +102,11 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 		"TAGame.PRI_TA:PawnType", "TAGame.Ball_Breakout_TA:LastTeamTouch", 
 		"TAGame.PRI_TA:ReplicatedWorstNetQualityBeyondLatency", 
 		"TAGame.GameEvent_Soccar_TA:ReplicatedServerPerformanceState", 
-		"TAGame.CarComponent_TA:ReplicatedActive"
+		"TAGame.CarComponent_TA:ReplicatedActive",
+		"TAGame.Ball_Haunted_TA:LastTeamTouch",
+		"TAGame.Ball_Haunted_TA:TotalActiveBeams",
+		"TAGame.Ball_Haunted_TA:DeactivatedGoalIndex",
+		"TAGame.Ball_Haunted_TA:ReplicatedBeamBrokenValue"
 		});
 
 	RegisterParsers<float>({
@@ -123,7 +130,8 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 
 	RegisterParsers<int32_t>({
 		"ProjectX.GRI_X:ReplicatedGameMutatorIndex", 
-		"TAGame.PRI_TA:TimeTillItem"
+		"TAGame.PRI_TA:TimeTillItem",
+		"TAGame.PRI_TA:MaxTimeTillItem"
 		});
 
 	RegisterParsers<ReplicatedPickupData>({

@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-
+#include <iostream>
+#include <memory>
 struct Vector3
 {
 	float x, y, z;

@@ -2,7 +2,7 @@
 #include <fstream>
 #include "networkdata.h"
 #include "rapidjson/filewritestream.h"
-#include <rapidjson///writer.h>
+#include <rapidjson/writer.h>
 
 ReplayFile::ReplayFile(std::filesystem::path path_) : path(path_)
 {
@@ -19,12 +19,21 @@ bool ReplayFile::Load()
 	if (!std::filesystem::exists(path))
 		return false;
 	std::ifstream file(path, std::ios::binary | std::ios::ate);
+	/*file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	try {
+		file.open(path, std::ios::binary);
+	}
+	catch (std::ifstream::failure e) {
+		std::cerr << "Exception opening file: " << std::strerror(errno) << "\n";
+	}*/
+	
 	std::streamsize size = file.tellg();
 	data.resize((size_t)size);
 	file.seekg(0, std::ios::beg);
+	
 	if (file.bad())
 		return false;
-	 return (bool)file.read(data.data(), size);
+	return (bool)file.read(data.data(), size);
 }
 
 void ReplayFile::DeserializeHeader()
@@ -255,6 +264,10 @@ const std::unordered_map<std::string, std::string> class_extensions =
   , {"TAGame.Vehicle_TA", "TAGame.RBActor_TA"}
   , {"TAGame.VehiclePickup_Boost_TA", "TAGame.VehiclePickup_TA"}
   , {"TAGame.VehiclePickup_TA", "Engine.ReplicationInfo"}
+  , {"TAGame.SpecialPickup_HauntedBallBeam_TA", "TAGame.SpecialPickup_TA"}
+  , {"TAGame.CarComponent_TA", "Engine.Actor"}
+  , {"Engine.Info", "Engine.Actor"}
+  , {"Engine.Pawn", "Engine.Actor"}
 };
 
 void ReplayFile::FixParents()
@@ -284,7 +297,7 @@ void ReplayFile::FixParents()
 }
 
 uint32_t val = 0;
-void ReplayFile::Parse(const uint32_t startPos, int32_t endPos)
+void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t endPos)
 {
 	if (endPos < 0)
 	{
@@ -294,124 +307,138 @@ void ReplayFile::Parse(const uint32_t startPos, int32_t endPos)
 	CPPBitReader<uint32_t> networkReader((uint32_t*)(replayFile->netstream_data), ((uint32_t)endPos), replayFile);
 
 	++val;
-	FILE* fp = fopen(("./json/" + std::to_string(val) + ".json").c_str(), "wb");
-	char writeBuffer[65536*5];
-	rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+	FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
 
-	rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
+	try {
+		char writeBuffer[65536 * 5];
+		rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
 
-	std::unordered_map<uint32_t, std::string> test;
-	
-	networkReader.skip(startPos);
+		rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
 
-	//writer.StartObject();
-	//writer.String("frames");
-	const int32_t maxChannels = GetProperty<int32_t>("MaxChannels");
-	//writer.StartArray();
-	while (networkReader.canRead())
-	{
-		//writer.StartObject();
-		Frame f;
-		f.time = networkReader.read<float>();
-		f.delta = networkReader.read<float>();
+		std::unordered_map<uint32_t, std::string> test;
 
-		//writer.String("time");
-		//writer.Double(f.time);
-		//writer.String("delta");
-		//writer.Double(f.delta);
-		int k = 5;
+		networkReader.skip(startPos);
 
-		//writer.String("actors");
-		//writer.StartArray();
-		//While there are actors in buffer (this frame)
-		while (networkReader.read<bool>())
+		writer.StartObject();
+		writer.String("frames");
+		const int32_t maxChannels = GetProperty<int32_t>("MaxChannels");
+		writer.StartArray();
+		while (networkReader.canRead())
 		{
-			//writer.StartObject();
-			const uint32_t actorId = networkReader.readBitsMax<uint32_t>(maxChannels);
-			ActorState& actorState = actorStates[actorId];
-			//writer.String("actorid");
-			//writer.Uint(actorId);
+			writer.StartObject();
+			Frame f;
+			f.time = networkReader.read<float>();
+			f.delta = networkReader.read<float>();
 
-			//writer.String("status");
-			if (networkReader.read<bool>())
+			writer.String("time");
+			writer.Double(f.time);
+			writer.String("delta");
+			writer.Double(f.delta);
+			int k = 5;
+
+			writer.String("actors");
+			writer.StartArray();
+			//While there are actors in buffer (this frame)
+			while (networkReader.read<bool>())
 			{
-				
-				//Is new state
+				writer.StartObject();
+				const uint32_t actorId = networkReader.readBitsMax<uint32_t>(maxChannels);
+				ActorState& actorState = actorStates[actorId];
+				writer.String("actorid");
+				writer.Uint(actorId);
+
+				writer.String("status");
 				if (networkReader.read<bool>())
 				{
-					//writer.String("created");
-					if (replayFile->header.engineVersion > 868 || (replayFile->header.engineVersion == 868 && replayFile->header.licenseeVersion >= 14))
+
+					//Is new state
+					if (networkReader.read<bool>())
 					{
-						
-						actorState.name_id = networkReader.read<uint32_t>();
-						//writer.String("nameid");
-						//writer.Uint(actorState.name_id);
+						writer.String("created");
+						if (replayFile->header.engineVersion > 868 || (replayFile->header.engineVersion == 868 && replayFile->header.licenseeVersion >= 14))
+						{
+
+							actorState.name_id = networkReader.read<uint32_t>();
+							writer.String("nameid");
+							writer.Uint(actorState.name_id);
+						}
+						const bool unknownBool = networkReader.read<bool>();
+						const uint32_t typeId = networkReader.read<uint32_t>();
+						writer.String("typeid");
+						writer.Uint(typeId);
+						//const uint32_t bit_pos = networkReader.GetAbsoluteBitPosition();
+
+						const std::string typeName = replayFile->objects.at(typeId);
+						writer.String("typename");
+						writer.String(typeName.c_str(), typeName.size());
+						actorState.classNet = GetClassnetByNameWithLookup(typeName);
+
+						if (actorState.classNet == nullptr)
+							throw 22;
+
+						const uint32_t classId = actorState.classNet->index;
+						const std::string className = replayFile->objects.at(classId);
+
+						writer.String("classname");
+						writer.String(className.c_str(), className.size());
+
+						if (HasInitialPosition(className))
+						{
+							actorState.position = static_cast<Vector3>(networkReader.read<Vector3I>());
+							writer.String("initialposition");
+							Serialize(writer, actorState.position);
+						}
+						if (HasRotation(className))
+						{
+							actorState.rotation = networkReader.read<Rotator>();
+							writer.String("initialrotation");
+							Serialize(writer, actorState.rotation);
+						}
 					}
-					const bool unknownBool = networkReader.read<bool>();
-					const uint32_t typeId = networkReader.read<uint32_t>();
-					//writer.String("typeid");
-					//writer.Uint(typeId);
-					//const uint32_t bit_pos = networkReader.GetAbsoluteBitPosition();
-
-					const std::string typeName = replayFile->objects.at(typeId);
-					//writer.String("typename");
-					//writer.String(typeName.c_str(), typeName.size());
-					actorState.classNet = GetClassnetByNameWithLookup(typeName);
-					
-					const uint32_t classId = actorState.classNet->index;
-					const std::string className = replayFile->objects.at(classId);
-
-					//writer.String("classname");
-					//writer.String(className.c_str(), className.size());
-
-					if (HasInitialPosition(className))
+					else //Is existing state
 					{
-						actorState.position = static_cast<Vector3>(networkReader.read<Vector3I>());
-						//writer.String("initialposition");
-						Serialize(writer, actorState.position);
-					}
-					if (HasRotation(className))
-					{
-						actorState.rotation = networkReader.read<Rotator>();
-						//writer.String("initialrotation");
-						Serialize(writer, actorState.rotation);
+						writer.String("updated");
+						writer.String("updates");
+						writer.StartArray();
+						//While there's data for this state to be updated
+						while (networkReader.read<bool>())
+						{
+							writer.StartObject();
+							const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
+							const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
+							const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
+							//printf("Calling parser for %s (%i, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId);
+							writer.String("class");
+							writer.String(replayFile->objects[propertyIndex].c_str(), replayFile->objects[propertyIndex].size());
+
+							writer.String("data");
+							//printf("Calling parse for %s", )
+							networkParser.Parse(propertyIndex, networkReader, writer);
+							writer.EndObject();
+						}
+						writer.EndArray();
 					}
 				}
-				else //Is existing state
+				else
 				{
-					//writer.String("updated");
-					//writer.String("updates");
-					//writer.StartArray();
-					//While there's data for this state to be updated
-					while (networkReader.read<bool>())
-					{
-						//writer.StartObject();
-						const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
-						const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
-						const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
-						//printf("Calling parser for %s (%i, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId);
-						//writer.String("class");
-						//writer.String(replayFile->objects[propertyIndex].c_str(), replayFile->objects[propertyIndex].size());
-						
-						//writer.String("data");
-						//printf("Calling parse for %s", )
-						networkParser.Parse(propertyIndex, networkReader, writer);
-						//writer.EndObject();
-					}
-					//writer.EndArray();
+					writer.String("deleted");
 				}
-			} 
-			else
-			{
-				//writer.String("deleted");
+				writer.EndObject();
 			}
-			//writer.EndObject();
+			writer.EndArray();
+			writer.EndObject();
 		}
-		//writer.EndArray();
-		//writer.EndObject();
+
+		writer.EndArray();
+		writer.EndObject();
 	}
-	//writer.EndArray();
-	//writer.EndObject();
+	catch (...)
+	{
+		fclose(fp);
+		throw 5;
+	}
+	
+	fclose(fp);
 	//printf("Parsed\n");
 }
 
@@ -422,7 +449,8 @@ const bool ReplayFile::HasInitialPosition(const std::string & name) const
 		|| name.compare("TAGame.VehiclePickup_Boost_TA") == 0
 		|| name.compare("TAGame.InMapScoreboard_TA") == 0
 		|| name.compare("TAGame.BreakOutActor_Platform_TA") == 0
-		|| name.compare("Engine.WorldInfo") == 0);
+		|| name.compare("Engine.WorldInfo") == 0
+		|| name.compare("TAGame.HauntedBallTrapTrigger_TA") == 0);
 }
 
 const bool ReplayFile::HasRotation(const std::string & name) const
@@ -430,7 +458,8 @@ const bool ReplayFile::HasRotation(const std::string & name) const
 	return name.compare("TAGame.Ball_TA") == 0
 		|| name.compare("TAGame.Car_TA") == 0
 		|| name.compare("TAGame.Car_Season_TA") == 0
-		|| name.compare("TAGame.Ball_Breakout_TA") == 0;
+		|| name.compare("TAGame.Ball_Breakout_TA") == 0
+		|| name.compare("TAGame.Ball_Haunted_TA") == 0;
 }
 
 const std::pair<const uint32_t, const KeyFrame> ReplayFile::GetNearestKeyframe(uint32_t frame) const
@@ -549,7 +578,7 @@ const bool ReplayFile::ParseProperty(const std::shared_ptr<Property>& currentPro
 	}
 	break;
 	default: //Die
-		assert(1 == 2);
+		//assert(1 == 2);
 		break;
 	}
 	
@@ -582,7 +611,8 @@ const std::shared_ptr<ClassNet>& ReplayFile::GetClassnetByNameWithLookup(const s
 	}
 	if (name.compare("Archetypes.Ball.Ball_Default") == 0 || name.compare("Archetypes.Ball.Ball_Basketball") == 0 ||
 		name.compare("Archetypes.Ball.Ball_BasketBall") == 0 || name.compare("Archetypes.Ball.Ball_BasketBall_Mutator") == 0 ||
-		name.compare("Archetypes.Ball.Ball_Puck") == 0 || name.compare("Archetypes.Ball.CubeBall") == 0) {
+		name.compare("Archetypes.Ball.Ball_Puck") == 0 || name.compare("Archetypes.Ball.CubeBall") == 0 ||
+		name.compare("Archetypes.Ball.Ball_Beachball") == 0) {
 		return GetClassnetByName("TAGame.Ball_TA");
 	}
 	if (name.compare("Archetypes.Ball.Ball_Breakout") == 0) {
@@ -676,6 +706,24 @@ const std::shared_ptr<ClassNet>& ReplayFile::GetClassnetByNameWithLookup(const s
 	if (name.compare("Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_1") == 0) {
 		return GetClassnetByName("TAGame.InMapScoreboard_TA");
 	}
+	if (name.compare("Archetypes.Ball.Ball_Haunted") == 0)
+	{
+		return GetClassnetByName("TAGame.Ball_Haunted_TA");
+	}
+	if (name.compare("Haunted_TrainStation_P.TheWorld:PersistentLevel.HauntedBallTrapTrigger_TA_1") == 0 ||
+		name.compare("Haunted_TrainStation_P.TheWorld:PersistentLevel.HauntedBallTrapTrigger_TA_0") == 0)
+	{
+		return GetClassnetByName("TAGame.HauntedBallTrapTrigger_TA");
+	}
+	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_HauntedBallBeam") == 0)
+	{
+		return GetClassnetByName("TAGame.SpecialPickup_HauntedBallBeam_TA");
+	}
+	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_Rugby") == 0)
+	{
+		return GetClassnetByName("TAGame.SpecialPickup_Rugby_TA");
+	}
+
 
 	if (name.find("CrowdActor_TA") != std::string::npos)
 	{
@@ -727,8 +775,8 @@ const uint16_t ReplayFile::GetPropertyIndexById(const std::shared_ptr<ClassNet>&
 
 const uint16_t ReplayFile::GetMaxPropertyId(const std::shared_ptr<ClassNet>& cn)
 {
-	/*if (cn == nullptr)
-		return 0;*/
+	if (cn == nullptr)
+		throw 21;
 	if (cn->max_prop_id == 0)
 	{
 		cn->max_prop_id = FindMaxPropertyId(cn, 0);

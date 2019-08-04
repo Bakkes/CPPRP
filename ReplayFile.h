@@ -30,7 +30,7 @@ public:
 	void DeserializeHeader();
 	void MergeDuplicates();
 	void FixParents();
-	void Parse(const uint32_t startPos = 0, int32_t endPos = -1);
+	void Parse(std::string fileName, uint32_t startPos = 0, int32_t endPos = -1);
 protected:
 	const bool HasInitialPosition(const std::string& name) const;
 	const bool HasRotation(const std::string& name) const;
@@ -49,7 +49,7 @@ protected:
 		//auto baseMap = std::any_cast<std::unordered_map<std::string, std::shared_ptr<Property>>>(replayFile.properties->value);
 		if (replayFile->properties.find(key) == replayFile->properties.end())
 		{
-			assert(1 == 2); //die
+			//assert(1 == 2); //die
 		}
 		return std::any_cast<T>(replayFile->properties.at(key)->value);
 	}
