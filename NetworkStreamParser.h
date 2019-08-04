@@ -54,7 +54,11 @@ public:
 	{
 		const auto func = parseFunctions[propertyIdx];
 		if (func == nullptr)
+		{
+			std::string parseFunc = br.owner->objects[propertyIdx];
+			printf("Parser not implemented for %s\n", parseFunc.c_str());
 			throw 20;
+		}
 		auto inst = parseFunctions[propertyIdx](br, writer);
 	}
 	//void Parse(const std::string& name, CPPBitReader<uint32_t>& br);

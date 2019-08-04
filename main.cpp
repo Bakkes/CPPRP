@@ -103,7 +103,8 @@ int main()
 {
 	std::vector<std::filesystem::path> replays;
 	//C:/Users/Chris/Documents/My Games/Rocket League/TAGame/Demos/
-	for (const auto & entry : std::filesystem::directory_iterator("F:/alpaca/"))
+	//F:/alpaca/
+	for (const auto & entry : std::filesystem::directory_iterator("C:/Users/Chris/Documents/My Games/Rocket League/TAGame/Demos_freeplay/"))
 	{
 		replays.push_back(entry.path());
 	}
