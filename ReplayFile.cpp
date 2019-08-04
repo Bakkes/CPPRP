@@ -615,15 +615,32 @@ const bool ReplayFile::ParseProperty(const std::shared_ptr<Property>& currentPro
 	{
 		if (currentProperty->property_type[1] == 'y') //Type is "ByteProperty"
 		{
-			currentProperty->value = EnumProperty
+			EnumProperty ep;
+			ep.type = fullReplayBitReader.read<std::string>();
+			if(ep.type.compare("OnlinePlatform_Steam") == 0 || ep.type.compare("OnlinePlatform_PS4") == 0) //for some reason if string is this, there's no value.
 			{ 
-				fullReplayBitReader.read<std::string>(),	//Type
-				fullReplayBitReader.read<std::string>()	//Value
-			};
+				ep.value = "";	
+				//fullReplayBitReader.read<uint32_t>();
+			}
+			else
+			{
+				ep.value = fullReplayBitReader.read<std::string>(); //Value
+			}
+			currentProperty->value = ep;
 		}
 		else //Type is "BoolProperty", but unlike network data, is stored as entire byte
 		{
-			currentProperty->value = fullReplayBitReader.read<uint8_t>();
+			if (replayFile->header.engineVersion == 0 &&
+				replayFile->header.licenseeVersion == 0 &&
+				replayFile->header.netVersion == 0) 
+			{
+				currentProperty->value = fullReplayBitReader.read<uint32_t>();
+			}
+			else
+			{
+				currentProperty->value = fullReplayBitReader.read<uint8_t>();
+			}
+			
 		}
 	}
 	break;
@@ -654,7 +671,8 @@ const bool ReplayFile::ParseProperty(const std::shared_ptr<Property>& currentPro
 				{
 					break;
 				}
-				props[currentProperty->property_name] = baseProperty;
+				//printf("%s", baseProperty->property_name.c_str());
+				props[baseProperty->property_name] = baseProperty;
 			}
 			properties[i] = props;
 		}

@@ -141,22 +141,26 @@ int main()
 				if (!rf->Load())
 				{
 					printf("Error loading replay file");
-					return 0;
+					throw;
 				}
-				//printf("Called load");
-				rf->DeserializeHeader();
-				rf->FixParents();
-				rf->Parse(s);
-				success++;
+				else {
+					//printf("Called load");
+					rf->DeserializeHeader();
+					rf->FixParents();
+					rf->Parse(s);
+					success++;
+				}
 			}
 			catch(const std::exception &) //e
 			{
 				fail++;
 				//printf("Failed to parse %s (%s)'\n", replayName.filename().u8string().c_str(), e.what());
+				std::filesystem::copy(replayName, "F:/alpacafails/");
 			}
 			catch (...)
 			{
 				fail++;
+				std::filesystem::copy(replayName, "F:/alpacafails/");
 			}
 			threads_active--;
 			

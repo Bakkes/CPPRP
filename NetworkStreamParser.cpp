@@ -200,7 +200,8 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 	  "TAGame.Car_TA:AddedBallForceMultiplier",
 	  "TAGame.PRI_TA:SteeringSensitivity",
 	  "TAGame.Car_TA:ReplicatedCarScale",
-	  "Engine.WorldInfo:WorldGravityZ"
+	  "Engine.WorldInfo:WorldGravityZ",
+	  "TAGame.Ball_TA:ReplicatedBallGravityScale"
 		});
 
 	RegisterParsers<ActorBase>("Engine.Actor:Base");
