@@ -557,6 +557,39 @@ inline const void Serialize(Writer& writer, const Attributes& item)
 }
 
 template<>
+inline const ActorBase Consume(CPPBitReader<uint32_t>& reader) 
+{
+	ActorBase item;
+	item.value = reader.read<uint32_t>();
+	item.unknown1 = reader.read<bool>();
+	item.unknown2 = reader.read<bool>();
+	return item;
+}
+
+template<>
+inline const std::string ToString(const ActorBase& item) 
+{
+	std::stringstream ss;
+	ss << "value = " << item.value;
+	ss << ",\n " << "unknown1 = " << item.unknown1;
+	ss << ",\n " << "unknown2 = " << item.unknown2;
+	return ss.str();
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const ActorBase& item)
+{
+	writer.StartObject();
+	writer.String("value");
+	Serialize(writer, item.value);
+	writer.String("unknown1");
+	Serialize(writer, item.unknown1);
+	writer.String("unknown2");
+	Serialize(writer, item.unknown2);
+	writer.EndObject();
+}
+
+template<>
 inline const OnlineLoadout Consume(CPPBitReader<uint32_t>& reader) 
 {
 	OnlineLoadout item;

@@ -272,6 +272,7 @@ const std::unordered_map<std::string, std::string> class_extensions =
 const std::vector<std::pair<std::string, std::vector<std::string>>> archetypeMap =
 {
 	{{"TAGame.Car_TA"}, {"Archetypes.Car.Car_Default"}},
+	{{"TAGame.Car_TA"}, {"Mutators.Mutators.Mutators.FreePlay:CarArchetype"}},
 	{{"TAGame.Ball_TA"},  {"Archetypes.Ball.Ball_GameEditor", "Archetypes.Ball.Ball_Training", "Archetypes.Ball.Ball_Default", "Archetypes.Ball.Ball_Basketball", "Archetypes.Ball.Ball_BasketBall", "Archetypes.Ball.Ball_BasketBall_Mutator", "Archetypes.Ball.Ball_Puck", "Archetypes.Ball.CubeBall", "Archetypes.Ball.Ball_Beachball"}},
 	{{"TAGame.Ball_Breakout_TA"}, {"Archetypes.Ball.Ball_Breakout"}},
 	{{"TAGame.Ball_Trajectory_TA"},{"Archetypes.Ball.Ball_Trajectory"}},
@@ -374,7 +375,7 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 	++val;
 	//FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
 
-	//try 
+	try 
 	{
 		//char writeBuffer[65536 * 5];
 		//rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
@@ -389,13 +390,23 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 	 	//writer.String("frames");
 		const int32_t maxChannels = GetProperty<int32_t>("MaxChannels");
 	 	//writer.StartArray();
+		int i = 0;
 		while (networkReader.canRead())
 		{
 		 	//writer.StartObject();
+			printf("Parsing frame no %i\n", i);
+			i++;
 			Frame f;
 			f.time = networkReader.read<float>();
 			f.delta = networkReader.read<float>();
-
+			if (f.time < 0 || f.delta < 0
+				|| (f.time > 0 && f.time < 1E-10)
+				|| (f.delta > 0 && f.delta < 1E-10))
+			{
+				printf("Out of range, calling again\n");
+				throw 55;
+				
+			}
 		 	//writer.String("time");
 		 	//writer.Double(f.time);
 		 	//writer.String("delta");
@@ -435,6 +446,7 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 						//const uint32_t bit_pos = networkReader.GetAbsoluteBitPosition();
 
 						const std::string typeName = replayFile->objects.at(typeId);
+						printf("New object of type %s\n", typeName.c_str());
 					 	//writer.String("typename");
 					 	//writer.String(typeName.c_str(), typeName.size());
 						actorState.classNet = GetClassnetByNameWithLookup(typeName);
@@ -501,8 +513,10 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 	 	//writer.EndArray();
 	 	//writer.EndObject();
 	}
-	//catch (...)
+	catch (...)
 	{
+		printf("Caught ex\n");
+		Parse(fileName, startPos, endPos);
 		//fclose(fp);
 		//throw 5;
 	}
@@ -686,7 +700,7 @@ const std::shared_ptr<ClassNet>& ReplayFile::GetClassnetByNameWithLookup(const s
 	}
 	else if (name.find("Archetypes.Teams.TeamWhite") != std::string::npos)
 	{
-		fffffind("Engine.TeamInfo");
+		fffffind("TAGame.Team_Soccar_TA");
 	}
 	auto found = classnetMap.find(name);
 	if (found == classnetMap.end())

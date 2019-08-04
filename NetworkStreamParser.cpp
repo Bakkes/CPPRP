@@ -82,7 +82,6 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 	  "TAGame.PRI_TA:Title",
 	  "TAGame.GameEvent_TA:ReplicatedStateName",
 	  "TAGame.Team_Soccar_TA:GameScore",
-	  "TAGame.GameEvent_Soccar_TA:GameTime",
 	  "TAGame.CarComponent_Boost_TA:UnlimitedBoostRefCount",
 	  "TAGame.CrowdActor_TA:ReplicatedRoundCountDownNumber",
 	  "TAGame.PRI_TA:MaxTimeTillItem",
@@ -92,7 +91,9 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 	  "TAGame.GameEvent_TA:ReplicatedRoundCountDownNumber",
 	  "TAGame.GameEvent_Soccar_TA:SeriesLength",
 	  "TAGame.PRI_TA:SpectatorShortcut",
-	  "Engine.Pawn:HealthMax"
+	  "Engine.Pawn:HealthMax",
+	  "TAGame.GameEvent_Soccar_TA:GameTime"
+	  
 		});
 
 	RegisterParsers < bool >({
@@ -145,7 +146,11 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 	  "TAGame.CameraSettingsActor_TA:bMouseCameraToggleEnabled",
 	  "TAGame.CameraSettingsActor_TA:bUsingSwivel",
 	  "TAGame.Ball_Haunted_TA:bIsBallBeamed",
-	  "TAGame.SpecialPickup_Rugby_TA:bBallWelded"
+	  "TAGame.SpecialPickup_Rugby_TA:bBallWelded",
+	  "TAGame.GameEvent_Soccar_TA:bShowIntroScene",
+	  "TAGame.GameEvent_TA:bHasLeaveMatchPenalty",
+	  "Engine.Actor:bNetOwner",
+	  "Engine.Actor:bTearOff"
 		});
 
 	RegisterParsers < uint64_t >({
@@ -197,6 +202,8 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 	  "TAGame.Car_TA:ReplicatedCarScale",
 	  "Engine.WorldInfo:WorldGravityZ"
 		});
+
+	RegisterParsers<ActorBase>("Engine.Actor:Base");
 
 	RegisterParsers < Reservation >("ProjectX.GRI_X:Reservations");
 

@@ -194,6 +194,14 @@ struct Attributes
 	std::vector<ProductAttribute> product_attributes;
 };
 
+//__ParserAttribute__(Consume, false)
+struct ActorBase
+{
+	uint32_t value;
+	bool unknown1;
+	bool unknown2;
+};
+
 struct OnlineLoadout
 {
 	//uint8_t attributes_list_count;//Is automatically read when consuming vector

@@ -159,7 +159,8 @@ int main()
 			}
 			threads_active--;
 			
-				//printf("Parsed replay \"%s\"\n", replayName.filename().u8string().c_str());
+				printf("Parsed replay \"%s\"\n", replayName.filename().u8string().c_str());
+				system("Pause");
 			//}  };
 			//threads.emplace_back(std::move(t));
 			//printf("Parsed\n\n");

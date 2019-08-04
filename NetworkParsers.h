@@ -297,6 +297,18 @@ inline const ClientLoadout Consume(CPPBitReader<uint32_t>& reader) {
 	return item;
 }
 
+//
+//template<>
+//inline const GameTime Consume(CPPBitReader<uint32_t>& reader) {
+//	static int test = 34;
+//	//test++;
+//	if (test == 256) system("pause");
+//	printf("Parsing gametime with test = %i\n", test);
+//	GameTime item;
+//	item.value = reader.read<uint32_t>(test);
+//	return item;
+//}
+
 template<>
 inline const ReplicatedRBState Consume(CPPBitReader<uint32_t>& reader) {
 	ReplicatedRBState item;
