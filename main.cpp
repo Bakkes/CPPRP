@@ -107,6 +107,9 @@ int main()
 	{
 		replays.push_back(entry.path());
 	}
+	//replays.clear();
+	//replays.push_back("F:/alpaca/00A66AD544A5F28DA2D54084A0052138.replay");
+
 	const size_t numReplays = replays.size();
 	printf("Attempt to parse %i replays\n", numReplays);
 	uint32_t success = 0;
@@ -121,10 +124,10 @@ int main()
 		for (auto replayName : replays)
 		{
 			
-			while(threads_active > 400)
-				std::this_thread::sleep_for(std::chrono::milliseconds(5));
+			//while(threads_active > 400)
+			//	std::this_thread::sleep_for(std::chrono::milliseconds(5));
 			threads_active++;
-			std::thread t{ [replayName, &success, &fail, &threads_active]() {
+			//std::thread t{ [replayName, &success, &fail, &threads_active]() {
 
 			//auto replayData = replaysToTest[replayName];
 				//printf("Parsing replay \"%s\"\n", replayName.filename().u8string().c_str());
@@ -136,7 +139,7 @@ int main()
 				if (!rf->Load())
 				{
 					printf("Error loading replay file");
-					return;
+					return 0;
 				}
 				//printf("Called load");
 				rf->DeserializeHeader();
@@ -156,8 +159,8 @@ int main()
 			threads_active--;
 			
 				//printf("Parsed replay \"%s\"\n", replayName.filename().u8string().c_str());
-			}  };
-			threads.emplace_back(std::move(t));
+			//}  };
+			//threads.emplace_back(std::move(t));
 			//printf("Parsed\n\n");
 		}
 

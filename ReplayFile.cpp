@@ -198,7 +198,6 @@ void ReplayFile::DeserializeHeader()
 
 void ReplayFile::MergeDuplicates()
 {
-	GetClassnetByName("");
 	std::unordered_map<std::string, int> counts;
 	for (auto it : classnetMap)
 	{
@@ -270,14 +269,76 @@ const std::unordered_map<std::string, std::string> class_extensions =
   , {"Engine.Pawn", "Engine.Actor"}
 };
 
+const std::vector<std::pair<std::string, std::vector<std::string>>> archetypeMap =
+{ 
+	{{"TAGame.Car_TA"}, {"Archetypes.Car.Car_Default"}},
+	{{"TAGame.Ball_TA"},  {"Archetypes.Ball.Ball_Default", "Archetypes.Ball.Ball_Basketball", "Archetypes.Ball.Ball_BasketBall", "Archetypes.Ball.Ball_BasketBall_Mutator", "Archetypes.Ball.Ball_Puck", "Archetypes.Ball.CubeBall", "Archetypes.Ball.Ball_Beachball"}},
+	{{"TAGame.Ball_Breakout_TA"}, {"Archetypes.Ball.Ball_Breakout"}},
+	{{"TAGame.CarComponent_Boost_TA"}, {"Archetypes.CarComponents.CarComponent_Boost"}},
+	{{"TAGame.CarComponent_Dodge_TA"}, {"Archetypes.CarComponents.CarComponent_Dodge"}},
+	{{"TAGame.CarComponent_DoubleJump_TA"}, {"Archetypes.CarComponents.CarComponent_DoubleJump"}},
+	{{"TAGame.CarComponent_FlipCar_TA"}, {"Archetypes.CarComponents.CarComponent_FlipCar"}},
+	{{"TAGame.CarComponent_Jump_TA"}, {"Archetypes.CarComponents.CarComponent_Jump"}},
+	{{"TAGame.Team_Soccar_TA"}, {"Archetypes.Teams.Team0", "Archetypes.Teams.Team1"}},
+	{{"TAGame.PRI_TA"}, {"TAGame.Default__PRI_TA"}},
+	{{"TAGame.GameEvent_Soccar_TA"}, {"Archetypes.GameEvent.GameEvent_Basketball", "Archetypes.GameEvent.GameEvent_Hockey", "Archetypes.GameEvent.GameEvent_Soccar", "Archetypes.GameEvent.GameEvent_Items", "Archetypes.GameEvent.GameEvent_SoccarLan"}},
+	{{"TAGame.GameEvent_SoccarPrivate_TA"}, {"Archetypes.GameEvent.GameEvent_SoccarPrivate", "Archetypes.GameEvent.GameEvent_BasketballPrivate", "Archetypes.GameEvent.GameEvent_HockeyPrivate"}},
+	{{"TAGame.GameEvent_SoccarSplitscreen_TA"}, {"Archetypes.GameEvent.GameEvent_SoccarSplitscreen", "Archetypes.GameEvent.GameEvent_BasketballSplitscreen", "Archetypes.GameEvent.GameEvent_HockeySplitscreen"}},
+	{{"TAGame.GameEvent_Season_TA"}, {"Archetypes.GameEvent.GameEvent_Season"}},
+	{{"TAGame.Car_TA"}, {"Archetypes.GameEvent.GameEvent_Season:CarArchetype"}},
+	{{"TAGame.GameEvent_Breakout_TA"}, {"Archetypes.GameEvent.GameEvent_Breakout"}},
+	{{"TAGame.GRI_TA"}, {"GameInfo_Basketball.GameInfo.GameInfo_Basketball:GameReplicationInfoArchetype", "Gameinfo_Hockey.GameInfo.Gameinfo_Hockey:GameReplicationInfoArchetype", "GameInfo_Season.GameInfo.GameInfo_Season:GameReplicationInfoArchetype", "GameInfo_Soccar.GameInfo.GameInfo_Soccar:GameReplicationInfoArchetype", "GameInfo_Items.GameInfo.GameInfo_Items:GameReplicationInfoArchetype", "GameInfo_Breakout.GameInfo.GameInfo_Breakout:GameReplicationInfoArchetype"}},
+	{{"TAGame.CameraSettingsActor_TA"}, {"TAGame.Default__CameraSettingsActor_TA"}},
+	{{"TAGame.InMapScoreboard_TA"}, {"Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_0", "NeoTokyo_P.TheWorld:PersistentLevel.InMapScoreboard_TA_0", "NeoTokyo_P.TheWorld:PersistentLevel.InMapScoreboard_TA_1", "NeoTokyo_Standard_P.TheWorld:PersistentLevel.InMapScoreboard_TA_1", "NeoTokyo_Standard_P.TheWorld:PersistentLevel.InMapScoreboard_TA_0", "Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_1"}},
+	{{"TAGame.SpecialPickup_BallGravity_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_GravityWell"}},
+	{{"TAGame.SpecialPickup_BallVelcro_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BallVelcro"}},
+	{{"TAGame.SpecialPickup_BallLasso_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BallLasso"}},
+	{{"TAGame.SpecialPickup_GrapplingHook_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BallGrapplingHook"}},
+	{{"TAGame.SpecialPickup_Swapper_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Swapper"}},
+	{{"TAGame.SpecialPickup_BallFreeze_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BallFreeze"}},
+	{{"TAGame.SpecialPickup_BoostOverride_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BoostOverride"}},
+	{{"TAGame.SpecialPickup_Tornado_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Tornado"}},
+	{{"TAGame.SpecialPickup_BallCarSpring_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_CarSpring", "Archetypes.SpecialPickups.SpecialPickup_BallSpring"}},
+	{{"TAGame.SpecialPickup_HitForce_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_StrongHit"}},
+	{{"TAGame.SpecialPickup_Batarang_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Batarang"}},
+	//{{"TAGame.InMapScoreboard_TA"}, {"Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_1"}},
+	{{"TAGame.Ball_Haunted_TA"}, {"Archetypes.Ball.Ball_Haunted"}},
+	{{"TAGame.HauntedBallTrapTrigger_TA"}, {"Haunted_TrainStation_P.TheWorld:PersistentLevel.HauntedBallTrapTrigger_TA_1", "Haunted_TrainStation_P.TheWorld:PersistentLevel.HauntedBallTrapTrigger_TA_0"}},
+	{{"TAGame.SpecialPickup_HauntedBallBeam_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_HauntedBallBeam"}},
+	{{"TAGame.SpecialPickup_Rugby_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Rugby"}}
+};
+
 void ReplayFile::FixParents()
 {
+
+	for (uint32_t i = 0; i < replayFile->classnets.size(); ++i)
+	{
+		const uint32_t index = replayFile->classnets.at(i)->index;
+		const std::string objectName = replayFile->objects.at(index);
+		classnetMap[objectName] = replayFile->classnets.at(i);
+	}
+
+	for (auto& archetypeMapping : archetypeMap)
+	{
+		const auto found = classnetMap.find(archetypeMapping.first);
+		if (found == classnetMap.end())
+		{
+			//printf("%s not found\n", archetypeMapping.first.c_str());
+			continue;
+		}
+		std::shared_ptr<ClassNet>& headClassnet = found->second;
+		for (auto& archetype : archetypeMapping.second)
+		{
+			classnetMap[archetype] = headClassnet;
+		}
+	}
+
 	this->MergeDuplicates();
 	for (auto kv : class_extensions)
 	{
 		
-		std::shared_ptr<ClassNet> childClass = GetClassnetByName(kv.first);
-		std::shared_ptr<ClassNet> parentClass = GetClassnetByName(kv.second);
+		std::shared_ptr<ClassNet> childClass = GetClassnetByNameWithLookup(kv.first);
+		std::shared_ptr<ClassNet> parentClass = GetClassnetByNameWithLookup(kv.second);
 		if (parentClass != nullptr && childClass != nullptr && (childClass->parent_class == nullptr || (childClass->parent_class->id != parentClass->id)))
 		{
 			childClass->parent_class = parentClass;
@@ -307,70 +368,71 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 	CPPBitReader<uint32_t> networkReader((uint32_t*)(replayFile->netstream_data), ((uint32_t)endPos), replayFile);
 
 	++val;
-	FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
+	//FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
 
-	try {
-		char writeBuffer[65536 * 5];
-		rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
+	//try 
+	{
+		//char writeBuffer[65536 * 5];
+		//rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
 
-		rapidjson::Writer<rapidjson::FileWriteStream> writer(os);
-
+		rapidjson::Writer<rapidjson::FileWriteStream> writer;
+		int t = 0;
 		std::unordered_map<uint32_t, std::string> test;
 
 		networkReader.skip(startPos);
 
-		writer.StartObject();
-		writer.String("frames");
+	 	//writer.StartObject();
+	 	//writer.String("frames");
 		const int32_t maxChannels = GetProperty<int32_t>("MaxChannels");
-		writer.StartArray();
+	 	//writer.StartArray();
 		while (networkReader.canRead())
 		{
-			writer.StartObject();
+		 	//writer.StartObject();
 			Frame f;
 			f.time = networkReader.read<float>();
 			f.delta = networkReader.read<float>();
 
-			writer.String("time");
-			writer.Double(f.time);
-			writer.String("delta");
-			writer.Double(f.delta);
+		 	//writer.String("time");
+		 	//writer.Double(f.time);
+		 	//writer.String("delta");
+		 	//writer.Double(f.delta);
 			int k = 5;
 
-			writer.String("actors");
-			writer.StartArray();
+		 	//writer.String("actors");
+		 	//writer.StartArray();
 			//While there are actors in buffer (this frame)
 			while (networkReader.read<bool>())
 			{
-				writer.StartObject();
+			 	//writer.StartObject();
 				const uint32_t actorId = networkReader.readBitsMax<uint32_t>(maxChannels);
 				ActorState& actorState = actorStates[actorId];
-				writer.String("actorid");
-				writer.Uint(actorId);
+			 	//writer.String("actorid");
+			 	//writer.Uint(actorId);
 
-				writer.String("status");
+			 	//writer.String("status");
 				if (networkReader.read<bool>())
 				{
 
 					//Is new state
 					if (networkReader.read<bool>())
 					{
-						writer.String("created");
+					 	//writer.String("created");
 						if (replayFile->header.engineVersion > 868 || (replayFile->header.engineVersion == 868 && replayFile->header.licenseeVersion >= 14))
 						{
 
 							actorState.name_id = networkReader.read<uint32_t>();
-							writer.String("nameid");
-							writer.Uint(actorState.name_id);
+						 	//writer.String("nameid");
+						 	//writer.Uint(actorState.name_id);
 						}
 						const bool unknownBool = networkReader.read<bool>();
 						const uint32_t typeId = networkReader.read<uint32_t>();
-						writer.String("typeid");
-						writer.Uint(typeId);
+					 	//writer.String("typeid");
+					 	//writer.Uint(typeId);
 						//const uint32_t bit_pos = networkReader.GetAbsoluteBitPosition();
 
 						const std::string typeName = replayFile->objects.at(typeId);
-						writer.String("typename");
-						writer.String(typeName.c_str(), typeName.size());
+					 	//writer.String("typename");
+					 	//writer.String(typeName.c_str(), typeName.size());
 						actorState.classNet = GetClassnetByNameWithLookup(typeName);
 
 						if (actorState.classNet == nullptr)
@@ -379,66 +441,66 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 						const uint32_t classId = actorState.classNet->index;
 						const std::string className = replayFile->objects.at(classId);
 
-						writer.String("classname");
-						writer.String(className.c_str(), className.size());
+					 	//writer.String("classname");
+					 	//writer.String(className.c_str(), className.size());
 
 						if (HasInitialPosition(className))
 						{
 							actorState.position = static_cast<Vector3>(networkReader.read<Vector3I>());
-							writer.String("initialposition");
-							Serialize(writer, actorState.position);
+						 	//writer.String("initialposition");
+							//Serialize(writer, actorState.position);
 						}
 						if (HasRotation(className))
 						{
 							actorState.rotation = networkReader.read<Rotator>();
-							writer.String("initialrotation");
-							Serialize(writer, actorState.rotation);
+						 	//writer.String("initialrotation");
+							//Serialize(writer, actorState.rotation);
 						}
 					}
 					else //Is existing state
 					{
-						writer.String("updated");
-						writer.String("updates");
-						writer.StartArray();
+					 	//writer.String("updated");
+					 	//writer.String("updates");
+					 	//writer.StartArray();
 						//While there's data for this state to be updated
 						while (networkReader.read<bool>())
 						{
-							writer.StartObject();
+						 	//writer.StartObject();
 							const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
 							const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
 							const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
 							//printf("Calling parser for %s (%i, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId);
-							writer.String("class");
-							writer.String(replayFile->objects[propertyIndex].c_str(), replayFile->objects[propertyIndex].size());
+						 	//writer.String("class");
+						 	//writer.String(replayFile->objects[propertyIndex].c_str(), replayFile->objects[propertyIndex].size());
 
-							writer.String("data");
+						 	//writer.String("data");
 							//printf("Calling parse for %s", )
 							networkParser.Parse(propertyIndex, networkReader, writer);
-							writer.EndObject();
+						 	//writer.EndObject();
 						}
-						writer.EndArray();
+					 	//writer.EndArray();
 					}
 				}
 				else
 				{
-					writer.String("deleted");
+				 	//writer.String("deleted");
 				}
-				writer.EndObject();
+			 	//writer.EndObject();
 			}
-			writer.EndArray();
-			writer.EndObject();
+		 	//writer.EndArray();
+		 	//writer.EndObject();
 		}
 
-		writer.EndArray();
-		writer.EndObject();
+	 	//writer.EndArray();
+	 	//writer.EndObject();
 	}
-	catch (...)
+	//catch (...)
 	{
-		fclose(fp);
-		throw 5;
+		//fclose(fp);
+		//throw 5;
 	}
 	
-	fclose(fp);
+	//fclose(fp);
 	//printf("Parsed\n");
 }
 
@@ -585,171 +647,44 @@ const bool ReplayFile::ParseProperty(const std::shared_ptr<Property>& currentPro
 	return true;
 }
 
-const std::shared_ptr<ClassNet>& ReplayFile::GetClassnetByName(const std::string& name)
+#define fffffind(a)\
+auto found = classnetMap.find(a);\
+if (found == classnetMap.end()) {\
+return notfound;\
+}\
+return (*found).second;
+
+const std::shared_ptr<ClassNet>& ReplayFile::GetClassnetByNameWithLookup(const std::string & name) const
 {
-	if (!classNetMapCached)
-	{
-		for (uint32_t i = 0; i < replayFile->classnets.size(); ++i)
-		{
-			const uint32_t index = replayFile->classnets.at(i)->index;
-			const std::string objectName = replayFile->objects.at(index);
-			if (objectName.compare(objectName) == 0)
-			{
-				classnetMap[objectName] = replayFile->classnets.at(i);
-			}
-		}
-
-		classNetMapCached = true;
-	}
-	return classnetMap[name];
-}
-
-const std::shared_ptr<ClassNet>& ReplayFile::GetClassnetByNameWithLookup(const std::string & name)
-{
-	if (name.compare("Archetypes.Car.Car_Default") == 0) {
-		return GetClassnetByName("TAGame.Car_TA");
-	}
-	if (name.compare("Archetypes.Ball.Ball_Default") == 0 || name.compare("Archetypes.Ball.Ball_Basketball") == 0 ||
-		name.compare("Archetypes.Ball.Ball_BasketBall") == 0 || name.compare("Archetypes.Ball.Ball_BasketBall_Mutator") == 0 ||
-		name.compare("Archetypes.Ball.Ball_Puck") == 0 || name.compare("Archetypes.Ball.CubeBall") == 0 ||
-		name.compare("Archetypes.Ball.Ball_Beachball") == 0) {
-		return GetClassnetByName("TAGame.Ball_TA");
-	}
-	if (name.compare("Archetypes.Ball.Ball_Breakout") == 0) {
-		return GetClassnetByName("TAGame.Ball_Breakout_TA");
-	}
-	if (name.compare("Archetypes.CarComponents.CarComponent_Boost") == 0) {
-		return GetClassnetByName("TAGame.CarComponent_Boost_TA");
-	}
-	if (name.compare("Archetypes.CarComponents.CarComponent_Dodge") == 0) {
-		return GetClassnetByName("TAGame.CarComponent_Dodge_TA");
-	}
-	if (name.compare("Archetypes.CarComponents.CarComponent_DoubleJump") == 0) {
-		return GetClassnetByName("TAGame.CarComponent_DoubleJump_TA");
-	}
-	if (name.compare("Archetypes.CarComponents.CarComponent_FlipCar") == 0) {
-		return GetClassnetByName("TAGame.CarComponent_FlipCar_TA");
-	}
-	if (name.compare("Archetypes.CarComponents.CarComponent_Jump") == 0) {
-		return GetClassnetByName("TAGame.CarComponent_Jump_TA");
-	}
-	if (name.compare("Archetypes.Teams.Team0") == 0 || name.compare("Archetypes.Teams.Team1") == 0) {
-		return GetClassnetByName("TAGame.Team_Soccar_TA");
-	}
-	if (name.compare("TAGame.Default__PRI_TA") == 0) {
-		return GetClassnetByName("TAGame.PRI_TA");
-	}
-	if (name.compare("Archetypes.GameEvent.GameEvent_Basketball") == 0 || name.compare("Archetypes.GameEvent.GameEvent_Hockey") == 0 ||
-		name.compare("Archetypes.GameEvent.GameEvent_Soccar") == 0 || name.compare("Archetypes.GameEvent.GameEvent_Items") == 0 || name.compare("Archetypes.GameEvent.GameEvent_SoccarLan") == 0) {
-		return GetClassnetByName("TAGame.GameEvent_Soccar_TA");
-	}
-	if (name.compare("Archetypes.GameEvent.GameEvent_SoccarPrivate") == 0 || name.compare("Archetypes.GameEvent.GameEvent_BasketballPrivate") == 0 || name.compare("Archetypes.GameEvent.GameEvent_HockeyPrivate") == 0) {
-		return GetClassnetByName("TAGame.GameEvent_SoccarPrivate_TA");
-	}
-	if (name.compare("Archetypes.GameEvent.GameEvent_SoccarSplitscreen") == 0 || name.compare("Archetypes.GameEvent.GameEvent_BasketballSplitscreen") == 0 || name.compare("Archetypes.GameEvent.GameEvent_HockeySplitscreen") == 0) {
-		return GetClassnetByName("TAGame.GameEvent_SoccarSplitscreen_TA");
-	}
-	if (name.compare("Archetypes.GameEvent.GameEvent_Season") == 0) {
-		return GetClassnetByName("TAGame.GameEvent_Season_TA");
-	}
-	if (name.compare("Archetypes.GameEvent.GameEvent_Season:CarArchetype") == 0) {
-		return GetClassnetByName("TAGame.Car_TA");
-	}
-	if (name.compare("Archetypes.GameEvent.GameEvent_Breakout") == 0) {
-		return GetClassnetByName("TAGame.GameEvent_Breakout_TA");
-	}
-	if (name.compare("GameInfo_Basketball.GameInfo.GameInfo_Basketball:GameReplicationInfoArchetype") == 0 || name.compare("Gameinfo_Hockey.GameInfo.Gameinfo_Hockey:GameReplicationInfoArchetype") == 0
-		|| name.compare("GameInfo_Season.GameInfo.GameInfo_Season:GameReplicationInfoArchetype") == 0 || name.compare("GameInfo_Soccar.GameInfo.GameInfo_Soccar:GameReplicationInfoArchetype") == 0
-		|| name.compare("GameInfo_Items.GameInfo.GameInfo_Items:GameReplicationInfoArchetype") == 0 || name.compare("GameInfo_Breakout.GameInfo.GameInfo_Breakout:GameReplicationInfoArchetype") == 0) {
-		return GetClassnetByName("TAGame.GRI_TA");
-	}
-	if (name.compare("TAGame.Default__CameraSettingsActor_TA") == 0) {
-		return GetClassnetByName("TAGame.CameraSettingsActor_TA");
-	}
-	if (name.compare("Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_0") == 0 || name.compare("NeoTokyo_P.TheWorld:PersistentLevel.InMapScoreboard_TA_0") == 0 ||
-		name.compare("NeoTokyo_P.TheWorld:PersistentLevel.InMapScoreboard_TA_1") == 0 || name.compare("NeoTokyo_Standard_P.TheWorld:PersistentLevel.InMapScoreboard_TA_1") == 0 || name.compare("NeoTokyo_Standard_P.TheWorld:PersistentLevel.InMapScoreboard_TA_0") == 0) {
-		return GetClassnetByName("TAGame.InMapScoreboard_TA");
-	}
-	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_GravityWell") == 0) {
-		return GetClassnetByName("TAGame.SpecialPickup_BallGravity_TA");
-	}
-	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_BallVelcro") == 0) {
-		return GetClassnetByName("TAGame.SpecialPickup_BallVelcro_TA");
-	}
-	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_BallLasso") == 0) {
-		return GetClassnetByName("TAGame.SpecialPickup_BallLasso_TA");
-	}
-	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_BallGrapplingHook") == 0) {
-		return GetClassnetByName("TAGame.SpecialPickup_GrapplingHook_TA");
-	}
-	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_Swapper") == 0) {
-		return GetClassnetByName("TAGame.SpecialPickup_Swapper_TA");
-	}
-	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_BallFreeze") == 0) {
-		return GetClassnetByName("TAGame.SpecialPickup_BallFreeze_TA");
-	}
-	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_BoostOverride") == 0) {
-		return GetClassnetByName("TAGame.SpecialPickup_BoostOverride_TA");
-	}
-	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_Tornado") == 0) {
-		return GetClassnetByName("TAGame.SpecialPickup_Tornado_TA");
-	}
-	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_CarSpring") == 0 || name.compare("Archetypes.SpecialPickups.SpecialPickup_BallSpring") == 0) {
-		return GetClassnetByName("TAGame.SpecialPickup_BallCarSpring_TA");
-	}
-	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_StrongHit") == 0) {
-		return GetClassnetByName("TAGame.SpecialPickup_HitForce_TA");
-	}
-	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_Batarang") == 0) {
-		return GetClassnetByName("TAGame.SpecialPickup_Batarang_TA");
-	}
-	if (name.compare("Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_1") == 0) {
-		return GetClassnetByName("TAGame.InMapScoreboard_TA");
-	}
-	if (name.compare("Archetypes.Ball.Ball_Haunted") == 0)
-	{
-		return GetClassnetByName("TAGame.Ball_Haunted_TA");
-	}
-	if (name.compare("Haunted_TrainStation_P.TheWorld:PersistentLevel.HauntedBallTrapTrigger_TA_1") == 0 ||
-		name.compare("Haunted_TrainStation_P.TheWorld:PersistentLevel.HauntedBallTrapTrigger_TA_0") == 0)
-	{
-		return GetClassnetByName("TAGame.HauntedBallTrapTrigger_TA");
-	}
-	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_HauntedBallBeam") == 0)
-	{
-		return GetClassnetByName("TAGame.SpecialPickup_HauntedBallBeam_TA");
-	}
-	if (name.compare("Archetypes.SpecialPickups.SpecialPickup_Rugby") == 0)
-	{
-		return GetClassnetByName("TAGame.SpecialPickup_Rugby_TA");
-	}
-
-
+	static std::shared_ptr<ClassNet> notfound = nullptr;
 	if (name.find("CrowdActor_TA") != std::string::npos)
 	{
-		return GetClassnetByName("TAGame.CrowdActor_TA");
+		fffffind("TAGame.CrowdActor_TA");
 	}
 	else if (name.find("VehiclePickup_Boost_TA") != std::string::npos)
 	{
-		return GetClassnetByName("TAGame.VehiclePickup_Boost_TA");
+		fffffind("TAGame.VehiclePickup_Boost_TA");
 	}
 	else if (name.find("CrowdManager_TA") != std::string::npos)
 	{
-		return GetClassnetByName("TAGame.CrowdManager_TA");
+		fffffind("TAGame.CrowdManager_TA");
 	}
 	else if (name.find("BreakOutActor_Platform_TA") != std::string::npos)
 	{
-		return GetClassnetByName("TAGame.BreakOutActor_Platform_TA");
+		fffffind("TAGame.BreakOutActor_Platform_TA");
 	}
 	else if (name.find("WorldInfo") != std::string::npos)
 	{
-		return GetClassnetByName("Engine.WorldInfo");
+		fffffind("Engine.WorldInfo");
 	}
 	else if (name.find("Archetypes.Teams.TeamWhite") != std::string::npos)
 	{
-		return GetClassnetByName("Engine.TeamInfo");
+		fffffind("Engine.TeamInfo");
 	}
-	return GetClassnetByName(name);
+	auto found = classnetMap.find(name);
+	if (found == classnetMap.end())
+		return notfound;
+	return found->second;
 }
 
 const uint16_t ReplayFile::GetPropertyIndexById(const std::shared_ptr<ClassNet>& cn, const int id) const
