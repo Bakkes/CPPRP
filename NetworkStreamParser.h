@@ -10,6 +10,8 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/filewritestream.h"
 
+constexpr bool IncludeParseLog = false;
+
 typedef std::shared_ptr<void>(*createFunc)(CPPBitReader<uint32_t>& reader, rapidjson::Writer<rapidjson::FileWriteStream>& writer);
 
 template<typename T>

@@ -221,9 +221,8 @@ void ReplayFile::MergeDuplicates()
 
 const std::unordered_map<std::string, std::string> class_extensions = 
 {
-
 	{"Engine.Actor", "Core.Object"}
-		 , {"TAGame.CarComponent_Boost_TA", "TAGame.CarComponent_TA"}
+  , {"TAGame.CarComponent_Boost_TA", "TAGame.CarComponent_TA"}
   , {"TAGame.CarComponent_Dodge_TA", "TAGame.CarComponent_TA"}
   , {"TAGame.CarComponent_DoubleJump_TA", "TAGame.CarComponent_TA"}
   , {"TAGame.CarComponent_FlipCar_TA", "TAGame.CarComponent_TA"}
@@ -552,10 +551,12 @@ void ReplayFile::Parse(const std::string& fileName, const uint32_t startPos, int
 
 						 	//writer.String("data");
 							//printf("Calling parse for %s", )
-							char buff[1024];
-							snprintf(buff, sizeof(buff), "Calling parser for %s (%i, %i, %s, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.name_id >= replayFile->names.size() ? "unknown" : replayFile->names[actorState.name_id].c_str(), i);
-							parseLog.push_back(std::string(buff));
-
+							if constexpr (IncludeParseLog) 
+							{
+								char buff[1024];
+								snprintf(buff, sizeof(buff), "Calling parser for %s (%i, %i, %s, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.name_id >= replayFile->names.size() ? "unknown" : replayFile->names[actorState.name_id].c_str(), i);
+								parseLog.push_back(std::string(buff));
+							}
 							networkParser.Parse(propertyIndex, networkReader, writer);
 							i++;
 						 	//writer.EndObject();

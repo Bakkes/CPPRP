@@ -109,9 +109,9 @@ int main()
 	//Q:/rocketleaguereplays.com/replay_files/
 	{
 		int i = 0;
-		for (const auto & entry : std::filesystem::directory_iterator("Q:/rocketleaguereplays.com/replay_files/"))
+		for (const auto & entry : std::filesystem::directory_iterator("F:/alpaca/"))
 		{
-			if (i > 501)
+			if (i > 65456456)
 				break;
 			i++;
 			replays.push_back(entry.path());
@@ -243,7 +243,7 @@ int main()
 	std::atomic<uint32_t> success = 0;
 	std::atomic<uint32_t> fail = 0;
 	{
-		const char* name = "Rocketleaguereplays.com replays";
+		const char* name = "Alpaca replays";
 		double start_time = get_time();
 
 		std::vector<std::thread> threads;
@@ -255,7 +255,7 @@ int main()
 			while(threads_active > 400)
 				std::this_thread::sleep_for(std::chrono::milliseconds(3));
 			threads_active++;
-			//std::thread t{ [replayName, &success, &fail, &threads_active]() {
+			std::thread t{ [replayName, &success, &fail, &threads_active]() {
 
 			//auto replayData = replaysToTest[replayName];
 				//printf("Parsing replay \"%s\"\n", replayName.filename().u8string().c_str());
@@ -283,31 +283,65 @@ int main()
 			{
 				fail++;
 				printf("Failed to parse %s (%s)'\n", replayName.filename().u8string().c_str(), e.what());
-				for (size_t i = rf->parseLog.size() - 8; i < rf->parseLog.size(); ++i)
+				if (rf->parseLog.size() == 0)
 				{
-					printf("\t%s\n", rf->parseLog[i].c_str());
+					printf("No parseLog available, recompile with parselog info\n");
+				}
+				else
+				{
+					for (size_t i = rf->parseLog.size() - 8; i < rf->parseLog.size(); ++i)
+					{
+						printf("\t%s\n", rf->parseLog[i].c_str());
+					}
 				}
 			}
 			catch (const GeneralParseException<uint32_t>& e)
 			{
 				fail++;
 				printf("Failed to parse %s (%s)'\n", replayName.filename().u8string().c_str(), e.what());
-				for (size_t i = rf->parseLog.size() - 8; i < rf->parseLog.size(); ++i)
+				if (rf->parseLog.size() == 0)
 				{
-					printf("\t%s\n", rf->parseLog[i].c_str());
+					printf("No parseLog available, recompile with parselog info\n");
+				}
+				else
+				{
+					for (size_t i = rf->parseLog.size() - 8; i < rf->parseLog.size(); ++i)
+					{
+						printf("\t%s\n", rf->parseLog[i].c_str());
+					}
 				}
 			}
 			catch(const std::exception &e) //e
 			{
 				fail++;
 				printf("Failed to parse %s (%s)'\n", replayName.filename().u8string().c_str(), e.what());
-				//std::filesystem::copy(replayName, "F:/alpacafails/");
+				if (rf->parseLog.size() == 0)
+				{
+					printf("No parseLog available, recompile with parselog info\n");
+				}
+				else
+				{
+					for (size_t i = rf->parseLog.size() - 8; i < rf->parseLog.size(); ++i)
+					{
+						printf("\t%s\n", rf->parseLog[i].c_str());
+					}
+				}
 			}
 			catch (...)
 			{
 				fail++;
 				printf("Failed to parse %s '\n", replayName.filename().u8string().c_str() );
-				//std::filesystem::copy(replayName, "F:/alpacafails/");
+				if (rf->parseLog.size() == 0)
+				{
+					printf("No parseLog available, recompile with parselog info\n");
+				}
+				else
+				{
+					for (size_t i = rf->parseLog.size() - 8; i < rf->parseLog.size(); ++i)
+					{
+						printf("\t%s\n", rf->parseLog[i].c_str());
+					}
+				}
 			}
 
 			const size_t total = success + fail;
@@ -321,8 +355,8 @@ int main()
 			
 				//printf("Parsed replay \"%s\"\n", replayName.filename().u8string().c_str());
 				//system("Pause");
-			//}  };
-			//threads.emplace_back(std::move(t));
+			}  };
+			threads.emplace_back(std::move(t));
 			//printf("Parsed\n\n");
 		}
 
