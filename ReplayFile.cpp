@@ -38,7 +38,7 @@ bool ReplayFile::Load()
 
 void ReplayFile::DeserializeHeader()
 {
-	const uint32_t dataSize = data.size() / 4;
+	const uint32_t dataSize = data.size() * 8;
 	replayFile = std::make_shared<ReplayFileData>();
 	fullReplayBitReader = CPPBitReader<uint32_t>((const uint32_t*)data.data(), dataSize, replayFile); //They're read as bytes, since we're retrieving them in memory as uint32_t, divide size by 4 (bytes)
 	//replayFile->header.crc = fullReplayBitReader.read<uint32_t>();
@@ -91,6 +91,12 @@ void ReplayFile::DeserializeHeader()
 	uint32_t test = netstreamCount * 8;
 	fullReplayBitReader.skip(test);
 	replayFile->netstream_size = netstreamCount;
+
+	if (!fullReplayBitReader.canRead())
+	{
+		//Replay is corrupt
+		throw GeneralParseException("ReplayFile corrupt. header + netstream_size > filesize", fullReplayBitReader);
+	}
 
 	const int32_t debugStringSize = fullReplayBitReader.read<int32_t>();
 	for (int32_t i = 0; i < debugStringSize; ++i)
@@ -290,6 +296,7 @@ const std::vector<std::pair<std::string, std::vector<std::string>>> archetypeMap
 	{{"TAGame.Team_Soccar_TA"}, {"Archetypes.Teams.Team0", "Archetypes.Teams.Team1"}},
 	{{"TAGame.PRI_TA"}, {"TAGame.Default__PRI_TA"}},
 	{{"TAGame.GameEvent_TrainingEditor_TA"}, {"Archetypes.GameEvent.GameEvent_TrainingEditor"}},
+	{{"TAGame.GameEvent_Tutorial_TA"}, {"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Aerial"}},
 	{{"TAGame.GameEvent_Soccar_TA"}, {/*"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Aerial",*/ "Archetypes.GameEvent.GameEvent_Basketball", "Archetypes.GameEvent.GameEvent_Hockey", "Archetypes.GameEvent.GameEvent_Soccar", "Archetypes.GameEvent.GameEvent_Items", "Archetypes.GameEvent.GameEvent_SoccarLan"}},
 	{{"TAGame.GameEvent_SoccarPrivate_TA"}, {"Archetypes.GameEvent.GameEvent_SoccarPrivate", "Archetypes.GameEvent.GameEvent_BasketballPrivate", "Archetypes.GameEvent.GameEvent_HockeyPrivate"}},
 	{{"TAGame.GameEvent_SoccarSplitscreen_TA"}, {"Archetypes.GameEvent.GameEvent_SoccarSplitscreen", "Archetypes.GameEvent.GameEvent_BasketballSplitscreen", "Archetypes.GameEvent.GameEvent_HockeySplitscreen"}},
@@ -310,6 +317,8 @@ const std::vector<std::pair<std::string, std::vector<std::string>>> archetypeMap
 	{{"TAGame.SpecialPickup_BallCarSpring_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_CarSpring", "Archetypes.SpecialPickups.SpecialPickup_BallSpring"}},
 	{{"TAGame.SpecialPickup_HitForce_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_StrongHit"}},
 	{{"TAGame.SpecialPickup_Batarang_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Batarang"}},
+	//{{"TAGame.SpecialPickup_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Swapper"}},
+	//{{"TAGame.SpecialPickup_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_GravityWell"}},
 	//{{"TAGame.InMapScoreboard_TA"}, {"Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_1"}},
 	{{"TAGame.Ball_Haunted_TA"}, {"Archetypes.Ball.Ball_Haunted"}},
 	{{"TAGame.HauntedBallTrapTrigger_TA"}, {"Haunted_TrainStation_P.TheWorld:PersistentLevel.HauntedBallTrapTrigger_TA_1", "Haunted_TrainStation_P.TheWorld:PersistentLevel.HauntedBallTrapTrigger_TA_0"}},
@@ -369,40 +378,49 @@ void ReplayFile::FixParents()
 }
 
 uint32_t val = 0;
-void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t endPos)
+static uint32_t i = 0;
+void ReplayFile::Parse(const std::string& fileName, const uint32_t startPos, int32_t endPos, const uint32_t frameCount)
 {
 	if (endPos < 0)
 	{
-		endPos = replayFile->netstream_size / 4 * 8;
+		endPos = replayFile->netstream_size  * 8;// / 4 * 8;
 	}
+
+	const uint32_t numFrames = frameCount > 0 ? frameCount : static_cast<uint32_t>(GetProperty<int32_t>("NumFrames"));
+	
 	//Divide by 4 since netstream_data is bytes, but we read uint32_ts
 	CPPBitReader<uint32_t> networkReader((uint32_t*)(replayFile->netstream_data), ((uint32_t)endPos), replayFile);
 
 	++val;
 	//FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
 
-	//try 
+	try 
 	{
+		if (fileName.compare("000900040016000B001C02990682C5D1.replay") == 0)
+		{
+			int fdsdf = 5;
+		}
 		//char writeBuffer[65536 * 5];
 		//rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
 
 		rapidjson::Writer<rapidjson::FileWriteStream> writer;
 		int t = 0;
 		std::unordered_map<uint32_t, std::string> test;
-
+		
 		networkReader.skip(startPos);
 
 	 	//writer.StartObject();
 	 	//writer.String("frames");
 		const int32_t maxChannels = GetProperty<int32_t>("MaxChannels");
 		const bool isLan = GetProperty<std::string>("MatchType").compare("Lan") == 0;
+		
 	 	//writer.StartArray();
-		int i = 0;
-		while (networkReader.canRead())
+		uint32_t currentFrame = 0;
+		while (networkReader.canRead() && currentFrame < numFrames)
 		{
 		 	//writer.StartObject();
 			//printf("Parsing frame no %i\n", i);
-			i++;
+			currentFrame++;
 			Frame f;
 			f.time = networkReader.read<float>();
 			f.delta = networkReader.read<float>();
@@ -411,7 +429,7 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 				|| (f.delta > 0 && f.delta < 1E-10))
 			{
 				//printf("Out of range, calling again\n");
-				throw 55;
+				throw GeneralParseException("Frame time incorrect (parser at wrong position)", networkReader);
 				
 			}
 		 	//writer.String("time");
@@ -427,7 +445,9 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 			{
 			 	//writer.StartObject();
 				const uint32_t actorId = networkReader.readBitsMax<uint32_t>(maxChannels);
+				//parseMutex.lock();
 				ActorState& actorState = actorStates[actorId];
+				//parseMutex.unlock();
 			 	//writer.String("actorid");
 			 	//writer.Uint(actorId);
 
@@ -439,11 +459,22 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 					if (networkReader.read<bool>())
 					{
 					 	//writer.String("created");
-						if (replayFile->header.engineVersion > 868 || (replayFile->header.engineVersion == 868 && replayFile->header.licenseeVersion >= 14 && !isLan))
+						if (replayFile->header.engineVersion > 868 || (replayFile->header.engineVersion == 868 && replayFile->header.licenseeVersion >= 20) || (replayFile->header.engineVersion == 868 && replayFile->header.licenseeVersion >= 14 && !isLan))
 						{
-							actorState.name_id = networkReader.read<uint32_t>();
+							const uint32_t nameId = networkReader.read<uint32_t>();
+							actorState.name_id = nameId;
+
+							if (nameId > replayFile->names.size())
+							{
+								throw GeneralParseException("nameId not in replayFile->objects " + std::to_string(nameId) + " > " + std::to_string(replayFile->names.size()), networkReader);
+							}
+
 						 	//writer.String("nameid");
 						 	//writer.Uint(actorState.name_id);
+						}
+						else
+						{ 
+							actorState.name_id = 0;
 						}
 						const bool unknownBool = networkReader.read<bool>();
 						const uint32_t typeId = networkReader.read<uint32_t>();
@@ -451,19 +482,26 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 					 	//writer.Uint(typeId);
 						//const uint32_t bit_pos = networkReader.GetAbsoluteBitPosition();
 
+						if (typeId > replayFile->objects.size())
+						{
+							throw GeneralParseException("Typeid not in replayFile->objects " + std::to_string(typeId) + " > " + std::to_string(replayFile->objects.size()), networkReader);
+						}
+
 						const std::string typeName = replayFile->objects.at(typeId);
 						//printf("New object of type %s\n", typeName.c_str());
 					 	//writer.String("typename");
 					 	//writer.String(typeName.c_str(), typeName.size());
-						actorState.classNet = GetClassnetByNameWithLookup(typeName);
+						auto classNet = GetClassnetByNameWithLookup(typeName);
 
-						if (actorState.classNet == nullptr)
+						if (classNet == nullptr)
 						{
-							//printf("%s not found\n", typeName.c_str());
-							throw 20;
+							throw GeneralParseException("Classnet for " + typeName + " not found", networkReader);
 						}
+						parseLog.push_back("New actor for " + typeName);
 
-						const uint32_t classId = actorState.classNet->index;
+						actorState.classNet = classNet;
+
+						const uint32_t classId = classNet->index;
 						const std::string className = replayFile->objects.at(classId);
 
 					 	//writer.String("classname");
@@ -498,14 +536,28 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 							const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
 							const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
 							const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
-							//printf("Calling parser for %s (%i, %i, %s)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, replayFile->names[actorState.name_id].c_str());
-
+							
+							
+							//if (replayFile->objects[propertyIndex].find("Replicated") == std::string::npos)
+							//{
+							//	//printf("Calling parser for %s (%i, %i, %s, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, replayFile->names[actorState.name_id].c_str(), i);
+							//}
+							//if (i > 2092749)
+							//{
+							//	//printf("Calling parser for %s (%i, %i, %s, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, replayFile->names[actorState.name_id].c_str(), i);
+							//	int owow = 5;
+							//}
 						 	//writer.String("class");
 						 	//writer.String(replayFile->objects[propertyIndex].c_str(), replayFile->objects[propertyIndex].size());
 
 						 	//writer.String("data");
 							//printf("Calling parse for %s", )
+							char buff[1024];
+							snprintf(buff, sizeof(buff), "Calling parser for %s (%i, %i, %s, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.name_id >= replayFile->names.size() ? "unknown" : replayFile->names[actorState.name_id].c_str(), i);
+							parseLog.push_back(std::string(buff));
+
 							networkParser.Parse(propertyIndex, networkReader, writer);
+							i++;
 						 	//writer.EndObject();
 						}
 					 	//writer.EndArray();
@@ -520,18 +572,23 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 		 	//writer.EndArray();
 		 	//writer.EndObject();
 		}
-
+		if (numFrames != currentFrame)
+		{
+			throw new GeneralParseException("Number of expected frames does not match number of parsed frames. Expected: " + std::to_string(numFrames) + ", parsed: " + std::to_string(currentFrame), networkReader);
+		}
 	 	//writer.EndArray();
 	 	//writer.EndObject();
 	}
-	//catch (...)
+	catch (...)
 	{
 		//printf("Caught ex\n");
 		//Parse(fileName, startPos, endPos);
 		//fclose(fp);
-		//throw 5;
+		throw;
 	}
 	
+	//int ow = 5;
+	//printf("%i", ow);
 	//fclose(fp);
 	//printf("Parsed\n");
 }
@@ -706,7 +763,7 @@ return (*found).second;
 
 const std::shared_ptr<ClassNet>& ReplayFile::GetClassnetByNameWithLookup(const std::string & name) const
 {
-	static std::shared_ptr<ClassNet> notfound = nullptr;
+	static std::shared_ptr<ClassNet> notfound = std::shared_ptr<ClassNet>(nullptr);
 	if (name.find("CrowdActor_TA") != std::string::npos)
 	{
 		fffffind("TAGame.CrowdActor_TA");
@@ -761,7 +818,10 @@ const uint16_t ReplayFile::GetPropertyIndexById(const std::shared_ptr<ClassNet>&
 const uint16_t ReplayFile::GetMaxPropertyId(const std::shared_ptr<ClassNet>& cn)
 {
 	if (cn == nullptr)
-		throw 21;
+	{
+		throw std::exception("ClassNet is nullptr");
+	}
+		
 	if (cn->max_prop_id == 0)
 	{
 		cn->max_prop_id = FindMaxPropertyId(cn, 0);

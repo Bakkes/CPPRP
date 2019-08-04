@@ -8,7 +8,7 @@
 #include "NetworkStreamParser.h"
 #include "CPPBitReader.h"
 #include "ReplayFileData.h"
-
+#include <mutex>
 class ReplayFile
 {
 private:
@@ -22,6 +22,7 @@ public:
 	std::unordered_map<int, ActorState> actorStates;
 	std::shared_ptr<ReplayFileData> replayFile;
 	NetworkStreamParser networkParser;
+	std::vector<std::string> parseLog;
 public:
 	ReplayFile(std::filesystem::path path_);
 	~ReplayFile();
@@ -30,7 +31,7 @@ public:
 	void DeserializeHeader();
 	void MergeDuplicates();
 	void FixParents();
-	void Parse(std::string fileName, uint32_t startPos = 0, int32_t endPos = -1);
+	void Parse(const std::string& fileName, const uint32_t startPos = 0, int32_t endPos = -1, const uint32_t frameCount = 0);
 protected:
 	const bool HasInitialPosition(const std::string& name) const;
 	const bool HasRotation(const std::string& name) const;
@@ -43,12 +44,14 @@ protected:
 	const uint16_t GetMaxPropertyId(const std::shared_ptr<ClassNet>& cn);
 	const uint16_t FindMaxPropertyId(const std::shared_ptr<ClassNet>& cn, uint16_t maxProp) const;
 
+public:
 	template<typename T>
 	const T GetProperty(const std::string& key)
 	{
 		//auto baseMap = std::any_cast<std::unordered_map<std::string, std::shared_ptr<Property>>>(replayFile.properties->value);
 		if (replayFile->properties.find(key) == replayFile->properties.end())
 		{
+			throw std::exception(std::string("Property " + key + " does not exist in properties map.").c_str());
 			//assert(1 == 2); //die
 		}
 		return std::any_cast<T>(replayFile->properties.at(key)->value);

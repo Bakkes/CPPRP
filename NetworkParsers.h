@@ -3,6 +3,7 @@
 #include "NetworkData.h"
 #include <sstream>
 #include "rapidjson/prettywriter.h"
+#include "ParseException.h"
 
 template<typename Writer, typename T>
 inline const void Serialize(Writer& writer, const T& item) 
@@ -207,7 +208,12 @@ inline const ProductAttribute Consume(CPPBitReader<uint32_t>& reader) {
 	item.unknown1 = reader.read<bool>();
 	item.class_index = reader.read<uint32_t>();
 	//TODO: read classnames
+	if (item.class_index > reader.owner->objects.size())
+	{
+		throw AttributeParseException<uint32_t>("ProductAttribute", reader);
+	}
 	std::string className = reader.owner->objects[item.class_index];
+
 	if (className.compare("TAGame.ProductAttribute_UserColor_TA") == 0)
 	{
 		//TODO: assign this
@@ -350,10 +356,33 @@ inline const ReplicatedRBState Consume(CPPBitReader<uint32_t>& reader) {
 	return item;
 }
 
+
+template<>
+inline const PartyLeader Consume(CPPBitReader<uint32_t>& reader) {
+	PartyLeader item{ 0 };
+	uint8_t test = reader.read<uint8_t>();
+	if (test != 0) 
+	{
+		reader.goback(8);
+		item.id = reader.read<UniqueId>();
+	}
+	else
+	{
+		
+	}
+	/*if (item.id.platform == 0 && reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 14)
+	{
+		reader.read<uint32_t>();
+	}*/
+	//printf("Platform: %i\n", (int)item.id.platform);
+	return item;
+}
+
+
 template<>
 inline const GameMode Consume(CPPBitReader<uint32_t>& reader) {
 	GameMode item;
-	if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 12)
+	if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 11)
 	{
 		item.gamemode = reader.read<uint8_t>();
 	}
@@ -369,9 +398,17 @@ inline const Reservation Consume(CPPBitReader<uint32_t>& reader) {
 	Reservation item;
 	item.unknown = reader.read<uint8_t>(3);
 	item.player_id = reader.read<UniqueId>();
-	if (item.player_id.platform != Platform_Unknown)
+	if (item.player_id.platform == Platform_Unknown && (reader.owner->header.licenseeVersion < 18 || reader.owner->header.netVersion  != 0))
+	{
+		
+	}
+	else
 	{
 		item.player_name = reader.read<std::string>();
+		//if (item.player_name[0] == 0 && item.player_name.size() > 0)
+		//{
+		//	printf("Version player name error (%i, %i, %i)\n", reader.owner->header.engineVersion, reader.owner->header.licenseeVersion, reader.owner->header.netVersion);
+		//}
 	}
 
 	if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 12)

@@ -52,12 +52,15 @@ public:
 	template<typename Writer>
 	void Parse(const uint32_t propertyIdx, CPPBitReader<uint32_t>& br, Writer& writer) const
 	{
+		if (propertyIdx > parseFunctions.size())
+		{
+			throw GeneralParseException("Reader at wrong position (propertyIndex > parseFunctions.size())", br);
+		}
 		const auto func = parseFunctions[propertyIdx];
 		if (func == nullptr)
 		{
 			std::string parseFunc = br.owner->objects[propertyIdx];
-			printf("Parser not implemented for %s\n", parseFunc.c_str());
-			throw 20;
+			throw GeneralParseException("Parser not implemented for " + parseFunc, br);
 		}
 		auto inst = parseFunctions[propertyIdx](br, writer);
 	}

@@ -590,6 +590,23 @@ inline const void Serialize(Writer& writer, const ActorBase& item)
 }
 
 template<>
+inline const std::string ToString(const PartyLeader& item) 
+{
+	std::stringstream ss;
+	ss << "id = " << ToString(item.id);
+	return ss.str();
+}
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const PartyLeader& item)
+{
+	writer.StartObject();
+	writer.String("id");
+	Serialize(writer, item.id);
+	writer.EndObject();
+}
+
+template<>
 inline const OnlineLoadout Consume(CPPBitReader<uint32_t>& reader) 
 {
 	OnlineLoadout item;

@@ -150,7 +150,17 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 	  "TAGame.GameEvent_Soccar_TA:bShowIntroScene",
 	  "TAGame.GameEvent_TA:bHasLeaveMatchPenalty",
 	  "Engine.Actor:bNetOwner",
-	  "Engine.Actor:bTearOff"
+	  "Engine.Actor:bTearOff",
+	  "TAGame.PRI_TA:bMatchAdmin",
+	  "Engine.PlayerReplicationInfo:bAdmin",
+	  "Engine.PlayerReplicationInfo:bIsInactive",
+	  "Engine.GameReplicationInfo:bStopCountDown",
+	  "TAGame.PRI_TA:bBusy",
+	  "Engine.GameReplicationInfo:bMatchHasBegun",
+	  "Engine.PlayerReplicationInfo:bOnlySpectator",
+	  "TAGame.GameEvent_Team_TA:bDisableMutingOtherTeam",
+	  "TAGame.PRI_TA:bVoteToForfeitDisabled",
+	  "TAGame.PRI_TA:bUsingFreecam"
 		});
 
 	RegisterParsers < uint64_t >({
@@ -210,13 +220,16 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 
 	RegisterParsers < UniqueId >({
 	  "Engine.PlayerReplicationInfo:UniqueId",
-	  "TAGame.PRI_TA:PartyLeader"
+		});
+	RegisterParsers<PartyLeader>({
+			  "TAGame.PRI_TA:PartyLeader"
 		});
 
 	RegisterParsers < int32_t >({
 	  "ProjectX.GRI_X:ReplicatedGameMutatorIndex",
 	  "TAGame.PRI_TA:TimeTillItem",
-	  "TAGame.PRI_TA:MaxTimeTillItem"
+	  "TAGame.PRI_TA:MaxTimeTillItem",
+	  "TAGame.PRI_TA:RespawnTimeRemaining"
 		});
 
 	RegisterParsers < ReplicatedPickupData >({

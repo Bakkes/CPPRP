@@ -202,6 +202,13 @@ struct ActorBase
 	bool unknown2;
 };
 
+__ParserAttribute__(Consume, false)
+struct PartyLeader
+{
+	__ParserAttribute__(CallToString, true)
+	UniqueId id;
+};
+
 struct OnlineLoadout
 {
 	//uint8_t attributes_list_count;//Is automatically read when consuming vector

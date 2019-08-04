@@ -340,6 +340,11 @@ namespace CPPRP
 				return "";
 			}
 
+			if (final_length > 500)
+			{
+				throw GeneralParseException("Got unwanted string length, read value " + std::to_string(length) + ", reading bytes " + std::to_string(final_length), *this);
+			}
+
 			std::string str;
 			str.resize(final_length - 1);
 			//Possible optimization (but later)
@@ -404,6 +409,26 @@ namespace CPPRP
 			return GetAbsoluteBitPosition() < size;
 		}
 
+		void goback(int32_t num)
+		{
+			constexpr uint32_t SIZE_IN_BITS = (sizeof(T) * 8);
+
+			//bit pos = 6, num = 8
+			//6 - 8 = -2
+			//bit pos = SIZE_IN_BITS + num %
+			if (static_cast<int32_t>(bit_position) - num < 0)
+			{
+				num -= bit_position;
+				bit_position = SIZE_IN_BITS - (num % SIZE_IN_BITS);
+				t_position -= (abs(num)) / SIZE_IN_BITS + 1; // +1 since bit_position + num >= SIZE_IN_BITS
+			}
+			else
+			{
+				bit_position -= num;			
+			}
+			data = start + t_position;
+		}
+
 		//Not yet implemented
 		void skip(uint32_t num)
 		{
@@ -431,7 +456,7 @@ namespace CPPRP
 
 		const size_t GetAbsoluteBitPosition()
 		{
-			return GetBytePosition() * 8 + bit_position;
+			return (t_position * sizeof(T) * 8) + bit_position;
 		}
 
 	};
