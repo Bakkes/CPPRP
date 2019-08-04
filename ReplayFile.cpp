@@ -378,7 +378,7 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 	++val;
 	//FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
 
-	try 
+	//try 
 	{
 		//char writeBuffer[65536 * 5];
 		//rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
@@ -397,7 +397,7 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 		while (networkReader.canRead())
 		{
 		 	//writer.StartObject();
-			printf("Parsing frame no %i\n", i);
+			//printf("Parsing frame no %i\n", i);
 			i++;
 			Frame f;
 			f.time = networkReader.read<float>();
@@ -406,7 +406,7 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 				|| (f.time > 0 && f.time < 1E-10)
 				|| (f.delta > 0 && f.delta < 1E-10))
 			{
-				printf("Out of range, calling again\n");
+				//printf("Out of range, calling again\n");
 				throw 55;
 				
 			}
@@ -449,14 +449,14 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 						//const uint32_t bit_pos = networkReader.GetAbsoluteBitPosition();
 
 						const std::string typeName = replayFile->objects.at(typeId);
-						printf("New object of type %s\n", typeName.c_str());
+						//printf("New object of type %s\n", typeName.c_str());
 					 	//writer.String("typename");
 					 	//writer.String(typeName.c_str(), typeName.size());
 						actorState.classNet = GetClassnetByNameWithLookup(typeName);
 
 						if (actorState.classNet == nullptr)
 						{
-							printf("%s not found\n", typeName.c_str());
+							//printf("%s not found\n", typeName.c_str());
 							throw 20;
 						}
 
@@ -488,14 +488,14 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 						while (networkReader.read<bool>())
 						{
 						 	//writer.StartObject();
-							if (std::string("CarComponent_Boost_TA_0").compare(replayFile->names[actorState.name_id]) == 0)
-							{
-								int k = 5;
-							}
+							//if (std::string("CarComponent_Boost_TA_0").compare(replayFile->names[actorState.name_id]) == 0)
+							//{
+							//	int k = 5;
+							//}
 							const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
 							const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
 							const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
-							printf("Calling parser for %s (%i, %i, %s)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, replayFile->names[actorState.name_id].c_str());
+							//printf("Calling parser for %s (%i, %i, %s)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, replayFile->names[actorState.name_id].c_str());
 
 						 	//writer.String("class");
 						 	//writer.String(replayFile->objects[propertyIndex].c_str(), replayFile->objects[propertyIndex].size());
@@ -521,10 +521,10 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 	 	//writer.EndArray();
 	 	//writer.EndObject();
 	}
-	catch (...)
+	//catch (...)
 	{
-		printf("Caught ex\n");
-		Parse(fileName, startPos, endPos);
+		//printf("Caught ex\n");
+		//Parse(fileName, startPos, endPos);
 		//fclose(fp);
 		//throw 5;
 	}
