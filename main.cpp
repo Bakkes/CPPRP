@@ -105,12 +105,12 @@ int main()
 	//C:/Users/Chris/Documents/My Games/Rocket League/TAGame/Demos/
 	//"C:/Users/Chris/Documents/My Games/Rocket League/TAGame/Demos_freeplay/"
 	//F:/alpaca/
-	for (const auto & entry : std::filesystem::directory_iterator("F:/alpaca/"))
+	for (const auto & entry : std::filesystem::directory_iterator("C:/Users/Chris/source/repos/CPPRP/CPPRP/replays/"))
 	{
 		replays.push_back(entry.path());
 	}
 	//replays.clear();
-	//replays.push_back("F:/alpaca/00A66AD544A5F28DA2D54084A0052138.replay");
+	//replays.push_back("C:/Users/Chris/source/repos/CPPRP/CPPRP/replays/d236.replay");
 
 	const size_t numReplays = replays.size();
 	printf("Attempt to parse %i replays\n", numReplays);
@@ -137,6 +137,7 @@ int main()
 			{
 				std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>(replayName);
 				std::string s = replayName.filename().u8string();
+				printf("Parsing replay \"%s\"\n", replayName.filename().u8string().c_str());
 				//printf("Calling load\n");
 				if (!rf->Load())
 				{
@@ -151,16 +152,17 @@ int main()
 					success++;
 				}
 			}
-			catch(const std::exception &) //e
+			catch(const std::exception &e) //e
 			{
 				fail++;
-				//printf("Failed to parse %s (%s)'\n", replayName.filename().u8string().c_str(), e.what());
-				std::filesystem::copy(replayName, "F:/alpacafails/");
+				printf("Failed to parse %s (%s)'\n", replayName.filename().u8string().c_str(), e.what());
+				//std::filesystem::copy(replayName, "F:/alpacafails/");
 			}
 			catch (...)
 			{
 				fail++;
-				std::filesystem::copy(replayName, "F:/alpacafails/");
+				printf("Failed to parse %s '\n", replayName.filename().u8string().c_str() );
+				//std::filesystem::copy(replayName, "F:/alpacafails/");
 			}
 			threads_active--;
 			

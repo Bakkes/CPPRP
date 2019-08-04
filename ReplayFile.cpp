@@ -193,7 +193,10 @@ void ReplayFile::DeserializeHeader()
 	{
 		fullReplayBitReader.read<int32_t>();
 	}
-	networkParser.RegisterParsers(replayFile);
+	if (replayFile->classnets.size() > 0) 
+	{
+		networkParser.RegisterParsers(replayFile);
+	}
 }
 
 void ReplayFile::MergeDuplicates()
@@ -392,6 +395,7 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 	 	//writer.StartObject();
 	 	//writer.String("frames");
 		const int32_t maxChannels = GetProperty<int32_t>("MaxChannels");
+		const bool isLan = GetProperty<std::string>("MatchType").compare("Lan") == 0;
 	 	//writer.StartArray();
 		int i = 0;
 		while (networkReader.canRead())
@@ -435,9 +439,8 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 					if (networkReader.read<bool>())
 					{
 					 	//writer.String("created");
-						if (replayFile->header.engineVersion > 868 || (replayFile->header.engineVersion == 868 && replayFile->header.licenseeVersion >= 14))
+						if (replayFile->header.engineVersion > 868 || (replayFile->header.engineVersion == 868 && replayFile->header.licenseeVersion >= 14 && !isLan))
 						{
-
 							actorState.name_id = networkReader.read<uint32_t>();
 						 	//writer.String("nameid");
 						 	//writer.Uint(actorState.name_id);
