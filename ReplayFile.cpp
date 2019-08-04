@@ -212,7 +212,13 @@ void ReplayFile::MergeDuplicates()
 
 const std::unordered_map<std::string, std::string> class_extensions = 
 {
+
 	{"Engine.Actor", "Core.Object"}
+		 , {"TAGame.CarComponent_Boost_TA", "TAGame.CarComponent_TA"}
+  , {"TAGame.CarComponent_Dodge_TA", "TAGame.CarComponent_TA"}
+  , {"TAGame.CarComponent_DoubleJump_TA", "TAGame.CarComponent_TA"}
+  , {"TAGame.CarComponent_FlipCar_TA", "TAGame.CarComponent_TA"}
+  , {"TAGame.CarComponent_Jump_TA", "TAGame.CarComponent_TA"}
   , {"Engine.GameReplicationInfo", "Engine.ReplicationInfo"}
   , {"Engine.Info", "Engine.Actor"}
   , {"Engine.Pawn", "Engine.Actor"}
@@ -226,11 +232,7 @@ const std::unordered_map<std::string, std::string> class_extensions =
   , {"TAGame.CameraSettingsActor_TA", "Engine.ReplicationInfo"}
   , {"TAGame.Car_Season_TA", "TAGame.PRI_TA"}
   , {"TAGame.Car_TA", "TAGame.Vehicle_TA"}
-  , {"TAGame.CarComponent_Boost_TA", "TAGame.CarComponent_TA"}
-  , {"TAGame.CarComponent_Dodge_TA", "TAGame.CarComponent_TA"}
-  , {"TAGame.CarComponent_DoubleJump_TA", "TAGame.CarComponent_TA"}
-  , {"TAGame.CarComponent_FlipCar_TA", "TAGame.CarComponent_TA"}
-  , {"TAGame.CarComponent_Jump_TA", "TAGame.CarComponent_TA"}
+ 
   , {"TAGame.CarComponent_TA", "Engine.ReplicationInfo"}
   , {"TAGame.CrowdActor_TA", "Engine.ReplicationInfo"}
   , {"TAGame.CrowdManager_TA", "Engine.ReplicationInfo"}
@@ -267,6 +269,7 @@ const std::unordered_map<std::string, std::string> class_extensions =
   , {"TAGame.CarComponent_TA", "Engine.Actor"}
   , {"Engine.Info", "Engine.Actor"}
   , {"Engine.Pawn", "Engine.Actor"}
+
 };
 
 const std::vector<std::pair<std::string, std::vector<std::string>>> archetypeMap =
@@ -344,7 +347,7 @@ void ReplayFile::FixParents()
 	{
 		std::shared_ptr<ClassNet> childClass = GetClassnetByNameWithLookup(kv.first);
 		std::shared_ptr<ClassNet> parentClass = GetClassnetByNameWithLookup(kv.second);
-		if (parentClass != nullptr && childClass != nullptr && (childClass->parent_class == nullptr || (childClass->parent_class->id != parentClass->id)))
+		if (parentClass != nullptr && childClass != nullptr && (childClass->parent_class == nullptr || (childClass->parent_class->index != parentClass->index)))
 		{
 			childClass->parent_class = parentClass;
 		}
@@ -485,10 +488,15 @@ void ReplayFile::Parse(std::string fileName, const uint32_t startPos, int32_t en
 						while (networkReader.read<bool>())
 						{
 						 	//writer.StartObject();
+							if (std::string("CarComponent_Boost_TA_0").compare(replayFile->names[actorState.name_id]) == 0)
+							{
+								int k = 5;
+							}
 							const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
 							const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
 							const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
-							printf("Calling parser for %s (%i, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId);
+							printf("Calling parser for %s (%i, %i, %s)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, replayFile->names[actorState.name_id].c_str());
+
 						 	//writer.String("class");
 						 	//writer.String(replayFile->objects[propertyIndex].c_str(), replayFile->objects[propertyIndex].size());
 
