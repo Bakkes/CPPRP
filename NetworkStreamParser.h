@@ -14,10 +14,10 @@ namespace CPPRP
 {
 	constexpr bool IncludeParseLog = false;
 
-	typedef std::shared_ptr<void>(*createFunc)(CPPBitReader<uint32_t>& reader, rapidjson::Writer<rapidjson::FileWriteStream>& writer);
+	typedef std::shared_ptr<void>(*createFunc)(CPPBitReader<BitReaderType>& reader, rapidjson::Writer<rapidjson::FileWriteStream>& writer);
 
 	template<typename T>
-	static inline std::shared_ptr<void> createInstance(CPPBitReader<uint32_t>& reader, rapidjson::Writer<rapidjson::FileWriteStream>& writer)
+	static inline std::shared_ptr<void> createInstance(CPPBitReader<BitReaderType>& reader, rapidjson::Writer<rapidjson::FileWriteStream>& writer)
 	{
 		/*auto consumed = */Consume<T>(reader);
 		//Serialize(writer, consumed);
@@ -54,7 +54,7 @@ namespace CPPRP
 
 		void RegisterParsers(const std::shared_ptr<ReplayFileData>& rfd);
 		template<typename Writer>
-		void Parse(const uint32_t propertyIdx, CPPBitReader<uint32_t>& br, Writer& writer) const
+		void Parse(const uint32_t propertyIdx, CPPBitReader<BitReaderType>& br, Writer& writer) const
 		{
 			if (propertyIdx > parseFunctions.size())
 			{
@@ -68,7 +68,7 @@ namespace CPPRP
 			}
 			auto inst = parseFunctions[propertyIdx](br, writer);
 		}
-		//void Parse(const std::string& name, CPPBitReader<uint32_t>& br);
+		//void Parse(const std::string& name, CPPBitReader<BitReaderType>& br);
 	};
 
 }

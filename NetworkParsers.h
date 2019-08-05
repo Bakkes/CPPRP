@@ -171,7 +171,7 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline const T Consume(CPPBitReader<uint32_t>& reader) { return reader.read<T>(); }
+	inline const T Consume(CPPBitReader<BitReaderType>& reader) { return reader.read<T>(); }
 
 
 	template<typename T>
@@ -194,7 +194,7 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline const std::vector<T> ConsumeVector(CPPBitReader<uint32_t>& reader) {
+	inline const std::vector<T> ConsumeVector(CPPBitReader<BitReaderType>& reader) {
 		uint8_t size = reader.read<uint8_t>();
 		std::vector<T> vec;
 		vec.resize(size);
@@ -206,14 +206,14 @@ namespace CPPRP
 	}
 
 	template<>
-	inline const ProductAttribute Consume(CPPBitReader<uint32_t>& reader) {
+	inline const ProductAttribute Consume(CPPBitReader<BitReaderType>& reader) {
 		ProductAttribute item;
 		item.unknown1 = reader.read<bool>();
 		item.class_index = reader.read<uint32_t>();
 		//TODO: read classnames
 		if (item.class_index > reader.owner->objects.size())
 		{
-			throw AttributeParseException<uint32_t>("ProductAttribute", reader);
+			throw AttributeParseException<BitReaderType>("ProductAttribute", reader);
 		}
 		std::string className = reader.owner->objects[item.class_index];
 
@@ -268,7 +268,7 @@ namespace CPPRP
 
 
 	template<>
-	inline const ClientLoadout Consume(CPPBitReader<uint32_t>& reader) {
+	inline const ClientLoadout Consume(CPPBitReader<BitReaderType>& reader) {
 		ClientLoadout item;
 		item.version = reader.read<uint8_t>();
 		item.body = reader.read<uint32_t>();
@@ -308,7 +308,7 @@ namespace CPPRP
 
 	//
 	//template<>
-	//inline const GameTime Consume(CPPBitReader<uint32_t>& reader) {
+	//inline const GameTime Consume(CPPBitReader<BitReaderType>& reader) {
 	//	static int test = 34;
 	//	//test++;
 	//	if (test == 256) system("pause");
@@ -319,7 +319,7 @@ namespace CPPRP
 	//}
 
 	template<>
-	inline const ReplicatedRBState Consume(CPPBitReader<uint32_t>& reader) {
+	inline const ReplicatedRBState Consume(CPPBitReader<BitReaderType>& reader) {
 		ReplicatedRBState item;
 		const uint32_t netVersion = reader.owner->header.netVersion;
 
@@ -361,7 +361,7 @@ namespace CPPRP
 
 
 	template<>
-	inline const PartyLeader Consume(CPPBitReader<uint32_t>& reader) {
+	inline const PartyLeader Consume(CPPBitReader<BitReaderType>& reader) {
 		PartyLeader item{ 0 };
 		uint8_t test = reader.read<uint8_t>();
 		if (test != 0)
@@ -383,7 +383,7 @@ namespace CPPRP
 
 
 	template<>
-	inline const GameMode Consume(CPPBitReader<uint32_t>& reader) {
+	inline const GameMode Consume(CPPBitReader<BitReaderType>& reader) {
 		GameMode item;
 		if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 12)
 		{
@@ -398,13 +398,14 @@ namespace CPPRP
 	}
 
 	template<>
-	inline const Reservation Consume(CPPBitReader<uint32_t>& reader) {
+	inline const Reservation Consume(CPPBitReader<BitReaderType>& reader) {
 		Reservation item;
 		item.unknown = reader.read<uint8_t>(3);
 		item.player_id = reader.read<UniqueId>();
+		//printf("Version player name error (%i, %i, %i)\n", reader.owner->header.engineVersion, reader.owner->header.licenseeVersion, reader.owner->header.netVersion);
 		if (item.player_id.platform == Platform_Unknown && (reader.owner->header.licenseeVersion < 18 || reader.owner->header.netVersion != 0))
 		{
-
+			
 		}
 		else
 		{

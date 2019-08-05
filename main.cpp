@@ -4,6 +4,7 @@
 
 //#include <omp.h>
 #include "ReplayFile.h"
+#include "ReplayException.h"
 #include <iostream>
 #include "bench.h"
 #include <thread>
@@ -117,7 +118,6 @@ int main(int argc, char *argv[])
 	//Q:/rocketleaguereplays.com/replay_files/
 	{
 		//21AFD0E344271B02DC9A38BD633727F7.replay
-		uint32_t i = 0;
 		std::filesystem::path p(argv[1]);
 		if (std::filesystem::is_regular_file(p))
 		{
@@ -129,9 +129,8 @@ int main(int argc, char *argv[])
 			{
 				if (entry.path().filename().u8string().find(".replay") == std::string::npos)
 					continue;
-				if (i > -1)
+				if (replays.size() >= 2500)
 					break;
-				i++;
 				replays.push_back(entry.path());
 			}
 		}
@@ -273,10 +272,20 @@ std::map<uint32_t, bool> activeThreads;
 		std::vector<std::thread> threads;
 
 		std::atomic<uint32_t> threads_active = 0;
+
+		std::vector<std::shared_ptr<CPPRP::ReplayFile>> preloadedReplays;
+
+		printf("Loading replay files into memory\n");
 		for (auto replayName : replays)
 		{
-			
-			while(threads_active > 100)
+			std::shared_ptr<CPPRP::ReplayFile> rf = std::make_shared<CPPRP::ReplayFile>(replayName);
+			rf->Load();
+			preloadedReplays.push_back(std::move(rf));
+		}
+		printf("Starting parse calls\n");
+		for(auto replay : preloadedReplays)
+		{
+			while(threads_active > 400)
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			//printf("Active: %i\n", threads_active.load());
 			threads_active++;
@@ -289,39 +298,39 @@ std::map<uint32_t, bool> activeThreads;
 				current++;
 				//printf("Loaded %i\n", curLoaded);
 			}
-			std::thread t{ [replayName, &success, &fail, &corrupt, &threads_active, &errorLogMutex, cur = curLoaded, &activeThreads, &activeThreadsMutex]() {
-
+			std::thread t{ [replay = replay, &success, &fail, &corrupt, &threads_active, &errorLogMutex, cur = curLoaded, &activeThreads, &activeThreadsMutex]() {
+				auto replayName = (replay)->path;
 			//auto replayData = replaysToTest[replayName];
 				//printf("Parsing replay \"%s\"\n", replayName.filename().u8string().c_str());
-			std::shared_ptr<CPPRP::ReplayFile> rf = std::make_shared<CPPRP::ReplayFile>(replayName);
+			//std::shared_ptr<CPPRP::ReplayFile> rf = std::make_shared<CPPRP::ReplayFile>(replayName);
 			try 
 			{
 				
-				std::string s = replayName.filename().u8string();
+				std::string s = "";//replayName.filename().u8string();
 				//printf("Parsing replay \"%s\"\n", replayName.filename().u8string().c_str());
 				//printf("Calling load\n");
-				if (!rf->Load())
+				if (false)
 				{
 					printf("Error loading replay file");
 					throw;
 				}
 				else {
 					//printf("Called load");
-					rf->DeserializeHeader();
+					replay->DeserializeHeader();
 					
-					rf->Parse(s);
+					replay->Parse(s);
 					success++;
-					if (rf->GetProperty<std::string>("MatchType").compare("Training") == 0)
+					if (replay->GetProperty<std::string>("MatchType").compare("Training") == 0)
 					{
 						printf("Successfully parsed training replay!\n");
 					}
 				}
 			}
-			catch (const CPPRP::InvalidVersionException& e)
+			catch (const CPPRP::InvalidVersionException&)
 			{
 				corrupt++;
 				std::lock_guard<std::mutex> lock(errorLogMutex);
-				printf("InvalidVersion: %s\n", e.what());
+				//printf("InvalidVersion: %s\n", e.what());
 			}
 			catch (const CPPRP::PropertyDoesNotExistException& e)
 			{
@@ -333,18 +342,18 @@ std::map<uint32_t, bool> activeThreads;
 			{
 				fail++;
 				std::lock_guard<std::mutex> lock(errorLogMutex);
-				bool hasProp = rf->HasProperty("MatchType");
+				bool hasProp = replay->HasProperty("MatchType");
 
-				printf("Failed to parse %s replay %s (%s)'\n", !hasProp ? "unknown" : rf->GetProperty<std::string>("MatchType").c_str(), replayName.filename().u8string().c_str(), e.what());
-				if (rf->parseLog.size() == 0)
+				printf("Failed to parse %s replay %s (%s)'\n", !hasProp ? "unknown" : replay->GetProperty<std::string>("MatchType").c_str(), replayName.filename().u8string().c_str(), e.what());
+				if (replay->parseLog.size() == 0)
 				{
 					//printf("No parseLog available, recompile with parselog info\n");
 				}
 				else
 				{
-					for (size_t i = std::max(0, (int32_t)rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
+					for (size_t i = std::max(0, (int32_t)replay->parseLog.size() - 8); i < replay->parseLog.size(); ++i)
 					{
-						printf("\t%s\n", rf->parseLog[i].c_str());
+						printf("\t%s\n", replay->parseLog[i].c_str());
 					}
 				}
 			}
@@ -353,18 +362,18 @@ std::map<uint32_t, bool> activeThreads;
 				fail++;
 				std::lock_guard<std::mutex> lock(errorLogMutex);
 
-				bool hasProp = rf->HasProperty("MatchType");
+				bool hasProp = replay->HasProperty("MatchType");
 
-				printf("Failed to parse %s replay %s (%s)'\n", !hasProp ? "unknown" : rf->GetProperty<std::string>("MatchType").c_str(), replayName.filename().u8string().c_str(), e.what());
-				if (rf->parseLog.size() == 0)
+				printf("Failed to parse %s replay %s (%s)'\n", !hasProp ? "unknown" : replay->GetProperty<std::string>("MatchType").c_str(), replayName.filename().u8string().c_str(), e.what());
+				if (replay->parseLog.size() == 0)
 				{
 					//printf("No parseLog available, recompile with parselog info\n");
 				}
 				else
 				{
-					for (size_t i = std::max(0, (int32_t)rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
+					for (size_t i = std::max(0, (int32_t)replay->parseLog.size() - 8); i < replay->parseLog.size(); ++i)
 					{
-						printf("\t%s\n", rf->parseLog[i].c_str());
+						printf("\t%s\n", replay->parseLog[i].c_str());
 					}
 				}
 			}
@@ -372,18 +381,18 @@ std::map<uint32_t, bool> activeThreads;
 			{
 				fail++;
 				std::lock_guard<std::mutex> lock(errorLogMutex);
-				bool hasProp = rf->HasProperty("MatchType");
+				bool hasProp = replay->HasProperty("MatchType");
 
-				printf("Failed to parse %s replay %s (%s)'\n", !hasProp ? "unknown" : rf->GetProperty<std::string>("MatchType").c_str(), replayName.filename().u8string().c_str(), e.what());
-				if (rf->parseLog.size() == 0)
+				printf("Failed to parse %s replay %s (%s)'\n", !hasProp ? "unknown" : replay->GetProperty<std::string>("MatchType").c_str(), replayName.filename().u8string().c_str(), e.what());
+				if (replay->parseLog.size() == 0)
 				{
 					//printf("No parseLog available, recompile with parselog info\n");
 				}
 				else
 				{
-					for (size_t i = std::max(0, (int32_t)rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
+					for (size_t i = std::max(0, (int32_t)replay->parseLog.size() - 8); i < replay->parseLog.size(); ++i)
 					{
-						printf("\t%s\n", rf->parseLog[i].c_str());
+						printf("\t%s\n", replay->parseLog[i].c_str());
 					}
 				}
 			}
@@ -391,18 +400,18 @@ std::map<uint32_t, bool> activeThreads;
 			{
 				fail++;
 				std::lock_guard<std::mutex> lock(errorLogMutex);
-				bool hasProp = rf->HasProperty("MatchType");
+				bool hasProp = replay->HasProperty("MatchType");
 
-				printf("Failed to parse %s replay %s (%s)'\n", !hasProp ? "unknown" : rf->GetProperty<std::string>("MatchType").c_str(), replayName.filename().u8string().c_str(), "");
-				if (rf->parseLog.size() == 0)
+				printf("Failed to parse %s replay %s (%s)'\n", !hasProp ? "unknown" : replay->GetProperty<std::string>("MatchType").c_str(), replayName.filename().u8string().c_str(), "");
+				if (replay->parseLog.size() == 0)
 				{
 					//printf("No parseLog available, recompile with parselog info\n");
 				}
 				else
 				{
-					for (size_t i = std::max(0, (int32_t)rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
+					for (size_t i = std::max(0, (int32_t)replay->parseLog.size() - 8); i < replay->parseLog.size(); ++i)
 					{
-						printf("\t%s\n", rf->parseLog[i].c_str());
+						printf("\t%s\n", replay->parseLog[i].c_str());
 					}
 				}
 			}

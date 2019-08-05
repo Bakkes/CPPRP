@@ -32,7 +32,7 @@ inline const void Serialize(Writer& writer, const ReplicatedRBState& item)
 }
 
 template<>
-inline const LogoData Consume(CPPBitReader<uint32_t>& reader) 
+inline const LogoData Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	LogoData item;
 	item.unknown = reader.read<bool>();
@@ -61,7 +61,7 @@ inline const void Serialize(Writer& writer, const LogoData& item)
 }
 
 template<>
-inline const ActiveActor Consume(CPPBitReader<uint32_t>& reader) 
+inline const ActiveActor Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ActiveActor item;
 	item.active = reader.read<bool>();
@@ -90,7 +90,7 @@ inline const void Serialize(Writer& writer, const ActiveActor& item)
 }
 
 template<>
-inline const ObjectTarget Consume(CPPBitReader<uint32_t>& reader) 
+inline const ObjectTarget Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ObjectTarget item;
 	item.unknown = reader.read<bool>();
@@ -210,7 +210,7 @@ inline const void Serialize(Writer& writer, const ClientLoadout& item)
 }
 
 template<>
-inline const CameraSettings Consume(CPPBitReader<uint32_t>& reader) 
+inline const CameraSettings Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	CameraSettings item;
 	item.FOV = reader.read<float>();
@@ -264,7 +264,7 @@ inline const void Serialize(Writer& writer, const CameraSettings& item)
 }
 
 template<>
-inline const ReplicatedPickupData Consume(CPPBitReader<uint32_t>& reader) 
+inline const ReplicatedPickupData Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedPickupData item;
 	item.unknown1 = reader.read<bool>();
@@ -297,7 +297,7 @@ inline const void Serialize(Writer& writer, const ReplicatedPickupData& item)
 }
 
 template<>
-inline const TeamPaint Consume(CPPBitReader<uint32_t>& reader) 
+inline const TeamPaint Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	TeamPaint item;
 	item.team_number = reader.read<uint8_t>();
@@ -338,7 +338,7 @@ inline const void Serialize(Writer& writer, const TeamPaint& item)
 }
 
 template<>
-inline const ReplicatedDemolish Consume(CPPBitReader<uint32_t>& reader) 
+inline const ReplicatedDemolish Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedDemolish item;
 	item.unknown1 = reader.read<bool>();
@@ -383,7 +383,7 @@ inline const void Serialize(Writer& writer, const ReplicatedDemolish& item)
 }
 
 template<>
-inline const ReplicatedMusicStringer Consume(CPPBitReader<uint32_t>& reader) 
+inline const ReplicatedMusicStringer Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedMusicStringer item;
 	item.unknown1 = reader.read<bool>();
@@ -433,7 +433,7 @@ inline const void Serialize(Writer& writer, const GameMode& item)
 }
 
 template<>
-inline const ReplicatedStateIndex Consume(CPPBitReader<uint32_t>& reader) 
+inline const ReplicatedStateIndex Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedStateIndex item;
 	item.value = reader.readBitsMax<uint32_t>(140);
@@ -458,7 +458,7 @@ inline const void Serialize(Writer& writer, const ReplicatedStateIndex& item)
 }
 
 template<>
-inline const PrivateMatchSettings Consume(CPPBitReader<uint32_t>& reader) 
+inline const PrivateMatchSettings Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	PrivateMatchSettings item;
 	item.mutators = reader.read<std::string>();
@@ -532,7 +532,7 @@ inline const void Serialize(Writer& writer, const ProductAttribute& item)
 }
 
 template<>
-inline const Attributes Consume(CPPBitReader<uint32_t>& reader) 
+inline const Attributes Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	Attributes item;
 	item.product_attributes = ConsumeVector<ProductAttribute>(reader);
@@ -557,7 +557,7 @@ inline const void Serialize(Writer& writer, const Attributes& item)
 }
 
 template<>
-inline const ActorBase Consume(CPPBitReader<uint32_t>& reader) 
+inline const ActorBase Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ActorBase item;
 	item.value = reader.read<uint32_t>();
@@ -607,7 +607,7 @@ inline const void Serialize(Writer& writer, const PartyLeader& item)
 }
 
 template<>
-inline const OnlineLoadout Consume(CPPBitReader<uint32_t>& reader) 
+inline const OnlineLoadout Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	OnlineLoadout item;
 	item.attributes_list = ConsumeVector<Attributes>(reader);
@@ -632,7 +632,7 @@ inline const void Serialize(Writer& writer, const OnlineLoadout& item)
 }
 
 template<>
-inline const UserColorAttribute Consume(CPPBitReader<uint32_t>& reader) 
+inline const UserColorAttribute Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	UserColorAttribute item;
 	item.r = reader.read<uint8_t>();
@@ -669,7 +669,7 @@ inline const void Serialize(Writer& writer, const UserColorAttribute& item)
 }
 
 template<>
-inline const ClientLoadoutsOnline Consume(CPPBitReader<uint32_t>& reader) 
+inline const ClientLoadoutsOnline Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ClientLoadoutsOnline item;
 	item.online_one = Consume<OnlineLoadout>(reader);
@@ -706,7 +706,7 @@ inline const void Serialize(Writer& writer, const ClientLoadoutsOnline& item)
 }
 
 template<>
-inline const ClientLoadouts Consume(CPPBitReader<uint32_t>& reader) 
+inline const ClientLoadouts Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ClientLoadouts item;
 	item.loadout_one = Consume<ClientLoadout>(reader);
@@ -735,7 +735,7 @@ inline const void Serialize(Writer& writer, const ClientLoadouts& item)
 }
 
 template<>
-inline const ClubColors Consume(CPPBitReader<uint32_t>& reader) 
+inline const ClubColors Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ClubColors item;
 	item.team_color_set = reader.read<bool>();
@@ -772,7 +772,7 @@ inline const void Serialize(Writer& writer, const ClubColors& item)
 }
 
 template<>
-inline const WeldedInfo Consume(CPPBitReader<uint32_t>& reader) 
+inline const WeldedInfo Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	WeldedInfo item;
 	item.active = reader.read<bool>();
@@ -813,7 +813,7 @@ inline const void Serialize(Writer& writer, const WeldedInfo& item)
 }
 
 template<>
-inline const DamageState Consume(CPPBitReader<uint32_t>& reader) 
+inline const DamageState Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	DamageState item;
 	item.damage_state = reader.read<uint8_t>();
@@ -858,7 +858,7 @@ inline const void Serialize(Writer& writer, const DamageState& item)
 }
 
 template<>
-inline const AppliedDamage Consume(CPPBitReader<uint32_t>& reader) 
+inline const AppliedDamage Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	AppliedDamage item;
 	item.id = reader.read<uint8_t>();
@@ -895,7 +895,7 @@ inline const void Serialize(Writer& writer, const AppliedDamage& item)
 }
 
 template<>
-inline const ReplicatedExplosionData Consume(CPPBitReader<uint32_t>& reader) 
+inline const ReplicatedExplosionData Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedExplosionData item;
 	item.unknown1 = reader.read<bool>();
@@ -928,7 +928,7 @@ inline const void Serialize(Writer& writer, const ReplicatedExplosionData& item)
 }
 
 template<>
-inline const ReplicatedExplosionDataExtended Consume(CPPBitReader<uint32_t>& reader) 
+inline const ReplicatedExplosionDataExtended Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedExplosionDataExtended item;
 	item.unknown1 = reader.read<bool>();
@@ -969,7 +969,7 @@ inline const void Serialize(Writer& writer, const ReplicatedExplosionDataExtende
 }
 
 template<>
-inline const ReplicatedTitle Consume(CPPBitReader<uint32_t>& reader) 
+inline const ReplicatedTitle Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedTitle item;
 	item.unknown1 = reader.read<bool>();
@@ -1022,7 +1022,7 @@ inline const void Serialize(Writer& writer, const ReplicatedTitle& item)
 }
 
 template<>
-inline const HistoryKey Consume(CPPBitReader<uint32_t>& reader) 
+inline const HistoryKey Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	HistoryKey item;
 	item.data = reader.read<uint16_t>(14);
@@ -1047,7 +1047,7 @@ inline const void Serialize(Writer& writer, const HistoryKey& item)
 }
 
 template<>
-inline const ReplicatedStatEvent Consume(CPPBitReader<uint32_t>& reader) 
+inline const ReplicatedStatEvent Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedStatEvent item;
 	item.unknown1 = reader.read<bool>();
@@ -1076,7 +1076,7 @@ inline const void Serialize(Writer& writer, const ReplicatedStatEvent& item)
 }
 
 template<>
-inline const RepStatTitle Consume(CPPBitReader<uint32_t>& reader) 
+inline const RepStatTitle Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	RepStatTitle item;
 	item.unknown1 = reader.read<bool>();
@@ -1113,7 +1113,7 @@ inline const void Serialize(Writer& writer, const RepStatTitle& item)
 }
 
 template<>
-inline const SkillTier Consume(CPPBitReader<uint32_t>& reader) 
+inline const SkillTier Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	SkillTier item;
 	item.tier = reader.readBitsMax<uint32_t>(500);

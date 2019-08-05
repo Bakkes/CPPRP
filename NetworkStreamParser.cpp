@@ -323,13 +323,13 @@ namespace CPPRP
 	}
 
 	//template<typename Writer>
-	//void NetworkStreamParser::Parse(const uint32_t propertyIdx, CPPBitReader<uint32_t>& br, Writer& writer) const
+	//void NetworkStreamParser::Parse(const uint32_t propertyIdx, CPPBitReader<BitReaderType>& br, Writer& writer) const
 	//{
 	//	auto inst = parseFunctions[propertyIdx](br);
 	//	//printf("Result: %s\n", inst->ToString().c_str());
 	//}
 
-	//void NetworkStreamParser::Parse(const std::string & name, CPPBitReader<uint32_t>& br)
+	//void NetworkStreamParser::Parse(const std::string & name, CPPBitReader<BitReaderType>& br)
 	//{
 	//	if (functionToIndexMapping.find(name) == functionToIndexMapping.end())
 	//	{

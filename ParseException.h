@@ -37,17 +37,6 @@ namespace CPPRP
 		const char* what() const throw();
 	};
 
-	struct InvalidVersionException : public std::exception
-	{
-	protected:
-		uint32_t engineVersion;
-		uint32_t licenseeVersion;
-		uint32_t netVersion;
-		std::string errorMsg;
-	public:
-		InvalidVersionException(const uint32_t engine, const uint32_t licensee, const uint32_t net);
-		const char* what() const throw();
-	};
 
 	template<typename T>
 	struct AttributeParseException : public ParseException<T>

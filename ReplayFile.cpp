@@ -39,9 +39,9 @@ namespace CPPRP
 
 	void ReplayFile::DeserializeHeader()
 	{
-		const size_t dataSize = data.size() * 8;
+		const size_t dataSizeBits = data.size() * 8;
 		replayFile = std::make_shared<ReplayFileData>();
-		fullReplayBitReader = CPPBitReader<uint32_t>((const uint32_t*)data.data(), dataSize, replayFile); //They're read as bytes, since we're retrieving them in memory as uint32_t, divide size by 4 (bytes)
+		fullReplayBitReader = CPPBitReader<BitReaderType>((const BitReaderType*)data.data(), dataSizeBits, replayFile); //They're read as bytes, since we're retrieving them in memory as uint32_t, divide size by 4 (bytes)
 		//replayFile->header.crc = fullReplayBitReader.read<uint32_t>();
 		replayFile->header = {
 			fullReplayBitReader.read<uint32_t>(),	//Size
@@ -402,7 +402,7 @@ namespace CPPRP
 		const uint32_t numFrames = frameCount > 0 ? frameCount : static_cast<uint32_t>(GetProperty<int32_t>("NumFrames"));
 
 		//Divide by 4 since netstream_data is bytes, but we read uint32_ts
-		CPPBitReader<uint32_t> networkReader((uint32_t*)(replayFile->netstream_data), ((uint32_t)endPos), replayFile);
+		CPPBitReader<BitReaderType> networkReader((BitReaderType*)(replayFile->netstream_data), static_cast<size_t>(endPos), replayFile);
 
 		++val;
 		//FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
@@ -588,7 +588,12 @@ namespace CPPRP
 			}
 			if (numFrames != currentFrame)
 			{
-				throw new GeneralParseException("Number of expected frames does not match number of parsed frames. Expected: " + std::to_string(numFrames) + ", parsed: " + std::to_string(currentFrame), networkReader);
+				throw GeneralParseException("Number of expected frames does not match number of parsed frames. Expected: " + std::to_string(numFrames) + ", parsed: " + std::to_string(currentFrame), networkReader);
+			}
+			if (networkReader.size - networkReader.GetAbsoluteBitPosition() > 8192)
+			{
+				//Unsure how big RL buffer sizes are, 8192 seems fair
+				throw GeneralParseException("Not enough bytes parsed! Expected ~" + std::to_string(networkReader.size) + ", parsed: " + std::to_string(networkReader.GetAbsoluteBitPosition()) + ". Diff(" + std::to_string(networkReader.size - networkReader.GetAbsoluteBitPosition()) + ")", networkReader);
 			}
 			//writer.EndArray();
 			//writer.EndObject();

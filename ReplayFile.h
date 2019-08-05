@@ -12,16 +12,18 @@
 namespace CPPRP
 {
 
+
 	class ReplayFile
 	{
 	private:
-		std::filesystem::path path;
+		
 		std::vector<char> data;
-		CPPBitReader<uint32_t> fullReplayBitReader;
+		CPPBitReader<BitReaderType> fullReplayBitReader;
 
 		bool classNetMapCached = false;
 		std::unordered_map<std::string, std::shared_ptr<ClassNet>> classnetMap;
 	public:
+		std::filesystem::path path;
 		std::unordered_map<int, ActorState> actorStates;
 		std::shared_ptr<ReplayFileData> replayFile;
 		NetworkStreamParser networkParser;

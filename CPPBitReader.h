@@ -5,10 +5,14 @@
 #include <assert.h>
 //#include "ParseException.h"
 #include "ReplayFileData.h"
+#include "ReplayException.h"
 #include <cmath>
 #define QUAT_NUM_BITS (18)
 #define MAX_QUAT_VALUE (0.7071067811865475244f)
 #define MAX_QUAT_VALUE_INVERSE (1.0f / MAX_QUAT_VALUE)
+
+typedef uint32_t BitReaderType;
+
 
 namespace CPPRP
 {
@@ -60,9 +64,9 @@ namespace CPPRP
 			{
 				throw std::runtime_error("Attempted to read beyond buffer");
 			}
-			constexpr uint8_t SIZE_T = sizeof(T) * 8;
+			constexpr uint16_t SIZE_T = sizeof(T) * 8;
 			X result = 0;
-			uint8_t bit_pos = 0;
+			uint16_t bit_pos = 0;
 			T bt = *data;
 			if (bit_position > 0)
 			{
@@ -129,7 +133,7 @@ namespace CPPRP
 			{
 				result |= ((bt >> bit_position++) & 1) << i;
 
-				if (bit_position == sizeof(X) * 8)
+				if (bit_position == sizeof(T) * 8)
 				{
 					bt = *(++data);
 					t_position++;
@@ -170,7 +174,7 @@ namespace CPPRP
 
 	template<>
 	template<>
-	inline const bool CPPBitReader<uint32_t>::read<bool>()
+	inline const bool CPPBitReader<BitReaderType>::read<bool>()
 	{
 		return get_bits<uint8_t>(1);
 	}
@@ -178,16 +182,16 @@ namespace CPPRP
 	//Float requires special casting since bit operations aren't allowed
 	template<>
 	template<>
-	inline const float CPPBitReader<uint32_t>::read<float>()
+	inline const float CPPBitReader<BitReaderType>::read<float>()
 	{
-		//assert(sizeof(float) == sizeof(uint32_t));
+		assert(sizeof(float) == sizeof(uint32_t));
 		uint32_t value = read<uint32_t>();
 		return reinterpret_cast<float&>(value);
 	}
 
 	template<>
 	template<>
-	inline const Vector3I CPPBitReader<uint32_t>::read<Vector3I>()
+	inline const Vector3I CPPBitReader<BitReaderType>::read<Vector3I>()
 	{
 		const uint32_t maxbits = owner->header.netVersion >= 7 ? 22 : 20;
 		const uint32_t num_bits = readBitsMax<uint32_t>(maxbits);
@@ -203,7 +207,7 @@ namespace CPPRP
 
 	template<>
 	template<>
-	inline const Vector3 CPPBitReader<uint32_t>::read<Vector3>()
+	inline const Vector3 CPPBitReader<BitReaderType>::read<Vector3>()
 	{
 		Vector3I v = read<Vector3I>();
 		return { v.x / 100.f, v.y / 100.f, v.z / 100.f };
@@ -211,7 +215,7 @@ namespace CPPRP
 
 	template<>
 	template<>
-	inline const Rotator CPPBitReader<uint32_t>::read<Rotator>()
+	inline const Rotator CPPBitReader<BitReaderType>::read<Rotator>()
 	{
 		constexpr float conversion = 360.f / 256.f;
 		Rotator ret{ 0 };
@@ -234,7 +238,7 @@ namespace CPPRP
 
 	template<>
 	template<>
-	inline const Quat CPPBitReader<uint32_t>::read<Quat>()
+	inline const Quat CPPBitReader<BitReaderType>::read<Quat>()
 	{
 		uint8_t largest = read<uint8_t>(2);
 		float a = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
@@ -276,7 +280,7 @@ namespace CPPRP
 
 	template<>
 	template<>
-	inline const UniqueId CPPBitReader<uint32_t>::read<UniqueId>()
+	inline const UniqueId CPPBitReader<BitReaderType>::read<UniqueId>()
 	{
 		UniqueId id;
 		id.platform = read<uint8_t>();
@@ -335,7 +339,7 @@ namespace CPPRP
 
 	template<>
 	template<>
-	inline const std::string CPPBitReader<uint32_t>::read<std::string>()
+	inline const std::string CPPBitReader<BitReaderType>::read<std::string>()
 	{
 		const int32_t length = read<int32_t>();
 		const int32_t final_length = length * (length > 0 ? 1 : -2);
@@ -350,11 +354,11 @@ namespace CPPRP
 				&& owner->header.licenseeVersion == 0
 				&& owner->header.netVersion == 0)
 			{
-				throw std::runtime_error("Versions are all 0");
+				throw InvalidVersionException(0,0,0);
 			}
 			else
 			{
-				throw std::runtime_error("Got unwanted string length, read value " + std::to_string(length) + ", reading bytes " + std::to_string(final_length) + ".");
+				throw std::runtime_error("Got unwanted string length, read value " + std::to_string(length) + ", reading bytes " + std::to_string(final_length) + ". (" + std::to_string(this->bit_position) + ")");
 			}
 		}
 
@@ -495,7 +499,7 @@ namespace CPPRP
 	}
 	
 	
-	/*const bool CPPBitReader<uint32_t>::read<bool>()
+	/*const bool CPPBitReader<BitReaderType>::read<bool>()
 	{
 		
 	}*/
