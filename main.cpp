@@ -1,4 +1,8 @@
-#include <omp.h>
+//#define _CRTDBG_MAP_ALLOC
+//#include <stdlib.h>
+//#include <crtdbg.h>
+
+//#include <omp.h>
 #include "ReplayFile.h"
 #include <iostream>
 #include "bench.h"
@@ -6,6 +10,9 @@
 #include <vector>
 #include <mutex>
 #include <atomic>
+#include <algorithm>
+#include <map>
+#undef max
 std::vector<std::string> failingReplays = {/* "6688", "a128", "c23b","d044", "d236", "f811" */};
 
 std::unordered_map<std::string, std::string> replaysToTest =
@@ -100,23 +107,33 @@ std::unordered_map<std::string, std::string> replaysToTest =
 };
 
 
-int main()
+int main(int argc, char *argv[])
 {
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	std::vector<std::filesystem::path> replays;
 	//C:/Users/Chris/Documents/My Games/Rocket League/TAGame/Demos/
 	//"C:/Users/Chris/Documents/My Games/Rocket League/TAGame/Demos_freeplay/"
 	//F:/alpaca/
 	//Q:/rocketleaguereplays.com/replay_files/
 	{
+		//21AFD0E344271B02DC9A38BD633727F7.replay
 		uint32_t i = 0;
-		for (const auto & entry : std::filesystem::directory_iterator("./replays/"))
+		std::filesystem::path p(argv[1]);
+		if (std::filesystem::is_regular_file(p))
 		{
-			if (entry.path().filename().u8string().find(".replay") == std::string::npos)
-				continue;
-			if (i > -1)
-				break;
-			i++;
-			replays.push_back(entry.path());
+			replays.push_back(p);
+		}
+		else 
+		{
+			for (const auto & entry : std::filesystem::directory_iterator(argv[1]))
+			{
+				if (entry.path().filename().u8string().find(".replay") == std::string::npos)
+					continue;
+				if (i > -1)
+					break;
+				i++;
+				replays.push_back(entry.path());
+			}
 		}
 	}
 	//replays.clear();
@@ -239,12 +256,16 @@ int main()
 	//}
 
 
+std::mutex activeThreadsMutex;
+std::map<uint32_t, bool> activeThreads;
+
 	std::mutex errorLogMutex;
 	static const size_t numReplays = replays.size();
 	printf("Attempt to parse %i replays\n", numReplays);
 	std::atomic<uint32_t> success = 0;
 	std::atomic<uint32_t> fail = 0;
 	std::atomic<uint32_t> corrupt = 0;
+	std::atomic<uint32_t> current = 0;
 	{
 		const char* name = "Alpaca replays";
 		double start_time = get_time();
@@ -255,14 +276,24 @@ int main()
 		for (auto replayName : replays)
 		{
 			
-			while(threads_active > 400)
-				std::this_thread::sleep_for(std::chrono::milliseconds(3));
+			while(threads_active > 100)
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			//printf("Active: %i\n", threads_active.load());
 			threads_active++;
-			std::thread t{ [replayName, &success, &fail, &corrupt, &threads_active, &errorLogMutex]() {
+			uint32_t curLoaded =0;
+			{
+				std::lock_guard<std::mutex> lock(activeThreadsMutex);
+				uint32_t u = current.load();
+				activeThreads[u] = true;
+				curLoaded = current.load();
+				current++;
+				//printf("Loaded %i\n", curLoaded);
+			}
+			std::thread t{ [replayName, &success, &fail, &corrupt, &threads_active, &errorLogMutex, cur = curLoaded, &activeThreads, &activeThreadsMutex]() {
 
 			//auto replayData = replaysToTest[replayName];
 				//printf("Parsing replay \"%s\"\n", replayName.filename().u8string().c_str());
-			std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>(replayName);
+			std::shared_ptr<CPPRP::ReplayFile> rf = std::make_shared<CPPRP::ReplayFile>(replayName);
 			try 
 			{
 				
@@ -277,7 +308,7 @@ int main()
 				else {
 					//printf("Called load");
 					rf->DeserializeHeader();
-					rf->FixParents();
+					
 					rf->Parse(s);
 					success++;
 					if (rf->GetProperty<std::string>("MatchType").compare("Training") == 0)
@@ -286,19 +317,19 @@ int main()
 					}
 				}
 			}
-			catch (const InvalidVersionException& e)
+			catch (const CPPRP::InvalidVersionException& e)
 			{
 				corrupt++;
 				std::lock_guard<std::mutex> lock(errorLogMutex);
 				printf("InvalidVersion: %s\n", e.what());
 			}
-			catch (const PropertyDoesNotExistException& e)
+			catch (const CPPRP::PropertyDoesNotExistException& e)
 			{
 				corrupt++;
 				std::lock_guard<std::mutex> lock(errorLogMutex);
 				printf("PropertyDoesNotExistException: %s\n", e.what());
 			}
-			catch (const AttributeParseException<uint32_t>& e)
+			catch (const CPPRP::AttributeParseException<uint32_t>& e)
 			{
 				fail++;
 				std::lock_guard<std::mutex> lock(errorLogMutex);
@@ -311,13 +342,13 @@ int main()
 				}
 				else
 				{
-					for (size_t i = max(0, rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
+					for (size_t i = std::max(0, (int32_t)rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
 					{
 						printf("\t%s\n", rf->parseLog[i].c_str());
 					}
 				}
 			}
-			catch (const GeneralParseException<uint32_t>& e)
+			catch (const CPPRP::GeneralParseException<uint32_t>& e)
 			{
 				fail++;
 				std::lock_guard<std::mutex> lock(errorLogMutex);
@@ -331,7 +362,7 @@ int main()
 				}
 				else
 				{
-					for (size_t i = max(0, rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
+					for (size_t i = std::max(0, (int32_t)rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
 					{
 						printf("\t%s\n", rf->parseLog[i].c_str());
 					}
@@ -350,7 +381,7 @@ int main()
 				}
 				else
 				{
-					for (size_t i = max(0, rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
+					for (size_t i = std::max(0, (int32_t)rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
 					{
 						printf("\t%s\n", rf->parseLog[i].c_str());
 					}
@@ -369,18 +400,32 @@ int main()
 				}
 				else
 				{
-					for (size_t i = max(0, rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
+					for (size_t i = std::max(0, (int32_t)rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
 					{
 						printf("\t%s\n", rf->parseLog[i].c_str());
 					}
 				}
 			}
-
+			{
+				//printf("AA%i\n", cur);
+				std::lock_guard<std::mutex> lock(activeThreadsMutex);
+				activeThreads[cur] = false;
+				//printf("set %i\n", activeThreads[cur]);
+			}
 			const size_t total = success + fail;
 			if (total % 500 == 0)
 			{
+				std::lock_guard<std::mutex> lock(activeThreadsMutex);
 				printf("%i/%i (%.2f%%) (%i corrupt) status: ", total, numReplays, (double)total / (double)((numReplays - corrupt.load())) * 100, corrupt.load());
 				printf("success: %i, fail: %i (%.2f%%). \n", (success.load()), fail.load(), ((double)(success.load()) / (double)((success.load()) + fail.load())) * 100);
+				for (unsigned int i = 0; i < total; i++)
+				{
+					if (activeThreads[i])
+					{
+						printf("Lowest active is %i\n", i);
+						break;
+					}
+				}
 			}
 			threads_active--;
 			
