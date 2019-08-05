@@ -10,19 +10,19 @@ namespace CPPRP
 {
 
 	__ParserAttribute__(Consume, false)
-		struct ReplicatedRBState
+	struct ReplicatedRBState
 	{
 		__ParserAttribute__(CallToString, true)
-			Quat rotation;
+		Quat rotation;
 
 		__ParserAttribute__(CallToString, true)
-			Vector3 position;
+		Vector3 position;
 
 		__ParserAttribute__(CallToString, true)
-			Vector3 linear_velocity;
+		Vector3 linear_velocity;
 
 		__ParserAttribute__(CallToString, true)
-			Vector3 angular_velocity;
+		Vector3 angular_velocity;
 		bool sleeping;
 	};
 
@@ -44,34 +44,26 @@ namespace CPPRP
 		int32_t object_index;
 	};
 
-	//__ParserAttribute__(Consume, false)
-	//struct UniqueId
-	//{
-	//	uint8_t platform;
-	//	uint8_t player_number;
-	//	uint8_t* id;
-	//};
-
 	__ParserAttribute__(Consume, false)
-		struct Reservation
+	struct Reservation
 	{
 		__ParserAttribute__(NumBits, 3)
-			__ParserAttribute__(CallToString, true)
-			uint8_t unknown;
+		__ParserAttribute__(CallToString, true)
+		uint8_t unknown;
 
 		__ParserAttribute__(CallToString, true)
-			UniqueId player_id;
+		UniqueId player_id;
 		std::string player_name;
 
 		__ParserAttribute__(CallToString, true)
-			uint8_t unknown2;
+		uint8_t unknown2;
 	};
 
 	__ParserAttribute__(Consume, false)
-		struct ClientLoadout
+	struct ClientLoadout
 	{
 		__ParserAttribute__(CallToString, true)
-			uint8_t version;
+		uint8_t version;
 		uint32_t body;
 		uint32_t skin;
 		uint32_t wheels;
@@ -100,8 +92,8 @@ namespace CPPRP
 		float stiffness;
 		float swivelspeed;
 		__ParserAttribute__(EngineVersion, 868)
-			__ParserAttribute__(LicenseeVersion, 20)
-			float transitionspeed;
+		__ParserAttribute__(LicenseeVersion, 20)
+		float transitionspeed;
 	};
 
 
@@ -115,13 +107,13 @@ namespace CPPRP
 	struct TeamPaint
 	{
 		__ParserAttribute__(CallToString, true)
-			uint8_t team_number;
+		uint8_t team_number;
 
 		__ParserAttribute__(CallToString, true)
-			uint8_t team_color_id;
+		uint8_t team_color_id;
 
 		__ParserAttribute__(CallToString, true)
-			uint8_t custom_color_id;
+		uint8_t custom_color_id;
 		uint32_t team_finish_id;
 		uint32_t custom_finish_id;
 	};
@@ -133,9 +125,9 @@ namespace CPPRP
 		bool unknown2;
 		int32_t victim_actor_id;
 		__ParserAttribute__(CallToString, true)
-			Vector3 attacker_velocity;
+		Vector3 attacker_velocity;
 		__ParserAttribute__(CallToString, true)
-			Vector3 victim_velocity;
+		Vector3 victim_velocity;
 	};
 
 	struct ReplicatedMusicStringer
@@ -146,7 +138,7 @@ namespace CPPRP
 	};
 
 	__ParserAttribute__(Consume, false)
-		struct GameMode
+	struct GameMode
 	{
 		uint8_t gamemode;
 	};
@@ -154,7 +146,7 @@ namespace CPPRP
 	struct ReplicatedStateIndex
 	{
 		__ParserAttribute__(MaxBits, 140)
-			uint32_t value;
+		uint32_t value;
 	};
 
 	struct PrivateMatchSettings
@@ -168,7 +160,7 @@ namespace CPPRP
 	};
 
 	__ParserAttribute__(Consume, false)
-		struct ProductAttribute
+	struct ProductAttribute
 	{
 		uint32_t class_index;
 		std::string class_name;
@@ -181,8 +173,8 @@ namespace CPPRP
 	{
 		//uint8_t attributes_count; //Is automatically read when consuming vector
 		__ParserAttribute__(CallToString, true)
-			__ParserAttribute__(CallConsume, true)
-			std::vector<ProductAttribute> product_attributes;
+		__ParserAttribute__(CallConsume, true)
+		std::vector<ProductAttribute> product_attributes;
 	};
 
 	//__ParserAttribute__(Consume, false)
@@ -194,18 +186,18 @@ namespace CPPRP
 	};
 
 	__ParserAttribute__(Consume, false)
-		struct PartyLeader
+	struct PartyLeader
 	{
 		__ParserAttribute__(CallToString, true)
-			UniqueId id;
+		UniqueId id;
 	};
 
 	struct OnlineLoadout
 	{
 		//uint8_t attributes_list_count;//Is automatically read when consuming vector
 		__ParserAttribute__(CallToString, true)
-			__ParserAttribute__(CallConsume, true)
-			std::vector<Attributes> attributes_list;
+		__ParserAttribute__(CallConsume, true)
+		std::vector<Attributes> attributes_list;
 	};
 
 	struct UserColorAttribute
@@ -219,12 +211,12 @@ namespace CPPRP
 	struct ClientLoadoutsOnline
 	{
 		__ParserAttribute__(CallToString, true)
-			__ParserAttribute__(CallConsume, true)
-			OnlineLoadout online_one;
+		__ParserAttribute__(CallConsume, true)
+		OnlineLoadout online_one;
 
 		__ParserAttribute__(CallToString, true)
-			__ParserAttribute__(CallConsume, true)
-			OnlineLoadout online_two;
+		__ParserAttribute__(CallConsume, true)
+		OnlineLoadout online_two;
 
 		bool loadout_set;
 		bool is_deprecated;
@@ -233,12 +225,12 @@ namespace CPPRP
 	struct ClientLoadouts
 	{
 		__ParserAttribute__(CallToString, true)
-			__ParserAttribute__(CallConsume, true)
-			ClientLoadout loadout_one;
+		__ParserAttribute__(CallConsume, true)
+		ClientLoadout loadout_one;
 
 		__ParserAttribute__(CallToString, true)
-			__ParserAttribute__(CallConsume, true)
-			ClientLoadout loadout_two;
+		__ParserAttribute__(CallConsume, true)
+		ClientLoadout loadout_two;
 	};
 
 	struct ClubColors
@@ -254,10 +246,10 @@ namespace CPPRP
 		bool active;
 		int32_t actor_id;
 		__ParserAttribute__(CallToString, true)
-			Vector3 offset;
+		Vector3 offset;
 		float mass;
 		__ParserAttribute__(CallToString, true)
-			Rotator rotation;
+		Rotator rotation;
 	};
 
 	enum EBreakoutDamageState
@@ -275,7 +267,7 @@ namespace CPPRP
 		int32_t causer_actor_id;
 
 		__ParserAttribute__(CallToString, true)
-			Vector3 damage_location;
+		Vector3 damage_location;
 		bool direct_damage;
 		bool immediate;
 	};
@@ -284,7 +276,7 @@ namespace CPPRP
 	{
 		uint8_t id;
 		__ParserAttribute__(CallToString, true)
-			Vector3 position;
+		Vector3 position;
 		int32_t damage_index;
 		int32_t total_damage;
 	};
@@ -294,7 +286,7 @@ namespace CPPRP
 		bool unknown1;
 		uint32_t actor_id;
 		__ParserAttribute__(CallToString, true)
-			Vector3 position;
+		Vector3 position;
 	};
 
 	struct ReplicatedExplosionDataExtended
@@ -302,7 +294,7 @@ namespace CPPRP
 		bool unknown1;
 		uint32_t actor_id;
 		__ParserAttribute__(CallToString, true)
-			Vector3 position;
+		Vector3 position;
 		bool unknown3;
 		uint32_t unknown4;
 	};
@@ -322,7 +314,7 @@ namespace CPPRP
 	struct HistoryKey
 	{
 		__ParserAttribute__(NumBits, 14)
-			uint16_t data;
+		uint16_t data;
 	};
 
 	struct ReplicatedStatEvent
@@ -337,14 +329,14 @@ namespace CPPRP
 		std::string name;
 
 		__ParserAttribute__(CallToString, true)
-			__ParserAttribute__(CallConsume, true)
-			ObjectTarget object_target;
+		__ParserAttribute__(CallConsume, true)
+		ObjectTarget object_target;
 		uint32_t value;
 	};
 
 	struct SkillTier
 	{
 		__ParserAttribute__(MaxBits, 500)
-			uint32_t tier;
+		uint32_t tier;
 	};
 }
