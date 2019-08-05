@@ -386,10 +386,6 @@ inline const GameMode Consume(CPPBitReader<uint32_t>& reader) {
 	{
 		item.gamemode = reader.read<uint8_t>();
 	}
-	else if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion == 11)
-	{
-		item.gamemode = reader.read<uint8_t>(2);
-	}
 	else
 	{
 		item.gamemode = reader.read<uint8_t>(2);
