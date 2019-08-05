@@ -109,7 +109,7 @@ int main()
 	//Q:/rocketleaguereplays.com/replay_files/
 	{
 		uint32_t i = 0;
-		for (const auto & entry : std::filesystem::directory_iterator("Q:/rocketleaguereplays.com/replay_files/"))
+		for (const auto & entry : std::filesystem::directory_iterator("./replays/"))
 		{
 			if (entry.path().filename().u8string().find(".replay") == std::string::npos)
 				continue;
@@ -286,13 +286,17 @@ int main()
 					}
 				}
 			}
-			catch (const InvalidVersionException&)
+			catch (const InvalidVersionException& e)
 			{
 				corrupt++;
+				std::lock_guard<std::mutex> lock(errorLogMutex);
+				printf("InvalidVersion: %s\n", e.what());
 			}
-			catch (const PropertyDoesNotExistException&)
+			catch (const PropertyDoesNotExistException& e)
 			{
 				corrupt++;
+				std::lock_guard<std::mutex> lock(errorLogMutex);
+				printf("PropertyDoesNotExistException: %s\n", e.what());
 			}
 			catch (const AttributeParseException<uint32_t>& e)
 			{

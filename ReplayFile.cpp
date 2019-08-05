@@ -216,7 +216,10 @@ void ReplayFile::MergeDuplicates()
 		}
 		
 	}
-	assert(counts.size() == classnetMap.size());
+	if (counts.size() != classnetMap.size())
+	{
+		throw GeneralParseException("Found duplicate class!", fullReplayBitReader);
+	}
 }
 
 const std::unordered_map<std::string, std::string> class_extensions = 
@@ -329,22 +332,20 @@ const std::vector<std::pair<std::string, std::vector<std::string>>> archetypeMap
 
 void ReplayFile::FixParents()
 {
-
 	for (uint32_t i = 0; i < replayFile->classnets.size(); ++i)
 	{
 		const uint32_t index = replayFile->classnets.at(i)->index;
 		const std::string objectName = replayFile->objects.at(index);
 		classnetMap[objectName] = replayFile->classnets.at(i);
 	}
-	this->MergeDuplicates();
 
+	this->MergeDuplicates();
 
 	for (auto& archetypeMapping : archetypeMap)
 	{
 		const auto found = classnetMap.find(archetypeMapping.first);
 		if (found == classnetMap.end())
 		{
-			//printf("%s not found\n", archetypeMapping.first.c_str());
 			continue;
 		}
 		std::shared_ptr<ClassNet>& headClassnet = found->second;
@@ -353,7 +354,6 @@ void ReplayFile::FixParents()
 			classnetMap[archetype] = headClassnet;
 		}
 	}
-
 	
 	for (auto kv : class_extensions)
 	{
@@ -364,6 +364,7 @@ void ReplayFile::FixParents()
 			childClass->parent_class = parentClass;
 		}
 	}
+
 	for (auto cn : replayFile->classnets)
 	{
 		uint32_t i = 0;
@@ -374,14 +375,14 @@ void ReplayFile::FixParents()
 			result = GetPropertyIndexById(cn, ++i);
 		}
 	}
-
 }
 
 uint32_t val = 0;
 static uint32_t i = 0;
 void ReplayFile::Parse(const std::string& fileName, const uint32_t startPos, int32_t endPos, const uint32_t frameCount)
 {
-	/*Replay is corrupt, no way we'll parse this correctly
+	/*
+	Replay is corrupt, no way we'll parse this correctly
 	Parsing header is fine though, so only throw this in parse
 	*/
 	if (replayFile->header.engineVersion == 0 &&
@@ -741,18 +742,10 @@ const bool ReplayFile::ParseProperty(const std::shared_ptr<Property>& currentPro
 				{
 					break;
 				}
-				//printf("%s", baseProperty->property_name.c_str());
 				props[baseProperty->property_name] = baseProperty;
 			}
 			properties[i] = props;
 		}
-
-		/*for (int32_t i = 0; i < count; ++i)
-		{
-			std::shared_ptr<Property> prop = std::make_shared<Property>();
-			ParseProperty(prop);
-			properties[i] = prop;
-		}*/
 		currentProperty->value = properties;
 	}
 	break;

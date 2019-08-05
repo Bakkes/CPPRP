@@ -9,6 +9,7 @@
 #include "CPPBitReader.h"
 #include "ReplayFileData.h"
 #include <mutex>
+
 class ReplayFile
 {
 private:
@@ -29,10 +30,11 @@ public:
 
 	bool Load();
 	void DeserializeHeader();
-	void MergeDuplicates();
-	void FixParents();
 	void Parse(const std::string& fileName, const uint32_t startPos = 0, int32_t endPos = -1, const uint32_t frameCount = 0);
 protected:
+	void MergeDuplicates();
+	void FixParents();
+
 	const bool HasInitialPosition(const std::string& name) const;
 	const bool HasRotation(const std::string& name) const;
 	
@@ -48,15 +50,15 @@ public:
 	const bool HasProperty(const std::string& key) const;
 
 	template<typename T>
-	const T GetProperty(const std::string& key)
-	{
-		//auto baseMap = std::any_cast<std::unordered_map<std::string, std::shared_ptr<Property>>>(replayFile.properties->value);
-		if (replayFile->properties.find(key) == replayFile->properties.end())
-		{
-			throw PropertyDoesNotExistException(key);
-			//assert(1 == 2); //die
-		}
-		return std::any_cast<T>(replayFile->properties.at(key)->value);
-	}
+	const T GetProperty(const std::string& key);
 };
 
+template<typename T>
+inline const T ReplayFile::GetProperty(const std::string& key)
+{
+	if (replayFile->properties.find(key) == replayFile->properties.end())
+	{
+		throw PropertyDoesNotExistException(key);
+	}
+	return std::any_cast<T>(replayFile->properties.at(key)->value);
+}
