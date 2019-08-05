@@ -284,7 +284,8 @@ const std::vector<std::pair<std::string, std::vector<std::string>>> archetypeMap
 {
 	{{"TAGame.Car_TA"}, {"Archetypes.Car.Car_Default"}},
 	{{"TAGame.Car_TA"}, {"Mutators.Mutators.Mutators.FreePlay:CarArchetype"}},
-	{{"TAGame.Ball_TA"},  {"Archetypes.Ball.Ball_GameEditor", "Archetypes.Ball.Ball_Training", "Archetypes.Ball.Ball_Default", "Archetypes.Ball.Ball_Basketball", "Archetypes.Ball.Ball_BasketBall", "Archetypes.Ball.Ball_BasketBall_Mutator", "Archetypes.Ball.Ball_Puck", "Archetypes.Ball.CubeBall", "Archetypes.Ball.Ball_Beachball"}},
+	{{"TAGame.Ball_TA"}, { "Archetypes.Ball.Ball_Training"}},
+	{{"TAGame.Ball_TA"},  {"Archetypes.Ball.Ball_GameEditor", "Archetypes.Ball.Ball_Default", "Archetypes.Ball.Ball_Basketball", "Archetypes.Ball.Ball_BasketBall", "Archetypes.Ball.Ball_BasketBall_Mutator", "Archetypes.Ball.Ball_Puck", "Archetypes.Ball.CubeBall", "Archetypes.Ball.Ball_Beachball"}},
 	{{"TAGame.Ball_Breakout_TA"}, {"Archetypes.Ball.Ball_Breakout"}},
 	{{"TAGame.Ball_Trajectory_TA"},{"Archetypes.Ball.Ball_Trajectory"}},
 	{{"TAGame.CarComponent_Boost_TA"}, {"Archetypes.CarComponents.CarComponent_Boost"}},
@@ -380,6 +381,15 @@ uint32_t val = 0;
 static uint32_t i = 0;
 void ReplayFile::Parse(const std::string& fileName, const uint32_t startPos, int32_t endPos, const uint32_t frameCount)
 {
+	/*Replay is corrupt, no way we'll parse this correctly
+	Parsing header is fine though, so only throw this in parse
+	*/
+	if (replayFile->header.engineVersion == 0 &&
+		replayFile->header.licenseeVersion == 0 &&
+		replayFile->header.netVersion == 0)
+	{
+		throw InvalidVersionException(0, 0, 0);
+	}
 	if (endPos < 0)
 	{
 		endPos = replayFile->netstream_size  * 8;// / 4 * 8;
@@ -395,10 +405,6 @@ void ReplayFile::Parse(const std::string& fileName, const uint32_t startPos, int
 
 	try 
 	{
-		if (fileName.compare("000900040016000B001C02990682C5D1.replay") == 0)
-		{
-			int fdsdf = 5;
-		}
 		//char writeBuffer[65536 * 5];
 		//rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
 
@@ -429,7 +435,6 @@ void ReplayFile::Parse(const std::string& fileName, const uint32_t startPos, int
 			{
 				//printf("Out of range, calling again\n");
 				throw GeneralParseException("Frame time incorrect (parser at wrong position)", networkReader);
-				
 			}
 		 	//writer.String("time");
 		 	//writer.Double(f.time);
@@ -496,13 +501,17 @@ void ReplayFile::Parse(const std::string& fileName, const uint32_t startPos, int
 						{
 							throw GeneralParseException("Classnet for " + typeName + " not found", networkReader);
 						}
-						parseLog.push_back("New actor for " + typeName);
+						
 
 						actorState.classNet = classNet;
 
 						const uint32_t classId = classNet->index;
 						const std::string className = replayFile->objects.at(classId);
-
+						if constexpr (IncludeParseLog)
+						{
+							parseLog.push_back("New actor for " + typeName + ", classname " + className);
+						}
+						
 					 	//writer.String("classname");
 					 	//writer.String(className.c_str(), className.size());
 
@@ -554,7 +563,7 @@ void ReplayFile::Parse(const std::string& fileName, const uint32_t startPos, int
 							if constexpr (IncludeParseLog) 
 							{
 								char buff[1024];
-								snprintf(buff, sizeof(buff), "Calling parser for %s (%i, %i, %s, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.name_id >= replayFile->names.size() ? "unknown" : replayFile->names[actorState.name_id].c_str(), i);
+								snprintf(buff, sizeof(buff), "Calling parser for %s (%i, %i, %s, %i)", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.name_id >= replayFile->names.size() ? "unknown" : replayFile->names[actorState.name_id].c_str(), i);
 								parseLog.push_back(std::string(buff));
 							}
 							networkParser.Parse(propertyIndex, networkReader, writer);
@@ -757,7 +766,8 @@ const bool ReplayFile::ParseProperty(const std::shared_ptr<Property>& currentPro
 
 #define fffffind(a)\
 auto found = classnetMap.find(a);\
-if (found == classnetMap.end()) {\
+if (found == classnetMap.end()) \
+{\
 return notfound;\
 }\
 return (*found).second;
@@ -849,4 +859,9 @@ const uint16_t ReplayFile::FindMaxPropertyId(const std::shared_ptr<ClassNet>& cn
 		return FindMaxPropertyId(cn->parent_class, maxProp);
 	}
 	return maxProp;
+}
+
+const bool ReplayFile::HasProperty(const std::string & key) const
+{
+	return replayFile->properties.find(key) != replayFile->properties.end();
 }

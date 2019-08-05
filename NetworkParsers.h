@@ -382,13 +382,18 @@ inline const PartyLeader Consume(CPPBitReader<uint32_t>& reader) {
 template<>
 inline const GameMode Consume(CPPBitReader<uint32_t>& reader) {
 	GameMode item;
-	if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 11)
+	if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 12)
 	{
 		item.gamemode = reader.read<uint8_t>();
 	}
+	else if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion == 11)
+	{
+		item.gamemode = reader.read<uint8_t>(2);
+	}
 	else
 	{
-		item.gamemode = reader.readBitsMax<uint8_t>(4);
+		item.gamemode = reader.read<uint8_t>(2);
+		//item.gamemode = reader.readBitsMax<uint8_t>(4);
 	}
 	return item;
 }

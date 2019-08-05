@@ -13,9 +13,8 @@ public:
 	const char* what() const throw();
 };
 
-
 template<typename T>
-struct GeneralParseException : ParseException<T>
+struct GeneralParseException : public ParseException<T>
 {
 protected:
 	std::string message;
@@ -24,8 +23,28 @@ public:
 	const char* what() const throw() override;
 };
 
+struct PropertyDoesNotExistException : public std::exception
+{
+protected:
+	std::string propertyName;
+public:
+	PropertyDoesNotExistException(const std::string propertyName_);
+	const char* what() const throw();
+};
+
+struct InvalidVersionException : public std::exception
+{
+protected:
+	uint32_t engineVersion;
+	uint32_t licenseeVersion;
+	uint32_t netVersion;
+public:
+	InvalidVersionException(const uint32_t engine, const uint32_t licensee, const uint32_t net);
+	const char* what() const throw();
+};
+
 template<typename T>
-struct AttributeParseException : ParseException<T>
+struct AttributeParseException : public ParseException<T>
 {
 protected:
 	std::string failedAttribute;
@@ -64,7 +83,7 @@ inline const char* AttributeParseException<T>::what() const throw()
 }
 
 template<typename T>
-inline GeneralParseException<T>::GeneralParseException(const std::string message_, const CPPBitReader<T>& br) : ParseException<T>(br), message(message)
+inline GeneralParseException<T>::GeneralParseException(const std::string message_, const CPPBitReader<T>& br) : ParseException<T>(br), message(message_)
 {
 }
 
@@ -72,7 +91,7 @@ template<typename T>
 inline const char * GeneralParseException<T>::what() const throw()
 {
 	std::stringstream ss;
-	ss << message;
+	ss << message << " ";
 	ss << ParseException<T>::what();
 	return ss.str().c_str();;
 }

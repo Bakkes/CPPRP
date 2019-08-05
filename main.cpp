@@ -108,10 +108,12 @@ int main()
 	//F:/alpaca/
 	//Q:/rocketleaguereplays.com/replay_files/
 	{
-		int i = 0;
-		for (const auto & entry : std::filesystem::directory_iterator("F:/alpaca/"))
+		uint32_t i = 0;
+		for (const auto & entry : std::filesystem::directory_iterator("Q:/rocketleaguereplays.com/replay_files/"))
 		{
-			if (i > 65456456)
+			if (entry.path().filename().u8string().find(".replay") == std::string::npos)
+				continue;
+			if (i > -1)
 				break;
 			i++;
 			replays.push_back(entry.path());
@@ -237,11 +239,12 @@ int main()
 	//}
 
 
-
+	std::mutex errorLogMutex;
 	static const size_t numReplays = replays.size();
 	printf("Attempt to parse %i replays\n", numReplays);
 	std::atomic<uint32_t> success = 0;
 	std::atomic<uint32_t> fail = 0;
+	std::atomic<uint32_t> corrupt = 0;
 	{
 		const char* name = "Alpaca replays";
 		double start_time = get_time();
@@ -255,7 +258,7 @@ int main()
 			while(threads_active > 400)
 				std::this_thread::sleep_for(std::chrono::milliseconds(3));
 			threads_active++;
-			std::thread t{ [replayName, &success, &fail, &threads_active]() {
+			std::thread t{ [replayName, &success, &fail, &corrupt, &threads_active, &errorLogMutex]() {
 
 			//auto replayData = replaysToTest[replayName];
 				//printf("Parsing replay \"%s\"\n", replayName.filename().u8string().c_str());
@@ -277,19 +280,34 @@ int main()
 					rf->FixParents();
 					rf->Parse(s);
 					success++;
+					if (rf->GetProperty<std::string>("MatchType").compare("Training") == 0)
+					{
+						printf("Successfully parsed training replay!\n");
+					}
 				}
+			}
+			catch (const InvalidVersionException&)
+			{
+				corrupt++;
+			}
+			catch (const PropertyDoesNotExistException&)
+			{
+				corrupt++;
 			}
 			catch (const AttributeParseException<uint32_t>& e)
 			{
 				fail++;
-				printf("Failed to parse %s (%s)'\n", replayName.filename().u8string().c_str(), e.what());
+				std::lock_guard<std::mutex> lock(errorLogMutex);
+				bool hasProp = rf->HasProperty("MatchType");
+
+				printf("Failed to parse %s replay %s (%s)'\n", !hasProp ? "unknown" : rf->GetProperty<std::string>("MatchType").c_str(), replayName.filename().u8string().c_str(), e.what());
 				if (rf->parseLog.size() == 0)
 				{
-					printf("No parseLog available, recompile with parselog info\n");
+					//printf("No parseLog available, recompile with parselog info\n");
 				}
 				else
 				{
-					for (size_t i = rf->parseLog.size() - 8; i < rf->parseLog.size(); ++i)
+					for (size_t i = max(0, rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
 					{
 						printf("\t%s\n", rf->parseLog[i].c_str());
 					}
@@ -298,14 +316,18 @@ int main()
 			catch (const GeneralParseException<uint32_t>& e)
 			{
 				fail++;
-				printf("Failed to parse %s (%s)'\n", replayName.filename().u8string().c_str(), e.what());
+				std::lock_guard<std::mutex> lock(errorLogMutex);
+
+				bool hasProp = rf->HasProperty("MatchType");
+
+				printf("Failed to parse %s replay %s (%s)'\n", !hasProp ? "unknown" : rf->GetProperty<std::string>("MatchType").c_str(), replayName.filename().u8string().c_str(), e.what());
 				if (rf->parseLog.size() == 0)
 				{
-					printf("No parseLog available, recompile with parselog info\n");
+					//printf("No parseLog available, recompile with parselog info\n");
 				}
 				else
 				{
-					for (size_t i = rf->parseLog.size() - 8; i < rf->parseLog.size(); ++i)
+					for (size_t i = max(0, rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
 					{
 						printf("\t%s\n", rf->parseLog[i].c_str());
 					}
@@ -314,14 +336,17 @@ int main()
 			catch(const std::exception &e) //e
 			{
 				fail++;
-				printf("Failed to parse %s (%s)'\n", replayName.filename().u8string().c_str(), e.what());
+				std::lock_guard<std::mutex> lock(errorLogMutex);
+				bool hasProp = rf->HasProperty("MatchType");
+
+				printf("Failed to parse %s replay %s (%s)'\n", !hasProp ? "unknown" : rf->GetProperty<std::string>("MatchType").c_str(), replayName.filename().u8string().c_str(), e.what());
 				if (rf->parseLog.size() == 0)
 				{
-					printf("No parseLog available, recompile with parselog info\n");
+					//printf("No parseLog available, recompile with parselog info\n");
 				}
 				else
 				{
-					for (size_t i = rf->parseLog.size() - 8; i < rf->parseLog.size(); ++i)
+					for (size_t i = max(0, rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
 					{
 						printf("\t%s\n", rf->parseLog[i].c_str());
 					}
@@ -330,14 +355,17 @@ int main()
 			catch (...)
 			{
 				fail++;
-				printf("Failed to parse %s '\n", replayName.filename().u8string().c_str() );
+				std::lock_guard<std::mutex> lock(errorLogMutex);
+				bool hasProp = rf->HasProperty("MatchType");
+
+				printf("Failed to parse %s replay %s (%s)'\n", !hasProp ? "unknown" : rf->GetProperty<std::string>("MatchType").c_str(), replayName.filename().u8string().c_str(), "");
 				if (rf->parseLog.size() == 0)
 				{
-					printf("No parseLog available, recompile with parselog info\n");
+					//printf("No parseLog available, recompile with parselog info\n");
 				}
 				else
 				{
-					for (size_t i = rf->parseLog.size() - 8; i < rf->parseLog.size(); ++i)
+					for (size_t i = max(0, rf->parseLog.size() - 8); i < rf->parseLog.size(); ++i)
 					{
 						printf("\t%s\n", rf->parseLog[i].c_str());
 					}
@@ -347,8 +375,7 @@ int main()
 			const size_t total = success + fail;
 			if (total % 500 == 0)
 			{
-	
-				printf("%i/%i (%.2f%%) status: ", total, numReplays, ((double)total / (double)(numReplays)) * 100);
+				printf("%i/%i (%.2f%%) (%i corrupt) status: ", total, numReplays, (double)total / (double)((numReplays - corrupt.load())) * 100, corrupt.load());
 				printf("success: %i, fail: %i (%.2f%%). \n", (success.load()), fail.load(), ((double)(success.load()) / (double)((success.load()) + fail.load())) * 100);
 			}
 			threads_active--;
@@ -374,8 +401,8 @@ int main()
 		double end_time = get_time();
 		double elapsed = (end_time - start_time) * 1000.f;
 		printf("Test %s\n", name);
-		printf("Attempted to parse %i replays in %.5f ms \n", success + fail, elapsed);
-		printf("Success: %i, fail: %i (%.2f%%). Average parse time %.5f ms (totaltime/attemptedparsecount)\n", (success.load()), fail.load(), ((double)success.load() / (double)((success.load()) + fail.load())) * 100, (elapsed / (double)success.load()));
+		printf("Attempted to parse %i replays in %.5f ms \n", success + fail + corrupt, elapsed);
+		printf("Success: %i, fail: %i (%.2f%%) corrupt: %i Average parse time %.5f ms (totaltime/successfulparses)\n", (success.load()), fail.load(), ((double)success.load() / (double)((success.load()) + fail.load())) * 100, corrupt.load(), (elapsed / (double)success.load()));
 	}
 	/*std::shared_ptr<ReplayFile> rf = std::make_shared<ReplayFile>("1BE973D44E656FCC97DCD1A4E9076C36.replay");
 	if (!rf->Load())

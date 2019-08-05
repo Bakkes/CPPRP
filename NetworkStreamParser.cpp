@@ -41,7 +41,8 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 	  "TAGame.GameEvent_Soccar_TA:MVP",
 	  "TAGame.GameEvent_Soccar_TA:MatchWinner",
 	  "Engine.PlayerReplicationInfo:Team",
-	  "TAGame.GameEvent_Soccar_TA:GameWinner"
+	  "TAGame.GameEvent_Soccar_TA:GameWinner",
+	  "TAGame.GameEvent_TA:ActivatorCar",
 		});
 
 	RegisterParsers < ObjectTarget >({
@@ -107,7 +108,7 @@ void NetworkStreamParser::RegisterParsers(const std::shared_ptr<ReplayFileData>&
 	  "TAGame.GameEvent_TA:bHasLeaveMatchPenalty",
 	  "TAGame.PRI_TA:bUsingBehindView",
 	  "TAGame.PRI_TA:bUsingSecondaryCamera",
-	  "TAGame.GameEvent_TA:ActivatorCar",
+	  
 	  "TAGame.GameEvent_Soccar_TA:bOverTime",
 	  "ProjectX.GRI_X:bGameStarted",
 	  "Engine.Actor:bCollideActors",

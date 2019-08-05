@@ -45,13 +45,15 @@ protected:
 	const uint16_t FindMaxPropertyId(const std::shared_ptr<ClassNet>& cn, uint16_t maxProp) const;
 
 public:
+	const bool HasProperty(const std::string& key) const;
+
 	template<typename T>
 	const T GetProperty(const std::string& key)
 	{
 		//auto baseMap = std::any_cast<std::unordered_map<std::string, std::shared_ptr<Property>>>(replayFile.properties->value);
 		if (replayFile->properties.find(key) == replayFile->properties.end())
 		{
-			throw std::exception(std::string("Property " + key + " does not exist in properties map.").c_str());
+			throw PropertyDoesNotExistException(key);
 			//assert(1 == 2); //die
 		}
 		return std::any_cast<T>(replayFile->properties.at(key)->value);

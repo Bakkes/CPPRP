@@ -340,9 +340,18 @@ namespace CPPRP
 				return "";
 			}
 
-			if (final_length > 500)
+			if (final_length > 1024)
 			{
-				throw GeneralParseException("Got unwanted string length, read value " + std::to_string(length) + ", reading bytes " + std::to_string(final_length), *this);
+				if (owner->header.engineVersion == 0
+					&& owner->header.licenseeVersion == 0
+					&& owner->header.netVersion == 0)
+				{
+					throw InvalidVersionException(0, 0, 0);
+				}
+				else
+				{
+					throw GeneralParseException("Got unwanted string length, read value " + std::to_string(length) + ", reading bytes " + std::to_string(final_length) + ".", *this);
+				}
 			}
 
 			std::string str;
