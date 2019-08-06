@@ -19,12 +19,11 @@ namespace CPPRP
 	template<typename T>
 	static inline std::shared_ptr<void> createInstance(CPPBitReader<BitReaderType>& reader, rapidjson::Writer<rapidjson::FileWriteStream>& writer)
 	{
-		/*auto consumed = */Consume<T>(reader);
+		auto consumed = Consume<T>(reader);
 		//Serialize(writer, consumed);
 		//printf("%s\n", ToString(consumed).c_str());
-		return std::static_pointer_cast<void>(std::make_shared<T>());
+		return std::static_pointer_cast<void>(std::make_shared<T>(consumed));
 	}
-
 
 	class NetworkStreamParser
 	{
@@ -34,7 +33,6 @@ namespace CPPRP
 	public:
 		NetworkStreamParser();
 		~NetworkStreamParser();
-
 
 
 		template<typename T>
@@ -54,7 +52,7 @@ namespace CPPRP
 
 		void RegisterParsers(const std::shared_ptr<ReplayFileData>& rfd);
 		template<typename Writer>
-		void Parse(const uint32_t propertyIdx, CPPBitReader<BitReaderType>& br, Writer& writer) const
+		std::shared_ptr<void> Parse(const uint32_t propertyIdx, CPPBitReader<BitReaderType>& br, Writer& writer) const
 		{
 			if (propertyIdx > parseFunctions.size())
 			{
@@ -66,9 +64,9 @@ namespace CPPRP
 				std::string parseFunc = br.owner->objects[propertyIdx];
 				throw GeneralParseException("Parser not implemented for " + parseFunc, br);
 			}
-			auto inst = parseFunctions[propertyIdx](br, writer);
+			auto inst = func(br, writer);
+			return inst;
 		}
-		//void Parse(const std::string& name, CPPBitReader<BitReaderType>& br);
 	};
 
 }

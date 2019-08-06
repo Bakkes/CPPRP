@@ -41,8 +41,8 @@ namespace CPPRP
 	{
 		const size_t dataSizeBits = data.size() * 8;
 		replayFile = std::make_shared<ReplayFileData>();
-		fullReplayBitReader = CPPBitReader<BitReaderType>((const BitReaderType*)data.data(), dataSizeBits, replayFile); //They're read as bytes, since we're retrieving them in memory as uint32_t, divide size by 4 (bytes)
-		//replayFile->header.crc = fullReplayBitReader.read<uint32_t>();
+		fullReplayBitReader = CPPBitReader<BitReaderType>((const BitReaderType*)data.data(), dataSizeBits, replayFile);
+
 		replayFile->header = {
 			fullReplayBitReader.read<uint32_t>(),	//Size
 			fullReplayBitReader.read<uint32_t>(),	//CRC
@@ -66,7 +66,7 @@ namespace CPPRP
 			}
 			replayFile->properties[baseProperty->property_name] = baseProperty;
 		}
-		//replayFile->properties = baseProperty;
+
 		replayFile->body_size = fullReplayBitReader.read<uint32_t>();
 		replayFile->crc2 = fullReplayBitReader.read<uint32_t>();
 
@@ -81,7 +81,7 @@ namespace CPPRP
 		{
 			replayFile->keyframes.push_back(
 				{
-					fullReplayBitReader.read<float>(),	//Time
+					fullReplayBitReader.read<float>(),		//Time
 					fullReplayBitReader.read<uint32_t>(),	//Frame
 					fullReplayBitReader.read<uint32_t>()	//File position
 				});
@@ -380,8 +380,6 @@ namespace CPPRP
 		}
 	}
 
-	uint32_t val = 0;
-	static uint32_t i = 0;
 	void ReplayFile::Parse(const std::string& fileName, const uint32_t startPos, int32_t endPos, const uint32_t frameCount)
 	{
 		/*
@@ -396,15 +394,13 @@ namespace CPPRP
 		}
 		if (endPos < 0)
 		{
-			endPos = replayFile->netstream_size * 8;// / 4 * 8;
+			endPos = replayFile->netstream_size * 8;
 		}
 
 		const uint32_t numFrames = frameCount > 0 ? frameCount : static_cast<uint32_t>(GetProperty<int32_t>("NumFrames"));
 
-		//Divide by 4 since netstream_data is bytes, but we read uint32_ts
 		CPPBitReader<BitReaderType> networkReader((BitReaderType*)(replayFile->netstream_data), static_cast<size_t>(endPos), replayFile);
 
-		++val;
 		//FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
 
 		try
@@ -418,18 +414,17 @@ namespace CPPRP
 
 			networkReader.skip(startPos);
 
-			//writer.StartObject();
-			//writer.String("frames");
+			//Get some const data we're gonna need repeatedly during parsing and store as for performance reasons
 			const int32_t maxChannels = GetProperty<int32_t>("MaxChannels");
 			const bool isLan = GetProperty<std::string>("MatchType").compare("Lan") == 0;
 
-			//writer.StartArray();
+			const size_t namesSize = replayFile->names.size();
+			const size_t objectsSize = replayFile->objects.size();
+
 			uint32_t currentFrame = 0;
 			while (networkReader.canRead() && currentFrame < numFrames)
 			{
-				//writer.StartObject();
-				//printf("Parsing frame no %i\n", i);
-				currentFrame++;
+				
 				Frame f;
 				f.time = networkReader.read<float>();
 				f.delta = networkReader.read<float>();
@@ -437,29 +432,14 @@ namespace CPPRP
 					|| (f.time > 0 && f.time < 1E-10)
 					|| (f.delta > 0 && f.delta < 1E-10))
 				{
-					//printf("Out of range, calling again\n");
 					throw GeneralParseException("Frame time incorrect (parser at wrong position)", networkReader);
 				}
-				//writer.String("time");
-				//writer.Double(f.time);
-				//writer.String("delta");
-				//writer.Double(f.delta);
-				int k = 5;
 
-				//writer.String("actors");
-				//writer.StartArray();
 				//While there are actors in buffer (this frame)
 				while (networkReader.read<bool>())
 				{
-					//writer.StartObject();
 					const uint32_t actorId = networkReader.readBitsMax<uint32_t>(maxChannels);
-					//parseMutex.lock();
 					ActorState& actorState = actorStates[actorId];
-					//parseMutex.unlock();
-					//writer.String("actorid");
-					//writer.Uint(actorId);
-
-					//writer.String("status");
 					if (networkReader.read<bool>())
 					{
 
@@ -472,13 +452,10 @@ namespace CPPRP
 								const uint32_t nameId = networkReader.read<uint32_t>();
 								actorState.name_id = nameId;
 
-								if (nameId > replayFile->names.size())
+								if (nameId > namesSize)
 								{
-									throw GeneralParseException("nameId not in replayFile->objects " + std::to_string(nameId) + " > " + std::to_string(replayFile->names.size()), networkReader);
+									throw GeneralParseException("nameId not in replayFile->objects " + std::to_string(nameId) + " > " + std::to_string(namesSize), networkReader);
 								}
-
-								//writer.String("nameid");
-								//writer.Uint(actorState.name_id);
 							}
 							else
 							{
@@ -486,19 +463,13 @@ namespace CPPRP
 							}
 							const bool unknownBool = networkReader.read<bool>();
 							const uint32_t typeId = networkReader.read<uint32_t>();
-							//writer.String("typeid");
-							//writer.Uint(typeId);
-							//const uint32_t bit_pos = networkReader.GetAbsoluteBitPosition();
 
-							if (typeId > replayFile->objects.size())
+							if (typeId > objectsSize)
 							{
-								throw GeneralParseException("Typeid not in replayFile->objects " + std::to_string(typeId) + " > " + std::to_string(replayFile->objects.size()), networkReader);
+								throw GeneralParseException("Typeid not in replayFile->objects " + std::to_string(typeId) + " > " + std::to_string(objectsSize), networkReader);
 							}
 
 							const std::string typeName = replayFile->objects.at(typeId);
-							//printf("New object of type %s\n", typeName.c_str());
-							//writer.String("typename");
-							//writer.String(typeName.c_str(), typeName.size());
 							auto classNet = GetClassnetByNameWithLookup(typeName);
 
 							if (classNet == nullptr)
@@ -516,75 +487,41 @@ namespace CPPRP
 								parseLog.push_back("New actor for " + typeName + ", classname " + className);
 							}
 
-							//writer.String("classname");
-							//writer.String(className.c_str(), className.size());
-
 							if (HasInitialPosition(className))
 							{
 								actorState.position = static_cast<Vector3>(networkReader.read<Vector3I>());
-								//writer.String("initialposition");
-								//Serialize(writer, actorState.position);
 							}
 							if (HasRotation(className))
 							{
 								actorState.rotation = networkReader.read<Rotator>();
-								//writer.String("initialrotation");
-								//Serialize(writer, actorState.rotation);
 							}
 						}
 						else //Is existing state
 						{
-							//writer.String("updated");
-							//writer.String("updates");
-							//writer.StartArray();
+
 							//While there's data for this state to be updated
 							while (networkReader.read<bool>())
 							{
-								//writer.StartObject();
-								//if (std::string("CarComponent_Boost_TA_0").compare(replayFile->names[actorState.name_id]) == 0)
-								//{
-								//	int k = 5;
-								//}
 								const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
 								const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
 								const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
 
-
-								//if (replayFile->objects[propertyIndex].find("Replicated") == std::string::npos)
-								//{
-								//	//printf("Calling parser for %s (%i, %i, %s, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, replayFile->names[actorState.name_id].c_str(), i);
-								//}
-								//if (i > 2092749)
-								//{
-								//	//printf("Calling parser for %s (%i, %i, %s, %i)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, replayFile->names[actorState.name_id].c_str(), i);
-								//	int owow = 5;
-								//}
-								//writer.String("class");
-								//writer.String(replayFile->objects[propertyIndex].c_str(), replayFile->objects[propertyIndex].size());
-
-								//writer.String("data");
-								//printf("Calling parse for %s", )
 								if constexpr (IncludeParseLog)
 								{
 									char buff[1024];
-									snprintf(buff, sizeof(buff), "Calling parser for %s (%i, %i, %s, %i)", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.name_id >= replayFile->names.size() ? "unknown" : replayFile->names[actorState.name_id].c_str(), i);
+									snprintf(buff, sizeof(buff), "Calling parser for %s (%i, %i, %s, %i)", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.name_id >= namesSize ? "unknown" : replayFile->names[actorState.name_id].c_str(), i);
 									parseLog.push_back(std::string(buff));
 								}
-								networkParser.Parse(propertyIndex, networkReader, writer);
-								i++;
-								//writer.EndObject();
+								std::shared_ptr<void> result = networkParser.Parse(propertyIndex, networkReader, writer);
 							}
-							//writer.EndArray();
 						}
 					}
 					else
 					{
-						//writer.String("deleted");
+						
 					}
-					//writer.EndObject();
 				}
-				//writer.EndArray();
-				//writer.EndObject();
+				currentFrame++;
 			}
 			if (numFrames != currentFrame)
 			{

@@ -11,7 +11,7 @@
 #define MAX_QUAT_VALUE (0.7071067811865475244f)
 #define MAX_QUAT_VALUE_INVERSE (1.0f / MAX_QUAT_VALUE)
 
-typedef uint8_t BitReaderType;
+typedef uint32_t BitReaderType;
 
 
 namespace CPPRP
