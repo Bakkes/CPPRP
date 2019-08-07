@@ -349,7 +349,7 @@ namespace CPPRP
 		{{"TAGame.Ball_TA"}, { "Archetypes.Ball.Ball_Training"}},
 		{{"TAGame.Ball_TA"},  {"Archetypes.Ball.Ball_GameEditor", "Archetypes.Ball.Ball_Default", "Archetypes.Ball.Ball_Basketball", "Archetypes.Ball.Ball_BasketBall", "Archetypes.Ball.Ball_BasketBall_Mutator", "Archetypes.Ball.Ball_Puck", "Archetypes.Ball.CubeBall", "Archetypes.Ball.Ball_Beachball"}},
 		{{"TAGame.Ball_Breakout_TA"}, {"Archetypes.Ball.Ball_Breakout"}},
-		{{"TAGame.Ball_Trajectory_TA"},{"Archetypes.Ball.Ball_Trajectory"}},
+		{{"TAGame.Ball_TA"},{"Archetypes.Ball.Ball_Trajectory"}},
 		{{"TAGame.CarComponent_Boost_TA"}, {"Archetypes.CarComponents.CarComponent_Boost"}},
 		{{"TAGame.CarComponent_Dodge_TA"}, {"Archetypes.CarComponents.CarComponent_Dodge"}},
 		{{"TAGame.CarComponent_DoubleJump_TA"}, {"Archetypes.CarComponents.CarComponent_DoubleJump"}},
@@ -489,6 +489,10 @@ namespace CPPRP
 				f.position = networkReader.GetAbsoluteBitPosition();
 				f.time = networkReader.read<float>();
 				f.delta = networkReader.read<float>();
+				if constexpr (IncludeParseLog)
+				{
+					parseLog.push_back("New frame " + std::to_string(currentFrame) + " at " + std::to_string(f.time) + ", pos " + std::to_string(f.position));
+				}
 				if (f.time < 0 || f.delta < 0
 					|| (f.time > 0 && f.time < 1E-10)
 					|| (f.delta > 0 && f.delta < 1E-10))

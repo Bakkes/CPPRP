@@ -5,11 +5,11 @@
 #include <any>
 #include <vector>
 #include <unordered_map>
+#include <mutex>
+
 #include "NetworkStreamParser.h"
 #include "CPPBitReader.h"
 #include "ReplayFileData.h"
-#include <mutex>
-
 namespace CPPRP
 {
 	enum CrcCheck

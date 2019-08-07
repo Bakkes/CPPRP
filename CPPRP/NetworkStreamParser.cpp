@@ -213,7 +213,8 @@ namespace CPPRP
 		  "TAGame.PRI_TA:SteeringSensitivity",
 		  "TAGame.Car_TA:ReplicatedCarScale",
 		  "Engine.WorldInfo:WorldGravityZ",
-		  "TAGame.Ball_TA:ReplicatedBallGravityScale"
+		  "TAGame.Ball_TA:ReplicatedBallGravityScale",
+		  "Engine.WorldInfo:TimeDilation"
 			});
 
 		RegisterParsers<ActorBase>("Engine.Actor:Base");
