@@ -7,6 +7,7 @@
 #include "ReplayFileData.h"
 #include "ReplayException.h"
 #include <cmath>
+#include <memory>
 #define QUAT_NUM_BITS (18)
 #define MAX_QUAT_VALUE (0.7071067811865475244f)
 #define MAX_QUAT_VALUE_INVERSE (1.0f / MAX_QUAT_VALUE)
@@ -278,77 +279,74 @@ namespace CPPRP
 		return q;
 	}
 
-	static inline constexpr uint64_t swap(uint64_t x)
-	{
-#if defined(__GNUC__) || defined(__clang__)
-		return __builtin_bswap64(x);
-#else
-		x = (x & 0x00000000FFFFFFFF) << 32 | (x & 0xFFFFFFFF00000000) >> 32;
-		x = (x & 0x0000FFFF0000FFFF) << 16 | (x & 0xFFFF0000FFFF0000) >> 16;
-		x = (x & 0x00FF00FF00FF00FF) << 8 | (x & 0xFF00FF00FF00FF00) >> 8;
-		return x;
-#endif
-	}
-
-	typedef uint64_t U64;
-#define ENDIAN_SWAP_U64(val) ((U64) ( \
-    (((U64) (val) & (U64) 0x00000000000000ff) << 56) | \
-    (((U64) (val) & (U64) 0x000000000000ff00) << 40) | \
-    (((U64) (val) & (U64) 0x0000000000ff0000) << 24) | \
-    (((U64) (val) & (U64) 0x00000000ff000000) <<  8) | \
-    (((U64) (val) & (U64) 0x000000ff00000000) >>  8) | \
-    (((U64) (val) & (U64) 0x0000ff0000000000) >> 24) | \
-    (((U64) (val) & (U64) 0x00ff000000000000) >> 40) | \
-    (((U64) (val) & (U64) 0xff00000000000000) >> 56)))
-
 	template<>
 	template<>
-	inline const UniqueId CPPBitReader<BitReaderType>::read<UniqueId>()
+	inline const std::shared_ptr<UniqueId> CPPBitReader<BitReaderType>::read<std::shared_ptr<UniqueId>>()
 	{
-		UniqueId id;
-		id.platform = read<uint8_t>();
-		switch (id.platform)
+		std::shared_ptr<UniqueId> uniqueId;
+		
+		uint8_t platform = read<uint8_t>();
+		switch (platform)
 		{
 		case Platform_Steam:
+			uniqueId = std::make_shared<XBoxID>();
+			std::static_pointer_cast<XBoxID>(uniqueId)->xboxID = read<uint64_t>(sizeof(uint64_t) * 8);
+			break;
 		case Platform_Dingo:
-			id.uniqueID = read<uint64_t>(sizeof(uint64_t) * 8);
-			//id.uniqueID = ENDIAN_SWAP_U64(id.uniqueID);
+			uniqueId = std::make_shared<SteamID>();
+			std::static_pointer_cast<SteamID>(uniqueId)->steamID = read<uint64_t>(sizeof(uint64_t) * 8);
 			break;
 		case Platform_PS4:
+			uniqueId = std::make_shared<PS4ID>();
 			if (owner->header.netVersion >= 1)
 			{
-				id.uniqueID = read<uint64_t>(40 * 8);
+				std::static_pointer_cast<PS4ID>(uniqueId)->psId = read<uint64_t>(40 * 8);
 			}
 			else
 			{
-				id.uniqueID = read<uint64_t>(32 * 8);
+				std::static_pointer_cast<PS4ID>(uniqueId)->psId = read<uint64_t>(32 * 8);
 			}
 			break;
 		case Platform_Switch:
-			id.uniqueID = read<uint64_t>(64);
-			id.uniqueID = read<uint64_t>(64);
-			id.uniqueID = read<uint64_t>(64);
-			id.uniqueID = read<uint64_t>(64);
+		{
+			std::shared_ptr<SwitchID> switchID = std::make_shared<SwitchID>();
+			switchID->a = read<uint64_t>(64);
+			switchID->b = read<uint64_t>(64);
+			switchID->c = read<uint64_t>(64);
+			switchID->d = read<uint64_t>(64);
+			uniqueId = switchID;
+		}
 			break;
 		case Platform_PsyNet:
+		{
+			std::shared_ptr<PsyNetID> psyNetID = std::make_shared<PsyNetID>();
 			if (owner->header.engineVersion >= 868 && owner->header.licenseeVersion >= 24 && owner->header.netVersion >= 10)
 			{
-				id.uniqueID = read<uint64_t>(64);
+				psyNetID->a = read<uint64_t>(64);
 			}
 			else
 			{
-				id.uniqueID = read<uint64_t>(64);
-				id.uniqueID = read<uint64_t>(64);
-				id.uniqueID = read<uint64_t>(64);
-				id.uniqueID = read<uint64_t>(64);
+				psyNetID->a = read<uint64_t>(64);
+				psyNetID->b = read<uint64_t>(64);
+				psyNetID->c = read<uint64_t>(64);
+				psyNetID->d = read<uint64_t>(64);
 			}
+			uniqueId = psyNetID;
+		}
 			break;
 		case Platform_Unknown:
+		{
+			uniqueId = std::make_shared<UnkownId>();
 			if (owner->header.licenseeVersion >= 18 && owner->header.netVersion == 0)
 			{
-				return id;
+				std::static_pointer_cast<UnkownId>(uniqueId)->unknown = 0;
 			}
-			id.uniqueID = read<uint64_t>(3 * 8);
+			else
+			{
+
+				std::static_pointer_cast<UnkownId>(uniqueId)->unknown = read<uint32_t>(3 * 8);
+			}
+		}
 			//printf("Unknown platform found!\n");
 			break;
 		default:
@@ -356,8 +354,9 @@ namespace CPPRP
 			//assert(1 == 2);
 			break;
 		}
-		id.playerNumber = read<uint8_t>();
-		return id;
+		uniqueId->platform = platform;
+		uniqueId->playerNumber= read<uint8_t>();
+		return uniqueId;
 	}
 
 

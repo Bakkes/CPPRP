@@ -220,7 +220,7 @@ namespace CPPRP
 
 		RegisterParsers < Reservation >("ProjectX.GRI_X:Reservations");
 
-		RegisterParsers < UniqueId >({
+		RegisterParsers < std::shared_ptr<UniqueId> >({
 		  "Engine.PlayerReplicationInfo:UniqueId",
 			});
 		RegisterParsers<PartyLeader>({

@@ -77,19 +77,49 @@ namespace CPPRP
 	{
 		uint8_t platform{ 0 };
 		uint8_t playerNumber{ 0 };
-		uint64_t uniqueID{ 0 };
+		//uint64_t uniqueID{ 0 };
 
 		std::string ToString() const
 		{
-			return std::to_string(platform) + "|" + std::to_string(uniqueID) + "|" + std::to_string(playerNumber);
+			return "";// return std::to_string(platform) + "|" + std::to_string(uniqueID) + "|" + std::to_string(playerNumber);
 		}
+	};
 
-		friend std::ostream& operator<<(std::ostream& os, UniqueId& foo)
-		{
-			os << foo.ToString();
-			return os;
-		}
 
+	struct SteamID : public UniqueId
+	{
+		uint64_t steamID{ 0 };
+	};
+
+	struct XBoxID : public UniqueId
+	{
+		uint64_t xboxID{ 0 };
+	};
+
+	struct SwitchID : public UniqueId
+	{
+		uint64_t a{ 0 };
+		uint64_t b{ 0 };
+		uint64_t c{ 0 }; 
+		uint64_t d{ 0 };
+	};
+
+	struct PS4ID : public UniqueId
+	{
+		uint64_t psId{ 0 };
+	};
+
+	struct PsyNetID : public UniqueId
+	{
+		uint64_t a{ 0 };
+		uint64_t b{ 0 };
+		uint64_t c{ 0 };
+		uint64_t d{ 0 };
+	};
+
+	struct UnkownId : public UniqueId
+	{
+		uint32_t unknown{ 0 };
 	};
 
 	struct Property

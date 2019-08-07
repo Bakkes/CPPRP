@@ -52,7 +52,7 @@ namespace CPPRP
 		uint8_t unknown;
 
 		__ParserAttribute__(CallToString, true)
-		UniqueId player_id;
+		std::shared_ptr<UniqueId> player_id;
 		std::string player_name;
 
 		__ParserAttribute__(CallToString, true)
@@ -189,7 +189,7 @@ namespace CPPRP
 	struct PartyLeader
 	{
 		__ParserAttribute__(CallToString, true)
-		UniqueId id;
+		std::shared_ptr<UniqueId> id;
 	};
 
 	struct OnlineLoadout

@@ -28,7 +28,7 @@ namespace CPPRP
 		writer.String("playernumber");
 		writer.Uint(item.playerNumber);
 		writer.String("uniqueid");
-		writer.Uint64(item.uniqueID);
+		//writer.Uint64(item.uniqueID);
 		writer.EndObject();
 	}
 
@@ -355,7 +355,7 @@ namespace CPPRP
 		if (test != 0)
 		{
 			reader.goback(8);
-			item.id = reader.read<UniqueId>();
+			item.id = reader.read<std::shared_ptr<UniqueId>>();
 		}
 		else
 		{
@@ -383,8 +383,8 @@ namespace CPPRP
 	inline const Reservation Consume(CPPBitReader<BitReaderType>& reader) {
 		Reservation item;
 		item.unknown = reader.read<uint8_t>(3);
-		item.player_id = reader.read<UniqueId>();
-		if (item.player_id.platform == Platform_Unknown && (reader.owner->header.licenseeVersion < 18 || reader.owner->header.netVersion != 0))
+		item.player_id = reader.read<std::shared_ptr<UniqueId>>();
+		if (item.player_id->platform == Platform_Unknown && (reader.owner->header.licenseeVersion < 18 || reader.owner->header.netVersion != 0))
 		{
 			
 		}
@@ -407,9 +407,9 @@ namespace CPPRP
 	}
 
 	template<>
-	inline const std::string ToString(const UniqueId& item)
+	inline const std::string ToString(const std::shared_ptr<UniqueId>& item)
 	{
-		return item.ToString();
+		return "";
 	}
 
 	template<>
@@ -441,5 +441,6 @@ inline const std::string ToString(const type & item) { return std::to_string(ite
 	ToStringStd(uint16_t);
 	ToStringStd(uint32_t);
 	ToStringStd(int);
-#include "generated.h"
+
 }
+#include "generated.h"

@@ -2,6 +2,7 @@
 #include "CPPBitReader.h"
 #include "NetworkData.h"
 #include <sstream>
+namespace CPPRP {
 template<>
 inline const std::string ToString(const ReplicatedRBState& item) 
 {
@@ -1137,3 +1138,5 @@ inline const void Serialize(Writer& writer, const SkillTier& item)
 	writer.EndObject();
 }
 
+
+};
