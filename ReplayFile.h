@@ -9,18 +9,21 @@
 #include "CPPBitReader.h"
 #include "ReplayFileData.h"
 #include <mutex>
+
 namespace CPPRP
 {
-
+	enum CrcCheck
+	{
+		CRC_Header = 0x1,
+		CRC_Body = 0x02,
+		CRC_Both = CRC_Header | CRC_Body
+	};
 
 	class ReplayFile
 	{
 	private:
-		
 		std::vector<char> data;
 		CPPBitReader<BitReaderType> fullReplayBitReader;
-
-		bool classNetMapCached = false;
 		std::unordered_map<std::string, std::shared_ptr<ClassNet>> classnetMap;
 	public:
 		std::filesystem::path path;
@@ -32,9 +35,10 @@ namespace CPPRP
 		ReplayFile(std::filesystem::path path_);
 		~ReplayFile();
 
-		bool Load();
+		const bool Load();
 		void DeserializeHeader();
-		void Parse(const std::string& fileName, const uint32_t startPos = 0, int32_t endPos = -1, const uint32_t frameCount = 0);
+		const bool VerifyCRC(CrcCheck verifyWhat);
+		void Parse(const uint32_t startPos = 0, int32_t endPos = -1, const uint32_t frameCount = 0);
 	protected:
 		void MergeDuplicates();
 		void FixParents();

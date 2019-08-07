@@ -11,7 +11,7 @@ namespace CPPRP
 {
 	struct Vector3
 	{
-		float x, y, z;
+		float x{ 0 }, y{ 0 }, z{ 0 };
 
 		std::string ToString() const
 		{
@@ -21,7 +21,7 @@ namespace CPPRP
 
 	struct Vector3I
 	{
-		int x, y, z;
+		int x{ 0 }, y{ 0 }, z{ 0 };
 
 		explicit operator Vector3() const
 		{
@@ -41,7 +41,7 @@ namespace CPPRP
 
 	struct Rotator
 	{
-		int pitch, yaw, roll;
+		int pitch{ 0 }, yaw{ 0 }, roll{ 0 };
 
 		std::string ToString() const
 		{
@@ -51,7 +51,7 @@ namespace CPPRP
 
 	struct Quat
 	{
-		float w, x, y, z;
+		float w{ 0 }, x{ 0 }, y{ 0 }, z{ 0 };
 
 		std::string ToString() const
 		{
@@ -75,9 +75,9 @@ namespace CPPRP
 
 	struct UniqueId
 	{
-		uint8_t platform;
-		uint8_t playerNumber;
-		uint64_t uniqueID;
+		uint8_t platform{ 0 };
+		uint8_t playerNumber{ 0 };
+		uint64_t uniqueID{ 0 };
 
 		std::string ToString() const
 		{
@@ -94,61 +94,74 @@ namespace CPPRP
 
 	struct Property
 	{
-		std::string property_name;
-		std::string property_type;
+		std::string property_name{ "" };
+		std::string property_type{ "" };
 		std::any value;
 	};
 
 	struct FileHeader
 	{
-		uint32_t size;
-		uint32_t crc;
-		uint32_t engineVersion;
-		uint32_t licenseeVersion;
-		uint32_t netVersion = 0;
+		uint32_t size{ 0 };
+		uint32_t crc{ 0 };
+		uint32_t engineVersion{ 0 };
+		uint32_t licenseeVersion{ 0 };
+		uint32_t netVersion{ 0 };
 	};
 
 	struct KeyFrame
 	{
-		float time;
-		uint32_t frame;
-		uint32_t filepos;
+		float time{ 0.f };
+		uint32_t frame{ 0 };
+		uint32_t filepos{ 0 };
 	};
 
 	struct ReplayTick
 	{
-		std::string type;
-		uint32_t frame;
+		std::string type{ "" };
+		uint32_t frame{ 0 };
 	};
 
 	struct ClassIndex
 	{
-		std::string class_name;
-		uint32_t index;
+		std::string class_name{ "" };
+		uint32_t index{ 0 };
 	};
 
 	struct PropIndexId
 	{
-		int32_t prop_index;
-		int32_t prop_id;
+		int32_t prop_index{ 0 };
+		int32_t prop_id{ 0 };
 	};
 
 	struct ClassNet
 	{
-		int32_t index;
-		int32_t parent;
-		std::shared_ptr<ClassNet> parent_class;
-		int32_t id;
-		int32_t prop_indexes_size;
+		int32_t index{ 0 };
+		int32_t parent{ 0 };
+		std::shared_ptr<ClassNet> parent_class{ nullptr };
+		int32_t id{ 0 };
+		int32_t prop_indexes_size{ 0 };
 		std::vector<PropIndexId> prop_indexes;
-		uint16_t max_prop_id;
+		uint16_t max_prop_id{ 0 };
 		std::vector<uint16_t> property_id_cache;
+	};
+
+	struct ActorState
+	{
+		std::shared_ptr<ClassNet> classNet{ nullptr };
+		uint32_t actor_id{ 0 };
+		uint32_t name_id{ 0 };
+		bool alive{ false };
+		std::unordered_map<std::string, std::shared_ptr<void>> fields;
+		//Vector3 position;
+		//Rotator rotation;
 	};
 
 	struct Frame
 	{
 		float time;
 		float delta;
+		uint32_t position;
+		std::unordered_map<uint32_t, ActorState> states;
 	};
 
 	struct EnumProperty
@@ -180,12 +193,5 @@ namespace CPPRP
 		std::vector<std::shared_ptr<ClassNet>> classnets;
 	};
 
-	struct ActorState
-	{
-		std::shared_ptr<ClassNet> classNet;
-		uint32_t actor_id;
-		uint32_t name_id;
-		Vector3 position;
-		Rotator rotation;
-	};
+
 }

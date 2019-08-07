@@ -306,18 +306,6 @@ namespace CPPRP
 		return item;
 	}
 
-	//
-	//template<>
-	//inline const GameTime Consume(CPPBitReader<BitReaderType>& reader) {
-	//	static int test = 34;
-	//	//test++;
-	//	if (test == 256) system("pause");
-	//	printf("Parsing gametime with test = %i\n", test);
-	//	GameTime item;
-	//	item.value = reader.read<uint32_t>(test);
-	//	return item;
-	//}
-
 	template<>
 	inline const ReplicatedRBState Consume(CPPBitReader<BitReaderType>& reader) {
 		ReplicatedRBState item;
@@ -373,11 +361,6 @@ namespace CPPRP
 		{
 
 		}
-		/*if (item.id.platform == 0 && reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 14)
-		{
-			reader.read<uint32_t>();
-		}*/
-		//printf("Platform: %i\n", (int)item.id.platform);
 		return item;
 	}
 
@@ -392,7 +375,6 @@ namespace CPPRP
 		else
 		{
 			item.gamemode = reader.read<uint8_t>(2);
-			//item.gamemode = reader.readBitsMax<uint8_t>(4);
 		}
 		return item;
 	}
@@ -402,7 +384,6 @@ namespace CPPRP
 		Reservation item;
 		item.unknown = reader.read<uint8_t>(3);
 		item.player_id = reader.read<UniqueId>();
-		//printf("Version player name error (%i, %i, %i)\n", reader.owner->header.engineVersion, reader.owner->header.licenseeVersion, reader.owner->header.netVersion);
 		if (item.player_id.platform == Platform_Unknown && (reader.owner->header.licenseeVersion < 18 || reader.owner->header.netVersion != 0))
 		{
 			
@@ -410,10 +391,6 @@ namespace CPPRP
 		else
 		{
 			item.player_name = reader.read<std::string>();
-			//if (item.player_name[0] == 0 && item.player_name.size() > 0)
-			//{
-			//	printf("Version player name error (%i, %i, %i)\n", reader.owner->header.engineVersion, reader.owner->header.licenseeVersion, reader.owner->header.netVersion);
-			//}
 		}
 
 		if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 12)

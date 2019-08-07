@@ -167,7 +167,7 @@ namespace CPPRP
 		void goback(int32_t num);
 		void skip(uint32_t num);
 
-		const size_t GetBytePosition() const noexcept;
+		const size_t GetAbsoluteBytePosition() const noexcept;
 		const size_t GetAbsoluteBitPosition() const noexcept;
 
 	};
@@ -473,7 +473,7 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline const size_t CPPBitReader<T>::GetBytePosition() const noexcept
+	inline const size_t CPPBitReader<T>::GetAbsoluteBytePosition() const noexcept
 	{
 		return (t_position * sizeof(T)) + (bit_position / 8);
 	}

@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 			{
 				if (entry.path().filename().u8string().find(".replay") == std::string::npos)
 					continue;
-				if (replays.size() >= 4500)
+				if (replays.size() >= 1)
 					break;
 				replays.push_back(entry.path());
 			}
@@ -275,7 +275,7 @@ std::map<uint32_t, bool> activeThreads;
 		for (auto replayName : replays)
 		{
 			
-			while(threads_active > 400)
+			while(threads_active > 10)
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			//printf("Active: %i\n", threads_active.load());
 			threads_active++;
@@ -305,10 +305,11 @@ std::map<uint32_t, bool> activeThreads;
 					throw;
 				}
 				else {
+					bool b = rf->VerifyCRC(CPPRP::CRC_Both);
 					//printf("Called load");
 					rf->DeserializeHeader();
 					
-					rf->Parse(s);
+					rf->Parse();
 					success++;
 					if (rf->GetProperty<std::string>("MatchType").compare("Training") == 0)
 					{
@@ -316,11 +317,11 @@ std::map<uint32_t, bool> activeThreads;
 					}
 				}
 			}
-			catch (const CPPRP::InvalidVersionException&)
+			catch (const CPPRP::InvalidVersionException& e)
 			{
 				corrupt++;
 				std::lock_guard<std::mutex> lock(errorLogMutex);
-				//printf("InvalidVersion: %s\n", e.what());
+				printf("InvalidVersion: %s\n", e.what());
 			}
 			catch (const CPPRP::PropertyDoesNotExistException& e)
 			{

@@ -3,6 +3,8 @@
 #include "networkdata.h"
 #include "rapidjson/filewritestream.h"
 #include "rapidjson/writer.h"
+#include "CRC.h"
+
 namespace CPPRP
 {
 	ReplayFile::ReplayFile(std::filesystem::path path_) : path(path_)
@@ -15,7 +17,7 @@ namespace CPPRP
 	{
 	}
 
-	bool ReplayFile::Load()
+	const bool ReplayFile::Load()
 	{
 		if (!std::filesystem::exists(path))
 			return false;
@@ -28,7 +30,7 @@ namespace CPPRP
 			std::cerr << "Exception opening file: " << std::strerror(errno) << "\n";
 		}*/
 
-		std::streamsize size = file.tellg();
+		const std::streamsize size = file.tellg();
 		data.resize((size_t)size);
 		file.seekg(0, std::ios::beg);
 
@@ -88,7 +90,7 @@ namespace CPPRP
 		}
 
 		const uint32_t netstreamCount = static_cast<uint32_t>(fullReplayBitReader.read<int32_t>());
-		replayFile->netstream_data = data.data() + fullReplayBitReader.GetBytePosition(); //We know this is always aligned, so valid
+		replayFile->netstream_data = data.data() + fullReplayBitReader.GetAbsoluteBytePosition(); //We know this is always aligned, so valid
 		uint32_t test = netstreamCount * 8;
 		fullReplayBitReader.skip(test);
 		replayFile->netstream_size = netstreamCount;
@@ -208,6 +210,62 @@ namespace CPPRP
 		}
 	}
 
+	const bool ReplayFile::VerifyCRC(CrcCheck verifyWhat)
+	{
+		if ((verifyWhat | CRC_Both) == 0) return false; //User supplied invalid value, < 0 or >= 4
+
+		const size_t dataSizeBits = data.size() * 8;
+		//Replay not loaded, less than 8 bytes
+		if (dataSizeBits < sizeof(uint32_t) * 2 * 8)
+		{
+			return false;
+		}
+		CPPBitReader<BitReaderType> bitReader((const BitReaderType*)data.data(), 
+			dataSizeBits, replayFile);
+		const uint32_t headerSize = bitReader.read<uint32_t>();
+		const uint32_t headerReadCrc = bitReader.read<uint32_t>();
+
+		//File is lying about its size
+		if (bitReader.GetAbsoluteBytePosition() + headerSize > data.size())
+		{
+			return false;
+		}
+
+		constexpr uint32_t CRC_SEED = 0xEFCBF201;
+		if (verifyWhat & CRC_Header)
+		{
+			const uint32_t headerCalculatedCRC = CalculateCRC(data, 
+				static_cast<size_t>(bitReader.GetAbsoluteBytePosition()), 
+				static_cast<size_t>(headerSize), CRC_SEED);
+			const bool result = headerCalculatedCRC == headerReadCrc;
+			//If only verify header, or if already failed here
+			if (!(verifyWhat & CRC_Both) || !result)
+			{
+				//return result;
+			}
+		}
+		bitReader.skip(headerSize * 8);
+
+		if (bitReader.GetAbsoluteBytePosition() + 2 > data.size())
+		{
+			//Won't be able to read body size and crc, so false
+			return false;
+		}
+
+
+		const uint32_t bodySize = bitReader.read<uint32_t>();
+		const uint32_t bodyReadCrc = bitReader.read<uint32_t>();
+		if (bitReader.GetAbsoluteBytePosition() + bodySize > data.size())
+		{
+			return false;
+		}
+
+		const uint32_t bodyCalculatedCRC = CalculateCRC(data, 
+			static_cast<size_t>(bitReader.GetAbsoluteBytePosition()), 
+			static_cast<size_t>(bodySize), CRC_SEED);
+		return bodyReadCrc == bodyCalculatedCRC;
+	}
+
 	void ReplayFile::MergeDuplicates()
 	{
 		std::unordered_map<std::string, int> counts;
@@ -246,7 +304,6 @@ namespace CPPRP
 	  , {"TAGame.CameraSettingsActor_TA", "Engine.ReplicationInfo"}
 	  , {"TAGame.Car_Season_TA", "TAGame.PRI_TA"}
 	  , {"TAGame.Car_TA", "TAGame.Vehicle_TA"}
-
 	  , {"TAGame.CarComponent_TA", "Engine.ReplicationInfo"}
 	  , {"TAGame.CrowdActor_TA", "Engine.ReplicationInfo"}
 	  , {"TAGame.CrowdManager_TA", "Engine.ReplicationInfo"}
@@ -283,7 +340,6 @@ namespace CPPRP
 	  , {"TAGame.CarComponent_TA", "Engine.Actor"}
 	  , {"Engine.Info", "Engine.Actor"}
 	  , {"Engine.Pawn", "Engine.Actor"}
-
 	};
 
 	const std::vector<std::pair<std::string, std::vector<std::string>>> archetypeMap =
@@ -380,7 +436,7 @@ namespace CPPRP
 		}
 	}
 
-	void ReplayFile::Parse(const std::string& fileName, const uint32_t startPos, int32_t endPos, const uint32_t frameCount)
+	void ReplayFile::Parse(const uint32_t startPos, int32_t endPos, const uint32_t frameCount)
 	{
 		/*
 		Replay is corrupt, no way we'll parse this correctly
@@ -397,7 +453,6 @@ namespace CPPRP
 			endPos = replayFile->netstream_size * 8;
 		}
 
-		const uint32_t numFrames = frameCount > 0 ? frameCount : static_cast<uint32_t>(GetProperty<int32_t>("NumFrames"));
 
 		CPPBitReader<BitReaderType> networkReader((BitReaderType*)(replayFile->netstream_data), static_cast<size_t>(endPos), replayFile);
 
@@ -414,18 +469,24 @@ namespace CPPRP
 
 			networkReader.skip(startPos);
 
-			//Get some const data we're gonna need repeatedly during parsing and store as for performance reasons
+			//Get some const data we're gonna need repeatedly during parsing and store for performance reasons
+			const uint32_t numFrames = frameCount > 0 ? frameCount : static_cast<uint32_t>(GetProperty<int32_t>("NumFrames"));
+
 			const int32_t maxChannels = GetProperty<int32_t>("MaxChannels");
 			const bool isLan = GetProperty<std::string>("MatchType").compare("Lan") == 0;
 
 			const size_t namesSize = replayFile->names.size();
 			const size_t objectsSize = replayFile->objects.size();
 
+
+			std::vector<Frame> frames;
+			frames.resize(numFrames);
 			uint32_t currentFrame = 0;
 			while (networkReader.canRead() && currentFrame < numFrames)
 			{
-				
-				Frame f;
+
+				Frame& f = frames[currentFrame];
+				f.position = networkReader.GetAbsoluteBitPosition();
 				f.time = networkReader.read<float>();
 				f.delta = networkReader.read<float>();
 				if (f.time < 0 || f.delta < 0
@@ -442,10 +503,10 @@ namespace CPPRP
 					ActorState& actorState = actorStates[actorId];
 					if (networkReader.read<bool>())
 					{
-
 						//Is new state
 						if (networkReader.read<bool>())
 						{
+							actorState.alive = true;
 							//writer.String("created");
 							if (replayFile->header.engineVersion > 868 || (replayFile->header.engineVersion == 868 && replayFile->header.licenseeVersion >= 20) || (replayFile->header.engineVersion == 868 && replayFile->header.licenseeVersion >= 14 && !isLan))
 							{
@@ -487,18 +548,23 @@ namespace CPPRP
 								parseLog.push_back("New actor for " + typeName + ", classname " + className);
 							}
 
+							ReplicatedRBState rbState{ 0 };
+
+
 							if (HasInitialPosition(className))
 							{
-								actorState.position = static_cast<Vector3>(networkReader.read<Vector3I>());
+								rbState.position = static_cast<Vector3>(networkReader.read<Vector3I>());
 							}
 							if (HasRotation(className))
 							{
-								actorState.rotation = networkReader.read<Rotator>();
+								Rotator rot = networkReader.read<Rotator>();
+								//TODO: properly convert
+								rbState.rotation = { static_cast<float>(rot.pitch), static_cast<float>(rot.yaw), static_cast<float>(rot.roll), 0.f };
 							}
+							//actorState.fields["TAGame.RBActor_TA:ReplicatedRBState"] = std::make_shared<ReplicatedRBState>(rbState);
 						}
 						else //Is existing state
 						{
-
 							//While there's data for this state to be updated
 							while (networkReader.read<bool>())
 							{
@@ -509,16 +575,18 @@ namespace CPPRP
 								if constexpr (IncludeParseLog)
 								{
 									char buff[1024];
-									snprintf(buff, sizeof(buff), "Calling parser for %s (%i, %i, %s, %i)", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.name_id >= namesSize ? "unknown" : replayFile->names[actorState.name_id].c_str(), i);
+									snprintf(buff, sizeof(buff), "Calling parser for %s (%i, %i, %s)", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.name_id >= namesSize ? "unknown" : replayFile->names[actorState.name_id].c_str());
 									parseLog.push_back(std::string(buff));
 								}
 								std::shared_ptr<void> result = networkParser.Parse(propertyIndex, networkReader, writer);
+								//actorState.fields[replayFile->objects[propertyIndex]] = result;
 							}
 						}
+						//f.states[actorId] = actorState;
 					}
 					else
 					{
-						
+						actorState.alive = false;
 					}
 				}
 				currentFrame++;
@@ -532,8 +600,6 @@ namespace CPPRP
 				//Unsure how big RL buffer sizes are, 8192 seems fair
 				throw GeneralParseException("Not enough bytes parsed! Expected ~" + std::to_string(networkReader.size) + ", parsed: " + std::to_string(networkReader.GetAbsoluteBitPosition()) + ". Diff(" + std::to_string(networkReader.size - networkReader.GetAbsoluteBitPosition()) + ")", networkReader);
 			}
-			//writer.EndArray();
-			//writer.EndObject();
 		}
 		catch (...)
 		{
@@ -543,10 +609,6 @@ namespace CPPRP
 			throw;
 		}
 
-		//int ow = 5;
-		//printf("%i", ow);
-		//fclose(fp);
-		//printf("Parsed\n");
 	}
 
 	const bool ReplayFile::HasInitialPosition(const std::string & name) const
