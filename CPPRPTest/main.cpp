@@ -3,7 +3,7 @@
 //#include <crtdbg.h>
 
 //#include <omp.h>
-#pragma comment(lib, "../Release/CPPRP.lib")
+#pragma comment(lib, "CPPRP.lib")
 #include "../CPPRP/ReplayFile.h"
 #include "../CPPRP/ReplayException.h"
 #include <iostream>
