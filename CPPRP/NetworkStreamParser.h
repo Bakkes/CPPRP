@@ -7,17 +7,15 @@
 #include "NetworkData.h"
 #include "NetworkParsers.h"
 #include <any>
-#include "rapidjson/writer.h"
-#include "rapidjson/filewritestream.h"
 
 namespace CPPRP
 {
 	constexpr bool IncludeParseLog = false;
 
-	typedef std::shared_ptr<void>(*createFunc)(CPPBitReader<BitReaderType>& reader, rapidjson::Writer<rapidjson::FileWriteStream>& writer);
+	typedef std::shared_ptr<void>(*createFunc)(CPPBitReader<BitReaderType>& reader);
 
 	template<typename T>
-	static inline std::shared_ptr<void> createInstance(CPPBitReader<BitReaderType>& reader, rapidjson::Writer<rapidjson::FileWriteStream>& writer)
+	static inline std::shared_ptr<void> createInstance(CPPBitReader<BitReaderType>& reader)
 	{
 		auto consumed = Consume<T>(reader);
 		//Serialize(writer, consumed);
@@ -34,9 +32,8 @@ namespace CPPRP
 		NetworkStreamParser();
 		~NetworkStreamParser();
 
-
 		template<typename T>
-		void RegisterParsers(const std::initializer_list<std::string> props)
+		constexpr void RegisterParsers(const std::initializer_list<std::string> props)
 		{
 			for (auto str : props)
 			{
@@ -45,28 +42,14 @@ namespace CPPRP
 		}
 
 		template<typename T>
-		void RegisterParsers(const std::string prop)
+		constexpr void RegisterParsers(const std::string prop)
 		{
 			parseFunctions[functionToIndexMapping[prop]] = &createInstance<T>;
 		}
 
 		void RegisterParsers(const std::shared_ptr<ReplayFileData>& rfd);
-		template<typename Writer>
-		std::shared_ptr<void> Parse(const uint32_t propertyIdx, CPPBitReader<BitReaderType>& br, Writer& writer) const
-		{
-			if (propertyIdx > parseFunctions.size())
-			{
-				throw GeneralParseException("Reader at wrong position (propertyIndex > parseFunctions.size())", br);
-			}
-			const auto func = parseFunctions[propertyIdx];
-			if (func == nullptr)
-			{
-				std::string parseFunc = br.owner->objects[propertyIdx];
-				throw GeneralParseException("Parser not implemented for " + parseFunc, br);
-			}
-			auto inst = func(br, writer);
-			return inst;
-		}
+
+		std::shared_ptr<void> Parse(const uint32_t propertyIdx, CPPBitReader<BitReaderType>& br) const;
 	};
 
 }

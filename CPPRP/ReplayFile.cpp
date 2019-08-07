@@ -1,8 +1,6 @@
 #include "ReplayFile.h"
 #include <fstream>
 #include "networkdata.h"
-#include "rapidjson/filewritestream.h"
-#include "rapidjson/writer.h"
 #include "CRC.h"
 
 namespace CPPRP
@@ -463,7 +461,7 @@ namespace CPPRP
 			//char writeBuffer[65536 * 5];
 			//rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
 
-			rapidjson::Writer<rapidjson::FileWriteStream> writer;
+			//rapidjson::Writer<rapidjson::FileWriteStream> writer;
 			int t = 0;
 			std::unordered_map<uint32_t, std::string> test;
 
@@ -582,7 +580,7 @@ namespace CPPRP
 									snprintf(buff, sizeof(buff), "Calling parser for %s (%i, %i, %s)", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.name_id >= namesSize ? "unknown" : replayFile->names[actorState.name_id].c_str());
 									parseLog.push_back(std::string(buff));
 								}
-								std::shared_ptr<void> result = networkParser.Parse(propertyIndex, networkReader, writer);
+								std::shared_ptr<void> result = networkParser.Parse(propertyIndex, networkReader);
 								//actorState.fields[replayFile->objects[propertyIndex]] = result;
 							}
 						}
