@@ -234,14 +234,14 @@ namespace CPPRP
 		constexpr uint32_t CRC_SEED = 0xEFCBF201;
 		if (verifyWhat & CRC_Header)
 		{
-			const uint32_t headerCalculatedCRC = CalculateCRC(data, 
+			const uint32_t headerCalculatedCRC = CalculateCRC(data,
 				static_cast<size_t>(bitReader.GetAbsoluteBytePosition()), 
 				static_cast<size_t>(headerSize), CRC_SEED);
 			const bool result = headerCalculatedCRC == headerReadCrc;
 			//If only verify header, or if already failed here
 			if (!(verifyWhat & CRC_Both) || !result)
 			{
-				//return result;
+				return result;
 			}
 		}
 		bitReader.skip(headerSize * 8);

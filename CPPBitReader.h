@@ -82,7 +82,7 @@ namespace CPPRP
 				}
 				else //n doesn't finish this byte
 				{
-					result |= (bt >> (bit_position)) & ((1 << n) - 1);
+					result |= (bt >> (bit_position)) & ((1ULL << n) - 1);
 					bit_position += n;
 
 					if (bit_position == SIZE_T)
@@ -108,7 +108,7 @@ namespace CPPRP
 
 			if (n > 0)
 			{
-				result |= ((bt >> (bit_position)) & ((1 << n) - 1)) << bit_pos;
+				result |= ((bt >> (bit_position)) & ((1ULL << n) - 1)) << bit_pos;
 				bit_position += n;
 
 				if (bit_position == SIZE_T)
@@ -278,6 +278,29 @@ namespace CPPRP
 		return q;
 	}
 
+	static inline constexpr uint64_t swap(uint64_t x)
+	{
+#if defined(__GNUC__) || defined(__clang__)
+		return __builtin_bswap64(x);
+#else
+		x = (x & 0x00000000FFFFFFFF) << 32 | (x & 0xFFFFFFFF00000000) >> 32;
+		x = (x & 0x0000FFFF0000FFFF) << 16 | (x & 0xFFFF0000FFFF0000) >> 16;
+		x = (x & 0x00FF00FF00FF00FF) << 8 | (x & 0xFF00FF00FF00FF00) >> 8;
+		return x;
+#endif
+	}
+
+	typedef uint64_t U64;
+#define ENDIAN_SWAP_U64(val) ((U64) ( \
+    (((U64) (val) & (U64) 0x00000000000000ff) << 56) | \
+    (((U64) (val) & (U64) 0x000000000000ff00) << 40) | \
+    (((U64) (val) & (U64) 0x0000000000ff0000) << 24) | \
+    (((U64) (val) & (U64) 0x00000000ff000000) <<  8) | \
+    (((U64) (val) & (U64) 0x000000ff00000000) >>  8) | \
+    (((U64) (val) & (U64) 0x0000ff0000000000) >> 24) | \
+    (((U64) (val) & (U64) 0x00ff000000000000) >> 40) | \
+    (((U64) (val) & (U64) 0xff00000000000000) >> 56)))
+
 	template<>
 	template<>
 	inline const UniqueId CPPBitReader<BitReaderType>::read<UniqueId>()
@@ -288,7 +311,8 @@ namespace CPPRP
 		{
 		case Platform_Steam:
 		case Platform_Dingo:
-			id.uniqueID = read<uint64_t>(8 * 8);
+			id.uniqueID = read<uint64_t>(sizeof(uint64_t) * 8);
+			//id.uniqueID = ENDIAN_SWAP_U64(id.uniqueID);
 			break;
 		case Platform_PS4:
 			if (owner->header.netVersion >= 1)
