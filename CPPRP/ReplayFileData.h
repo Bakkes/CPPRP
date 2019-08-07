@@ -190,7 +190,7 @@ namespace CPPRP
 	{
 		float time;
 		float delta;
-		uint32_t position;
+		size_t position;
 		std::unordered_map<uint32_t, ActorState> states;
 	};
 
