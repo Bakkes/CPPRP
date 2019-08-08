@@ -8,6 +8,31 @@
 #include "ReplayException.h"
 #include <cmath>
 #include <memory>
+
+#if defined(_MSC_VER) || defined(__MINGW32__)
+#define __LITTLE_ENDIAN 1234
+#define __BIG_ENDIAN    4321
+#define __BYTE_ORDER    __LITTLE_ENDIAN
+
+#include <xmmintrin.h>
+#ifdef __MINGW32__
+#define PREFETCH(location) __builtin_prefetch(location)
+#else
+#define PREFETCH(location) _mm_prefetch(location, _MM_HINT_T0)
+#endif
+#else
+  // defines __BYTE_ORDER as __LITTLE_ENDIAN or __BIG_ENDIAN
+#include <sys/param.h>
+
+#ifdef __GNUC__
+#define PREFETCH(location) __builtin_prefetch(location)
+#else
+  // no prefetching
+#define PREFETCH(location) ;
+#endif
+#endif
+
+
 #define QUAT_NUM_BITS (18)
 #define MAX_QUAT_VALUE (0.7071067811865475244f)
 #define MAX_QUAT_VALUE_INVERSE (1.0f / MAX_QUAT_VALUE)
@@ -52,15 +77,23 @@ namespace CPPRP
 	public:
 		const T *start;
 		const T *data;
-		size_t size; //Should be in bits?
 		uint32_t t_position;
 		uint32_t bit_position;
+		size_t size; //Should be in bits?
+
+		//Let's store this data in here, saves a call to owner.
+		//Use during network stream parsing
+		uint16_t engineVersion{ 0 };
+		uint8_t licenseeVersion{ 0 };
+		uint8_t netVersion{ 0 };
+
 		std::shared_ptr<ReplayFileData> owner;
 
 	private:
 		template<typename X>
 		const X get_bits(uint16_t n)
 		{
+			
 			if (GetAbsoluteBitPosition() + n > size)
 			{
 				throw std::runtime_error("Attempted to read beyond buffer");
@@ -88,7 +121,8 @@ namespace CPPRP
 
 					if (bit_position == SIZE_T)
 					{
-						bt = *(++data);
+						++data;
+						//bt = *(++data);
 						++t_position;
 						bit_position = 0;
 					}
@@ -114,7 +148,8 @@ namespace CPPRP
 
 				if (bit_position == SIZE_T)
 				{
-					bt = *(++data);
+					++data;
+					//bt = *(++data);
 					++t_position;
 					bit_position = 0;
 				}
@@ -190,11 +225,13 @@ namespace CPPRP
 		return reinterpret_cast<float&>(value);
 	}
 
+
 	template<>
 	template<>
 	inline const Vector3I CPPBitReader<BitReaderType>::read<Vector3I>()
 	{
-		const uint32_t maxbits = owner->header.netVersion >= 7 ? 22 : 20;
+		//PREFETCH((char*)(this->data));
+		const uint32_t maxbits = netVersion >= 7 ? 22 : 20;
 		const uint32_t num_bits = readBitsMax<uint32_t>(maxbits);
 
 		const int32_t bias = 1 << (int)(num_bits + 1);
@@ -298,7 +335,7 @@ namespace CPPRP
 			break;
 		case Platform_PS4:
 			uniqueId = std::make_shared<PS4ID>();
-			if (owner->header.netVersion >= 1)
+			if (netVersion >= 1)
 			{
 				std::static_pointer_cast<PS4ID>(uniqueId)->psId = read<uint64_t>(40 * 8);
 			}
@@ -320,7 +357,7 @@ namespace CPPRP
 		case Platform_PsyNet:
 		{
 			std::shared_ptr<PsyNetID> psyNetID = std::make_shared<PsyNetID>();
-			if (owner->header.engineVersion >= 868 && owner->header.licenseeVersion >= 24 && owner->header.netVersion >= 10)
+			if (engineVersion >= 868 && licenseeVersion >= 24 && netVersion >= 10)
 			{
 				psyNetID->a = read<uint64_t>(64);
 			}
@@ -337,7 +374,7 @@ namespace CPPRP
 		case Platform_Unknown:
 		{
 			uniqueId = std::make_shared<UnkownId>();
-			if (owner->header.licenseeVersion >= 18 && owner->header.netVersion == 0)
+			if (licenseeVersion >= 18 && netVersion == 0)
 			{
 				std::static_pointer_cast<UnkownId>(uniqueId)->unknown = 0;
 			}
@@ -373,9 +410,9 @@ namespace CPPRP
 
 		if (final_length > 1024)
 		{
-			if (owner->header.engineVersion == 0
-				&& owner->header.licenseeVersion == 0
-				&& owner->header.netVersion == 0)
+			if (engineVersion == 0
+				&& licenseeVersion == 0
+				&& netVersion == 0)
 			{
 				throw InvalidVersionException(0,0,0);
 			}
@@ -404,18 +441,17 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_)
+	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_) : engineVersion(owner_->header.engineVersion), licenseeVersion(owner_->header.licenseeVersion), netVersion(owner_->header.netVersion), owner(owner_)
 	{
 		this->start = data;
 		this->data = data;
 		this->size = size;
 		this->t_position = 0;
 		this->bit_position = 0;
-		this->owner = owner_;
 	}
 
 	template<typename T>
-	inline CPPBitReader<T>::CPPBitReader()
+	inline CPPBitReader<T>::CPPBitReader() : engineVersion(0), licenseeVersion(0), netVersion(0)
 	{
 		this->start = NULL;
 		this->data = NULL;
@@ -479,7 +515,7 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline void CPPBitReader<T>::skip(uint32_t num)
+	inline void CPPBitReader<T>::skip(size_t num)
 	{
 		constexpr uint32_t SIZE_IN_BITS = (sizeof(T) * 8);
 		if (bit_position + num >= SIZE_IN_BITS)

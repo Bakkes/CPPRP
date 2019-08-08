@@ -22,6 +22,7 @@
 
 int main(int argc, char *argv[])
 {
+	printf("hi");
 	std::queue<std::filesystem::path> replayFilesToLoad;
 	{
 		std::filesystem::path p(argv[1]);
@@ -35,8 +36,8 @@ int main(int argc, char *argv[])
 			{
 				if (entry.path().filename().u8string().find(".replay") == std::string::npos)
 					continue;
-				//if (replayFilesToLoad.size() >= 5)
-				//	break;
+				if (replayFilesToLoad.size() >= 1000)
+					break;
 				replayFilesToLoad.push(entry.path());
 			}
 		}
@@ -151,7 +152,8 @@ int main(int argc, char *argv[])
 
 	if constexpr (true)
 	{
-		constexpr size_t bothReplayThreadCount = 40;
+		auto start = std::chrono::steady_clock::now();
+		constexpr size_t bothReplayThreadCount = 10;
 		std::vector<std::thread> bothReplayThreads;
 		for (size_t i = 0; i < bothReplayThreadCount; ++i)
 		{
@@ -161,7 +163,7 @@ int main(int argc, char *argv[])
 			bothReplayThreads.emplace_back(std::move(bothReplayThread));
 		}
 
-		auto start = std::chrono::steady_clock::now();
+		
 		for (auto& t : bothReplayThreads)
 		{
 			t.join();
@@ -183,6 +185,7 @@ int main(int argc, char *argv[])
 	} 
 	else
 	{
+		auto start = std::chrono::steady_clock::now();
 		constexpr size_t loadReplayThreadCount = 4;
 		constexpr size_t parseReplayThreadCount = 0;
 		std::vector<std::thread> loadReplayThreads;
@@ -202,7 +205,7 @@ int main(int argc, char *argv[])
 			parseReplayThreads.emplace_back(std::move(parseReplayThread));
 		}
 
-		auto start = std::chrono::steady_clock::now();
+		
 		for (auto& t : loadReplayThreads)
 		{
 			t.join();

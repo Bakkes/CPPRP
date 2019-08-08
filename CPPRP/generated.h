@@ -114,8 +114,8 @@ inline const CameraSettings Consume(CPPBitReader<BitReaderType>& reader)
 	item.distance = reader.read<float>();
 	item.stiffness = reader.read<float>();
 	item.swivelspeed = reader.read<float>();
-	if(reader.owner->header.engineVersion >= 868 
-		&& reader.owner->header.licenseeVersion >= 20) { 
+	if(reader.engineVersion >= 868 
+		&& reader.licenseeVersion >= 20) { 
 		item.transitionspeed = reader.read<float>();
 	} else {
 		item.transitionspeed = 0;

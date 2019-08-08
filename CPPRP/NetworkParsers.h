@@ -59,7 +59,7 @@ namespace CPPRP
 		{
 			//TODO: assign this
 			//const UserColorAttribute uca = Consume<UserColorAttribute>(reader);
-			if (reader.owner->header.licenseeVersion >= 23)
+			if (reader.licenseeVersion >= 23)
 			{
 				UserColorAttribute uca;
 				uca.r = reader.read<uint8_t>();
@@ -78,7 +78,7 @@ namespace CPPRP
 		}
 		else if (className.compare("TAGame.ProductAttribute_Painted_TA") == 0)
 		{
-			if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 18)
+			if (reader.engineVersion >= 868 && reader.licenseeVersion >= 18)
 			{
 				reader.read<uint32_t>(31);
 			}
@@ -108,6 +108,7 @@ namespace CPPRP
 	template<>
 	inline const ClientLoadout Consume(CPPBitReader<BitReaderType>& reader) {
 		ClientLoadout item;
+		PREFETCH((char*)(reader.data));
 		item.version = reader.read<uint8_t>();
 		item.body = reader.read<uint32_t>();
 		item.skin = reader.read<uint32_t>();
@@ -147,8 +148,8 @@ namespace CPPRP
 	template<>
 	inline const ReplicatedRBState Consume(CPPBitReader<BitReaderType>& reader) {
 		ReplicatedRBState item;
-		const uint32_t netVersion = reader.owner->header.netVersion;
-
+		const uint32_t netVersion = reader.netVersion;
+		PREFETCH((char*)(reader.data));
 		item.sleeping = reader.read<bool>();
 
 		if (netVersion >= 5)
@@ -206,7 +207,7 @@ namespace CPPRP
 	template<>
 	inline const GameMode Consume(CPPBitReader<BitReaderType>& reader) {
 		GameMode item;
-		if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 12)
+		if (reader.engineVersion >= 868 && reader.licenseeVersion >= 12)
 		{
 			item.gamemode = reader.read<uint8_t>();
 		}
@@ -222,7 +223,7 @@ namespace CPPRP
 		Reservation item;
 		item.unknown = reader.read<uint8_t>(3);
 		item.player_id = reader.read<std::shared_ptr<UniqueId>>();
-		if (item.player_id->platform == Platform_Unknown && (reader.owner->header.licenseeVersion < 18 || reader.owner->header.netVersion != 0))
+		if (item.player_id->platform == Platform_Unknown && (reader.licenseeVersion < 18 || reader.netVersion != 0))
 		{
 			
 		}
@@ -231,7 +232,7 @@ namespace CPPRP
 			item.player_name = reader.read<std::string>();
 		}
 
-		if (reader.owner->header.engineVersion >= 868 && reader.owner->header.licenseeVersion >= 12)
+		if (reader.engineVersion >= 868 && reader.licenseeVersion >= 12)
 		{
 			item.unknown2 = reader.read<uint8_t>();
 

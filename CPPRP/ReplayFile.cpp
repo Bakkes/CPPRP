@@ -54,6 +54,12 @@ namespace CPPRP
 		{
 			replayFile->header.netVersion = fullReplayBitReader.read<uint32_t>();
 		}
+
+		//Reconstruct cause we got version info now,  find something better for this
+		size_t bitPos = fullReplayBitReader.GetAbsoluteBitPosition();
+		fullReplayBitReader = CPPBitReader<BitReaderType>((const BitReaderType*)data.data(), dataSizeBits, replayFile);
+		fullReplayBitReader.skip(bitPos);
+
 		replayFile->replayType = fullReplayBitReader.read<std::string>(); //Not sure what this is
 
 
@@ -210,7 +216,7 @@ namespace CPPRP
 
 	const bool ReplayFile::VerifyCRC(CrcCheck verifyWhat)
 	{
-		if ((verifyWhat | CRC_Both) == 0) return false; //User supplied invalid value, < 0 or >= 4
+		if ((verifyWhat & CRC_Both) == 0) return false; //User supplied invalid value, < 0 or >= 4
 
 		const size_t dataSizeBits = data.size() * 8;
 		//Replay not loaded, less than 8 bytes

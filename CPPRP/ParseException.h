@@ -11,8 +11,7 @@ namespace CPPRP
 	{
 	protected:
 		const CPPBitReader<T>& bitReader;
-		
-		ParseException(const CPPBitReader<T>& br);
+		explicit ParseException(const CPPBitReader<T>& br);
 	public:
 		std::string errorMsg = "";
 		const char* what() const throw();
@@ -24,7 +23,7 @@ namespace CPPRP
 	protected:
 		std::string message;
 	public:
-		GeneralParseException(const std::string message, const CPPBitReader<T>& br);
+		explicit GeneralParseException(const std::string& message, const CPPBitReader<T>& br);
 	};
 
 	struct PropertyDoesNotExistException : public std::exception
@@ -33,7 +32,7 @@ namespace CPPRP
 		std::string propertyName;
 		std::string errorMsg;
 	public:
-		PropertyDoesNotExistException(const std::string propertyName_);
+		explicit PropertyDoesNotExistException(const std::string& propertyName_);
 		const char* what() const throw();
 	};
 
@@ -44,7 +43,7 @@ namespace CPPRP
 	protected:
 		std::string failedAttribute;
 	public:
-		AttributeParseException(const std::string attribute, const CPPBitReader<T>& br);
+		AttributeParseException(const std::string& attribute, const CPPBitReader<T>& br);
 	};
 
 	template<typename T>
@@ -53,7 +52,7 @@ namespace CPPRP
 		std::stringstream ss;
 		auto absPos = (bitReader.t_position * sizeof(T) * 8) + bitReader.bit_position;
 		ss << "T_POS=" << bitReader.t_position << ", BIT_POS=" << bitReader.bit_position << ", ABS=" << absPos << "/" << bitReader.size;
-		ss << ". Version(" << bitReader.owner->header.engineVersion << ", " << bitReader.owner->header.licenseeVersion << ", " << bitReader.owner->header.netVersion << ")";
+		ss << ". Version(" << bitReader.engineVersion << ", " << bitReader.licenseeVersion << ", " << bitReader.netVersion << ")";
 		errorMsg = ss.str();
 	}
 
@@ -64,7 +63,7 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline AttributeParseException<T>::AttributeParseException(const std::string attribute, const CPPBitReader<T>& br) : ParseException<T>(br), failedAttribute(attribute)
+	inline AttributeParseException<T>::AttributeParseException(const std::string& attribute, const CPPBitReader<T>& br) : ParseException<T>(br), failedAttribute(attribute)
 	{
 		std::stringstream ss;
 		ss << "Failed to parse attribute \"" << failedAttribute << "\". ";
@@ -72,7 +71,7 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline GeneralParseException<T>::GeneralParseException(const std::string message_, const CPPBitReader<T>& br) : ParseException<T>(br), message(message_)
+	inline GeneralParseException<T>::GeneralParseException(const std::string& message_, const CPPBitReader<T>& br) : ParseException<T>(br), message(message_)
 	{
 		this->errorMsg = message + " " + this->errorMsg;
 	}
