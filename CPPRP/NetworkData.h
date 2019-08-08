@@ -340,3 +340,4 @@ namespace CPPRP
 		uint32_t tier;
 	};
 }
+#include "GameClasses.h"

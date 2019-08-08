@@ -515,7 +515,7 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline void CPPBitReader<T>::skip(size_t num)
+	inline void CPPBitReader<T>::skip(uint32_t num)
 	{
 		constexpr uint32_t SIZE_IN_BITS = (sizeof(T) * 8);
 		if (bit_position + num >= SIZE_IN_BITS)

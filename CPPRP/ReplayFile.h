@@ -19,6 +19,13 @@ namespace CPPRP
 		CRC_Both = CRC_Header | CRC_Body
 	};
 
+	struct ActorStateData
+	{
+		std::shared_ptr<Engine::Actor> actorObject;
+		std::shared_ptr<ClassNet> classNet;
+		uint32_t nameId{ 0 };
+	};
+
 	class ReplayFile
 	{
 	private:
@@ -27,7 +34,7 @@ namespace CPPRP
 		std::unordered_map<std::string, std::shared_ptr<ClassNet>> classnetMap;
 	public:
 		std::filesystem::path path;
-		std::unordered_map<int, ActorState> actorStates;
+		std::unordered_map<int, ActorStateData> actorStates;
 		std::shared_ptr<ReplayFileData> replayFile;
 		NetworkStreamParser networkParser;
 		std::vector<std::string> parseLog;

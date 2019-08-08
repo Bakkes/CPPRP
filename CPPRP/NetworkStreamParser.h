@@ -49,7 +49,7 @@ namespace CPPRP
 
 		void RegisterParsers(const std::shared_ptr<ReplayFileData>& rfd);
 
-		std::shared_ptr<void> Parse(const uint32_t propertyIdx, CPPBitReader<BitReaderType>& br) const;
+		std::shared_ptr<void> Parse(const std::string& name, CPPBitReader<BitReaderType>& br, const std::shared_ptr<Engine::Object>& actor) const;
 	};
 
 }

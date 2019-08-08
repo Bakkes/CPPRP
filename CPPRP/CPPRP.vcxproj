@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClInclude Include="CPPBitReader.h" />
     <ClInclude Include="CRC.h" />
+    <ClInclude Include="GameClasses.h" />
     <ClInclude Include="generated.h" />
     <ClInclude Include="NetworkData.h" />
     <ClInclude Include="NetworkParsers.h" />
