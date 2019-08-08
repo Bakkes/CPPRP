@@ -44,16 +44,16 @@ namespace CPPRP
 	}
 
 	template<>
-	inline const ProductAttribute Consume(CPPBitReader<BitReaderType>& reader) {
-		ProductAttribute item;
-		item.unknown1 = reader.read<bool>();
-		item.class_index = reader.read<uint32_t>();
+	inline const std::shared_ptr<ProductAttribute> Consume(CPPBitReader<BitReaderType>& reader) {
+		std::shared_ptr<ProductAttribute> prodAttr;
+		bool unknown1 = reader.read<bool>();
+		uint32_t class_index = reader.read<uint32_t>();
 		//TODO: read classnames
-		if (item.class_index > reader.owner->objects.size())
+		if (class_index > reader.owner->objects.size())
 		{
 			throw AttributeParseException<BitReaderType>("ProductAttribute", reader);
 		}
-		std::string className = reader.owner->objects[item.class_index];
+		std::string className = reader.owner->objects[class_index];
 
 		if (className.compare("TAGame.ProductAttribute_UserColor_TA") == 0)
 		{
@@ -61,47 +61,71 @@ namespace CPPRP
 			//const UserColorAttribute uca = Consume<UserColorAttribute>(reader);
 			if (reader.licenseeVersion >= 23)
 			{
-				UserColorAttribute uca;
-				uca.r = reader.read<uint8_t>();
-				uca.g = reader.read<uint8_t>();
-				uca.b = reader.read<uint8_t>();
-				uca.a = reader.read<uint8_t>();
+				std::shared_ptr<ProductAttributeUserColorRGB> ucargb = std::make_shared<ProductAttributeUserColorRGB>();
+
+				ucargb->r = reader.read<uint8_t>();
+				ucargb->g = reader.read<uint8_t>();
+				ucargb->b = reader.read<uint8_t>();
+				ucargb->a = reader.read<uint8_t>();
+				prodAttr = ucargb;
 			}
 			else
 			{
-				item.has_value = reader.read<bool>();
-				if (item.has_value)
+				std::shared_ptr<ProductAttributeUserColorSingle> ucas = std::make_shared<ProductAttributeUserColorSingle>();
+
+				ucas->has_value = reader.read<bool>();
+				if (ucas->has_value)
 				{
-					item.value = reader.read<uint32_t>(31);
+					ucas->value = reader.read<uint32_t>(31);
 				}
+				else
+				{
+					ucas->value = 0;
+				}
+				prodAttr = ucas;
 			}
 		}
 		else if (className.compare("TAGame.ProductAttribute_Painted_TA") == 0)
 		{
+			std::shared_ptr<ProductAttributePainted> pad = std::make_shared<ProductAttributePainted>();
+
 			if (reader.engineVersion >= 868 && reader.licenseeVersion >= 18)
 			{
-				reader.read<uint32_t>(31);
+				pad->value = reader.read<uint32_t>(31);
 			}
 			else
 			{
-				reader.readBitsMax<uint32_t>(14);
+				pad->value = reader.readBitsMax<uint32_t>(14);
 			}
+			prodAttr = pad;
 		}
-		else if (className.compare("TAGame.ProductAttribute_TeamEdition_TA") == 0
-			|| className.compare("TAGame.ProductAttribute_SpecialEdition_TA") == 0)
+		else if (className.compare("TAGame.ProductAttribute_TeamEdition_TA") == 0)
 		{
-			//TODO: assign
-			reader.read<uint32_t>(31); //Only read 31 bits?
+			std::shared_ptr<ProductAttributeTeamEdition> teamEdition = std::make_shared<ProductAttributeTeamEdition>();
+			teamEdition->value = reader.read<uint32_t>(31);
+			prodAttr = teamEdition;
+
+		}
+		else if(className.compare("TAGame.ProductAttribute_SpecialEdition_TA") == 0)
+		{
+			std::shared_ptr<ProductAttributeSpecialEdition> specialEdition = std::make_shared<ProductAttributeSpecialEdition>();
+			specialEdition->value = reader.read<uint32_t>(31);
+			prodAttr = specialEdition;
 		}
 		else if (className.compare("TAGame.ProductAttribute_TitleID_TA") == 0)
 		{
-			reader.read<std::string>();
+			std::shared_ptr<ProductAttributeTitle> title = std::make_shared<ProductAttributeTitle>();
+			title->title = reader.read<std::string>();
+			prodAttr = title;
+			
 		}
 		else
 		{
 			printf("Can not read product attribute %s@@@@\n", className.c_str());
 		}
-		return item;
+		prodAttr->unknown1 = unknown1;
+		prodAttr->class_index = class_index;
+		return prodAttr;
 	}
 
 
