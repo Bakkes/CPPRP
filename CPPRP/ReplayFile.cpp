@@ -300,13 +300,13 @@ namespace CPPRP
 	static std::unordered_map<std::string, parsePropertyFunc> parsePropertyFuncs;
 
 	template<typename T1>
-	constexpr std::shared_ptr<Engine::Actor> createObject()
+	constexpr inline static std::shared_ptr<Engine::Actor> createObject()
 	{
 		return std::make_shared<T1>();
 	}
 
 	template<typename T1>
-	constexpr void RegisterClass(std::string className)
+	constexpr inline static void RegisterClass(std::string className)
 	{
 		createObjectFuncs[className] = &createObject<T1>;
 	}
@@ -314,12 +314,14 @@ namespace CPPRP
 	//template<typename T1>
 	//constexpr void parseProp()
 
-	
-	void RegisterField(const std::string& str, parsePropertyFunc callback)
+
+	template<typename T>
+	constexpr inline static void RegisterField(const std::string& str, T callback)
 	{
 		parsePropertyFuncs[str] = callback;
 	}
-	void Initializor()
+	template<typename T>
+	constexpr inline static T Initializor()
 	{
 		RegisterClass<Engine::Actor>("Engine.Actor");
 		RegisterField("Engine.Actor:DrawScale", [](std::shared_ptr<Engine::Actor>& struc, CPPBitReader<BitReaderType>& br) { std::static_pointer_cast<Engine::Actor>(struc)->DrawScale = Consume<float>(br); });
@@ -580,13 +582,13 @@ namespace CPPRP
 		RegisterClass<TAGame::GameEvent_SoccarSplitscreen_TA>("TAGame.GameEvent_SoccarSplitscreen_TA");
 		RegisterClass<TAGame::HauntedBallTrapTrigger_TA>("TAGame.HauntedBallTrapTrigger_TA");
 
-
+		return 0;
 
 
 
 
 	}
-
+	static int T = Initializor<int>();
 	
 
 	const std::unordered_map<std::string, std::string> class_extensions =
@@ -760,7 +762,7 @@ namespace CPPRP
 			endPos = replayFile->netstream_size * 8;
 		}
 
-		Initializor();
+		
 		CPPBitReader<BitReaderType> networkReader((BitReaderType*)(replayFile->netstream_data), static_cast<size_t>(endPos), replayFile);
 
 		//FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
