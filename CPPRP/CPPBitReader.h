@@ -93,11 +93,13 @@ namespace CPPRP
 		template<typename X>
 		const X get_bits(uint16_t n)
 		{
-			
+			#ifndef PARSE_UNSAFE
 			if (GetAbsoluteBitPosition() + n > size)
 			{
 				throw std::runtime_error("Attempted to read beyond buffer");
 			}
+			#endif
+
 			constexpr uint16_t SIZE_T = sizeof(T) * 8;
 			X result = 0;
 			uint16_t bit_pos = 0;
@@ -136,7 +138,7 @@ namespace CPPRP
 			{
 				result |= bt << (bit_pos);
 				++t_position;
-				bt = *(++data);
+				bt = *(++data); //Valgrind says this has invalid reads, probably at end of replay and there's no bytes left?
 				n -= SIZE_T;
 				bit_pos += SIZE_T;
 			}
@@ -180,6 +182,8 @@ namespace CPPRP
 		}
 	public:
 		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_);
+		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_, 
+			const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV);
 		CPPBitReader();
 		
 
@@ -288,29 +292,17 @@ namespace CPPRP
 		switch (largest)
 		{
 		case 0:
-			q.w = extra;
-			q.x = a;
-			q.y = b;
-			q.z = c;
+			q = { extra, a, b, c };
 			break;
 		case 1:
-			q.w = a;
-			q.x = extra;
-			q.y = b;
-			q.z = c;
+			q = { a, extra, b, c };
 			break;
 		case 2:
-			q.w = a;
-			q.x = b;
-			q.y = extra;
-			q.z = c;
+			q = { a, b, extra, c };
 			break;
 		case 3:
 		default:
-			q.w = a;
-			q.x = b;
-			q.y = c;
-			q.z = extra;
+			q = { a, b, c, extra };
 			break;
 		};
 		return q;
@@ -408,6 +400,7 @@ namespace CPPRP
 			return "";
 		}
 
+		#ifndef PARSE_UNSAFE
 		if (final_length > 1024)
 		{
 			if (engineVersion == 0
@@ -421,6 +414,7 @@ namespace CPPRP
 				throw std::runtime_error("Got unwanted string length, read value " + std::to_string(length) + ", reading bytes " + std::to_string(final_length) + ". (" + std::to_string(this->bit_position) + ")");
 			}
 		}
+		#endif
 
 		std::string str;
 		str.resize(final_length - 1);
@@ -442,6 +436,17 @@ namespace CPPRP
 
 	template<typename T>
 	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_) : engineVersion(owner_->header.engineVersion), licenseeVersion(owner_->header.licenseeVersion), netVersion(owner_->header.netVersion), owner(owner_)
+	{
+		this->start = data;
+		this->data = data;
+		this->size = size;
+		this->t_position = 0;
+		this->bit_position = 0;
+	}
+
+	template<typename T>
+	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_, 
+		const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV) : engineVersion(engineV), licenseeVersion(licenseeV), netVersion(netV), owner(owner_)
 	{
 		this->start = data;
 		this->data = data;
@@ -515,7 +520,7 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline void CPPBitReader<T>::skip(size_t num)
+	inline void CPPBitReader<T>::skip(uint32_t num)
 	{
 		constexpr uint32_t SIZE_IN_BITS = (sizeof(T) * 8);
 		if (bit_position + num >= SIZE_IN_BITS)

@@ -114,8 +114,8 @@ inline const CameraSettings Consume(CPPBitReader<BitReaderType>& reader)
 	item.distance = reader.read<float>();
 	item.stiffness = reader.read<float>();
 	item.swivelspeed = reader.read<float>();
-	if(reader.engineVersion >= 868 
-		&& reader.licenseeVersion >= 20) { 
+	if(reader.owner->header.engineVersion >= 868 
+		&& reader.owner->header.licenseeVersion >= 20) { 
 		item.transitionspeed = reader.read<float>();
 	} else {
 		item.transitionspeed = 0;
@@ -293,7 +293,7 @@ template<>
 inline const Attributes Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	Attributes item;
-	item.product_attributes = ConsumeVector<ProductAttribute>(reader);
+	item.product_attributes = ConsumeVector<std::shared_ptr<ProductAttribute>>(reader);
 	return item;
 }
 
@@ -350,9 +350,27 @@ inline const std::string ToString(const OnlineLoadout& item)
 }
 
 template<>
-inline const UserColorAttribute Consume(CPPBitReader<BitReaderType>& reader) 
+inline const ProductAttributeUserColorSingle Consume(CPPBitReader<BitReaderType>& reader) 
 {
-	UserColorAttribute item;
+	ProductAttributeUserColorSingle item;
+	item.hasValue = reader.read<bool>();
+	item.value = reader.read<uint32_t>();
+	return item;
+}
+
+template<>
+inline const std::string ToString(const ProductAttributeUserColorSingle& item) 
+{
+	std::stringstream ss;
+	ss << "hasValue = " << item.hasValue;
+	ss << ",\n " << "value = " << item.value;
+	return ss.str();
+}
+
+template<>
+inline const ProductAttributeUserColorRGB Consume(CPPBitReader<BitReaderType>& reader) 
+{
+	ProductAttributeUserColorRGB item;
 	item.r = reader.read<uint8_t>();
 	item.g = reader.read<uint8_t>();
 	item.b = reader.read<uint8_t>();
@@ -361,13 +379,87 @@ inline const UserColorAttribute Consume(CPPBitReader<BitReaderType>& reader)
 }
 
 template<>
-inline const std::string ToString(const UserColorAttribute& item) 
+inline const std::string ToString(const ProductAttributeUserColorRGB& item) 
 {
 	std::stringstream ss;
 	ss << "r = " << item.r;
 	ss << ",\n " << "g = " << item.g;
 	ss << ",\n " << "b = " << item.b;
 	ss << ",\n " << "a = " << item.a;
+	return ss.str();
+}
+
+template<>
+inline const ProductAttributeTitle Consume(CPPBitReader<BitReaderType>& reader) 
+{
+	ProductAttributeTitle item;
+	item.title = reader.read<std::string>();
+	return item;
+}
+
+template<>
+inline const std::string ToString(const ProductAttributeTitle& item) 
+{
+	std::stringstream ss;
+	ss << "title = " << item.title;
+	return ss.str();
+}
+
+template<>
+inline const ProductAttributeSingleValue Consume(CPPBitReader<BitReaderType>& reader) 
+{
+	ProductAttributeSingleValue item;
+	item.value = reader.read<uint32_t>();
+	return item;
+}
+
+template<>
+inline const std::string ToString(const ProductAttributeSingleValue& item) 
+{
+	std::stringstream ss;
+	ss << "value = " << item.value;
+	return ss.str();
+}
+
+template<>
+inline const ProductAttributePainted Consume(CPPBitReader<BitReaderType>& reader) 
+{
+	ProductAttributePainted item;
+	return item;
+}
+
+template<>
+inline const std::string ToString(const ProductAttributePainted& item) 
+{
+	std::stringstream ss;
+	return ss.str();
+}
+
+template<>
+inline const ProductAttributeTeamEdition Consume(CPPBitReader<BitReaderType>& reader) 
+{
+	ProductAttributeTeamEdition item;
+	return item;
+}
+
+template<>
+inline const std::string ToString(const ProductAttributeTeamEdition& item) 
+{
+	std::stringstream ss;
+	return ss.str();
+}
+
+template<>
+inline const ProductAttributeSpecialEdition Consume(CPPBitReader<BitReaderType>& reader) 
+{
+	ProductAttributeSpecialEdition item;
+	return item;
+}
+
+template<>
+inline const std::string ToString(const ProductAttributeSpecialEdition& item) 
+{
+	std::stringstream ss;
 	return ss.str();
 }
 

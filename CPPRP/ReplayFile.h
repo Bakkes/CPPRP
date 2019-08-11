@@ -3,10 +3,11 @@
 #include <string>
 #include <filesystem>
 #include <any>
+#include <map>
 #include <vector>
 #include <unordered_map>
 #include <mutex>
-
+#include <functional>
 #include "NetworkStreamParser.h"
 #include "CPPBitReader.h"
 #include "ReplayFileData.h"
@@ -19,18 +20,32 @@ namespace CPPRP
 		CRC_Both = CRC_Header | CRC_Body
 	};
 
+	struct ActorStateData
+	{
+		std::shared_ptr<Engine::Actor> actorObject;
+		std::shared_ptr<ClassNet> classNet;
+		uint32_t nameId{ 0 };
+	};
+
+	typedef std::function<std::shared_ptr<Engine::Actor>()> createObjectFunc;
+	typedef std::function<void(std::shared_ptr<Engine::Actor>&, CPPBitReader<BitReaderType>& br)> parsePropertyFunc;
+
 	class ReplayFile
 	{
 	private:
 		std::vector<char> data;
 		CPPBitReader<BitReaderType> fullReplayBitReader;
-		std::unordered_map<std::string, std::shared_ptr<ClassNet>> classnetMap;
+		std::map<std::string, std::shared_ptr<ClassNet>> classnetMap;
 	public:
 		std::filesystem::path path;
-		std::unordered_map<int, ActorState> actorStates;
+		std::vector<Frame> frames;
+		std::unordered_map<int, ActorStateData> actorStates;
 		std::shared_ptr<ReplayFileData> replayFile;
 		NetworkStreamParser networkParser;
+		std::vector<parsePropertyFunc> parseFunctions;
+		std::vector<createObjectFunc> createFunctions;
 		std::vector<std::string> parseLog;
+		std::vector<std::function<void(const uint32_t, const std::unordered_map<int, ActorStateData>&)>> tickables;
 	public:
 		ReplayFile(std::filesystem::path path_);
 		~ReplayFile();

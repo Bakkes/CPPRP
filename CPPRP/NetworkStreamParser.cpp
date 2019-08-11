@@ -321,20 +321,21 @@ namespace CPPRP
 			});
 	}
 
-	std::shared_ptr<void> NetworkStreamParser::Parse(const uint32_t propertyIdx, CPPBitReader<BitReaderType>& br) const
+	std::shared_ptr<void> NetworkStreamParser::Parse(const std::string& name, CPPBitReader<BitReaderType>& br, const std::shared_ptr<Engine::Object>& actor) const
 	{
-		if (propertyIdx > parseFunctions.size())
+		/*if (propertyIdx > parseFunctions.size())
 		{
 			throw GeneralParseException("Reader at wrong position (propertyIndex > parseFunctions.size())", br);
-		}
-		const auto func = parseFunctions[propertyIdx];
+		}*/
+		return nullptr;
+		/*const auto func = parseFunctions[propertyIdx];
 		if (func == nullptr)
 		{
 			std::string parseFunc = br.owner->objects[propertyIdx];
 			throw GeneralParseException("Parser not implemented for " + parseFunc, br);
 		}
 		auto inst = func(br);
-		return inst;
+		return inst;*/
 	}
 
 	//template<typename Writer>

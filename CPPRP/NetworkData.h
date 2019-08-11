@@ -169,12 +169,14 @@ namespace CPPRP
 		bool unknown1;
 	};
 
+
+
 	struct Attributes
 	{
 		//uint8_t attributes_count; //Is automatically read when consuming vector
 		__ParserAttribute__(CallToString, true)
 		__ParserAttribute__(CallConsume, true)
-		std::vector<ProductAttribute> product_attributes;
+		std::vector<std::shared_ptr<ProductAttribute>> product_attributes;
 	};
 
 	//__ParserAttribute__(Consume, false)
@@ -200,12 +202,44 @@ namespace CPPRP
 		std::vector<Attributes> attributes_list;
 	};
 
-	struct UserColorAttribute
+
+	struct ProductAttributeUserColorSingle : public ProductAttribute 
+	{
+		bool hasValue;
+		uint32_t value;
+	};
+
+	struct ProductAttributeUserColorRGB : public ProductAttribute
 	{
 		uint8_t r;
 		uint8_t g;
 		uint8_t b;
 		uint8_t a;
+	};
+
+	struct ProductAttributeTitle : public ProductAttribute
+	{
+		std::string title;
+	};
+
+	struct ProductAttributeSingleValue : public ProductAttribute
+	{
+		uint32_t value;
+	};
+
+	struct ProductAttributePainted : public ProductAttributeSingleValue
+	{
+		
+	};
+
+	struct ProductAttributeTeamEdition : public ProductAttributeSingleValue
+	{
+
+	};
+
+	struct ProductAttributeSpecialEdition : public ProductAttributeSingleValue
+	{
+
 	};
 
 	struct ClientLoadoutsOnline
@@ -340,3 +374,4 @@ namespace CPPRP
 		uint32_t tier;
 	};
 }
+#include "GameClasses.h"
