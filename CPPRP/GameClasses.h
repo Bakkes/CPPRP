@@ -13,7 +13,7 @@ namespace CPPRP
 	{
 		struct Object
 		{
-
+			virtual ~Object() {} //Makes it polymorphic
 		};
 
 		CLASS(Actor);

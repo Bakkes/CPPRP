@@ -8,6 +8,10 @@
 #include "NetworkParsers.h"
 #include <any>
 
+
+/*
+Guess this class is unused for now
+*/
 namespace CPPRP
 {
 	constexpr bool IncludeParseLog = false;
@@ -35,14 +39,14 @@ namespace CPPRP
 		template<typename T>
 		constexpr void RegisterParsers(const std::initializer_list<std::string> props)
 		{
-			for (auto str : props)
+			for (auto& str : props)
 			{
 				RegisterParsers<T>(str);
 			}
 		}
 
 		template<typename T>
-		constexpr void RegisterParsers(const std::string prop)
+		constexpr void RegisterParsers(const std::string& prop)
 		{
 			parseFunctions[functionToIndexMapping[prop]] = &createInstance<T>;
 		}

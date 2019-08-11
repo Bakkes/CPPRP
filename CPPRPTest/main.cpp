@@ -16,13 +16,40 @@
 #include <map>
 #include <filesystem>
 #include <queue>
+#include <unordered_map>
 #undef max
 
 
 
 int main(int argc, char *argv[])
 {
-	printf("hi");
+	if constexpr (false) {
+		auto replayFile = std::make_shared<CPPRP::ReplayFile>("F:/Alpaca/2F6924754EEC41B468694D9537E4C1D7.replay");
+		replayFile->Load();
+		replayFile->DeserializeHeader();
+		for (auto it : replayFile->GetProperty<std::vector<std::unordered_map<std::string, std::shared_ptr<CPPRP::Property>>>>("PlayerStats"))
+		{
+			for (auto it2 : it)
+			{
+				printf("%s\n", it2.first.c_str());
+			}
+		}
+		std::map<uint32_t, std::unordered_map<uint32_t, CPPRP::Vector3>> locations;
+		replayFile->tickables.push_back([&](const uint32_t frameNumber, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
+		{
+			for (auto& actor : actorStats)
+			{
+				std::shared_ptr<CPPRP::TAGame::Car_TA> car = std::dynamic_pointer_cast<CPPRP::TAGame::Car_TA>(actor.second.actorObject);
+				if (car)
+				{
+					locations[frameNumber][actor.first] = car->ReplicatedRBState.position;
+				}
+			}
+		});
+		replayFile->Parse();
+		int fdfsd = 5;
+	}
+	//printf("hi");
 	std::queue<std::filesystem::path> replayFilesToLoad;
 	{
 		std::filesystem::path p(argv[1]);
@@ -36,7 +63,7 @@ int main(int argc, char *argv[])
 			{
 				if (entry.path().filename().u8string().find(".replay") == std::string::npos)
 					continue;
-				if (replayFilesToLoad.size() >= 1000)
+				if (replayFilesToLoad.size() >= 600)
 					break;
 				replayFilesToLoad.push(entry.path());
 			}
@@ -54,10 +81,11 @@ int main(int argc, char *argv[])
 	std::mutex queueMutex;
 	std::mutex filesMutex;
 
+	//td::atomic<uint32_t> 
 	std::atomic<bool> allLoaded = false;
 	std::queue<std::shared_ptr<CPPRP::ReplayFile>> replayFileQueue;
 
-	auto parseReplay = [&allLoaded, &queueMutex, &replayFileQueue]() 
+	auto parseReplay = [&success, &allLoaded, &queueMutex, &replayFileQueue]() 
 	{
 		while (true)
 		{
@@ -79,8 +107,10 @@ int main(int argc, char *argv[])
 				
 				try 
 				{
+					replayFile->VerifyCRC(CPPRP::CRC_Both);
 					replayFile->DeserializeHeader();
 					replayFile->Parse();
+					success++;
 					//printf("Parsed\n");
 				}
 				catch (...) { printf("err\n"); }
@@ -119,7 +149,7 @@ int main(int argc, char *argv[])
 		}
 	};
 
-	auto loadAndParseReplay = [&queueMutex, &replayFilesToLoad]()
+	auto loadAndParseReplay = [&success, &queueMutex, &replayFilesToLoad]()
 	{
 		while (true)
 		{
@@ -141,8 +171,42 @@ int main(int argc, char *argv[])
 			{
 				std::shared_ptr<CPPRP::ReplayFile> replayFile = std::make_shared<CPPRP::ReplayFile>(replayName);
 				replayFile->Load();
+				//replayFile->VerifyCRC(CPPRP::CRC_Both);
 				replayFile->DeserializeHeader();
+				
 				replayFile->Parse();
+
+				// struct t
+				// {
+				// 	uint32_t filepos;
+				// 	uint32_t framenumber;
+				// };
+
+				// const auto& kf = replayFile->replayFile->keyframes;
+				// std::vector<t> positions;
+
+				
+				// for (size_t i = 0; i < kf.size(); ++i)
+				// {
+				// 	positions.push_back({ kf[i].filepos, kf[i].frame });
+				// }
+				// t ow = { replayFile->replayFile->netstream_size * 8, static_cast<uint32_t>(replayFile->GetProperty<int32_t>("NumFrames")) };
+				// positions.push_back(ow);
+
+
+				// const size_t posCount = positions.size() - 1;
+				
+				// for (size_t i = 0; i < posCount; ++i)
+				// {
+				// 	auto wot1 = positions[i];
+				// 	auto wot2 = positions[i + 1];
+				// 	uint32_t frameCount = wot2.framenumber - wot1.framenumber;
+
+				// 	replayFile->Parse(wot1.filepos, wot2.filepos, frameCount);
+				// }
+
+				
+				success++;
 				//printf("Parsed\n");
 			}
 			catch (...) { printf("err\n"); }
@@ -153,20 +217,28 @@ int main(int argc, char *argv[])
 	if constexpr (true)
 	{
 		auto start = std::chrono::steady_clock::now();
-		constexpr size_t bothReplayThreadCount = 10;
-		std::vector<std::thread> bothReplayThreads;
-		for (size_t i = 0; i < bothReplayThreadCount; ++i)
-		{
-			std::thread bothReplayThread = std::thread{
-				loadAndParseReplay
-			};
-			bothReplayThreads.emplace_back(std::move(bothReplayThread));
-		}
+		constexpr size_t bothReplayThreadCount = 1;
 
-		
-		for (auto& t : bothReplayThreads)
+		if constexpr(bothReplayThreadCount == 1)
 		{
-			t.join();
+			loadAndParseReplay();
+		}
+		else
+		{
+			std::vector<std::thread> bothReplayThreads;
+			for (size_t i = 0; i < bothReplayThreadCount; ++i)
+			{
+				std::thread bothReplayThread = std::thread{
+					loadAndParseReplay
+				};
+				bothReplayThreads.emplace_back(std::move(bothReplayThread));
+			}
+
+			
+			for (auto& t : bothReplayThreads)
+			{
+				t.join();
+			}
 		}
 		
 		auto end = std::chrono::steady_clock::now();
@@ -177,17 +249,19 @@ int main(int argc, char *argv[])
 
 		std::cout << "Elapsed time in microseconds : "
 			<< std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
-			<< " µs" << std::endl;
+			<< " ï¿½s" << std::endl;
 
 		std::cout << "Elapsed time in milliseconds : "
 			<< std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
 			<< " ms" << std::endl;
+			float totalMs = (float)std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+		std::cout << "Average " << (totalMs/success) << std::endl;
 	} 
 	else
 	{
 		auto start = std::chrono::steady_clock::now();
 		constexpr size_t loadReplayThreadCount = 4;
-		constexpr size_t parseReplayThreadCount = 0;
+		constexpr size_t parseReplayThreadCount = 10;
 		std::vector<std::thread> loadReplayThreads;
 		std::vector<std::thread> parseReplayThreads;
 		for (size_t i = 0; i < loadReplayThreadCount; ++i)
@@ -224,11 +298,13 @@ int main(int argc, char *argv[])
 
 		std::cout << "Elapsed time in microseconds : "
 			<< std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
-			<< " µs" << std::endl;
+			<< " ï¿½s" << std::endl;
 
 		std::cout << "Elapsed time in milliseconds : "
 			<< std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
 			<< " ms" << std::endl;
+		float totalMs = (float)std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+		std::cout << "Average " << (totalMs/success) << std::endl;
 	}
 	{
 		

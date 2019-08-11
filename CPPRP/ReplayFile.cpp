@@ -1,6 +1,6 @@
 #include "ReplayFile.h"
 #include <fstream>
-#include "networkdata.h"
+#include "NetworkData.h"
 #include "CRC.h"
 #include <functional>
 
@@ -42,7 +42,7 @@ namespace CPPRP
 	{
 		const size_t dataSizeBits = data.size() * 8;
 		replayFile = std::make_shared<ReplayFileData>();
-		fullReplayBitReader = CPPBitReader<BitReaderType>((const BitReaderType*)data.data(), dataSizeBits, replayFile);
+		fullReplayBitReader = CPPBitReader<BitReaderType>((const BitReaderType*)data.data(), dataSizeBits, replayFile, 0, 0, 0);
 
 		replayFile->header = {
 			fullReplayBitReader.read<uint32_t>(),	//Size
@@ -226,7 +226,7 @@ namespace CPPRP
 			return false;
 		}
 		CPPBitReader<BitReaderType> bitReader((const BitReaderType*)data.data(), 
-			dataSizeBits, replayFile);
+			dataSizeBits, replayFile, 0, 0, 0);
 		const uint32_t headerSize = bitReader.read<uint32_t>();
 		const uint32_t headerReadCrc = bitReader.read<uint32_t>();
 
@@ -244,7 +244,7 @@ namespace CPPRP
 				static_cast<size_t>(headerSize), CRC_SEED);
 			const bool result = headerCalculatedCRC == headerReadCrc;
 			//If only verify header, or if already failed here
-			if (!(verifyWhat & CRC_Both) || !result)
+			if (!(verifyWhat & CRC_Body) || !result)
 			{
 				return result;
 			}
@@ -291,12 +291,10 @@ namespace CPPRP
 
 #include "GameClasses.h"
 	//std::function<void(std::shared_ptr<Engine::Object>, CPPBitReader<BitReaderType>& br)>
-	typedef std::shared_ptr<Engine::Actor>(*createObjectFunc)();
 	static std::unordered_map<std::string, createObjectFunc> createObjectFuncs;
 
 	//typedef void(*parsePropertyFunc)(std::shared_ptr<Engine::Object>&, CPPBitReader<BitReaderType>& br);
 	
-	typedef std::function<void(std::shared_ptr<Engine::Actor>&, CPPBitReader<BitReaderType>& br)> parsePropertyFunc;
 	static std::unordered_map<std::string, parsePropertyFunc> parsePropertyFuncs;
 
 	template<typename T1>
@@ -743,6 +741,29 @@ namespace CPPRP
 				result = GetPropertyIndexById(cn, ++i);
 			}
 		}
+
+		
+
+		const size_t objectsSize = replayFile->objects.size();
+		parseFunctions.resize(objectsSize);
+		createFunctions.resize(objectsSize);
+		for(size_t i = 0; i < objectsSize; i++)
+		{
+			const std::string& name = replayFile->objects.at(i);
+			auto found = parsePropertyFuncs.find(name);
+			if(found != parsePropertyFuncs.end())
+			{
+				parseFunctions[i] = found->second;
+			}
+
+			auto found2 = createObjectFuncs.find(name);
+			if(found2 != createObjectFuncs.end())
+			{
+				createFunctions[i] = found2->second;
+			}
+		}
+
+
 	}
 
 	void ReplayFile::Parse(const uint32_t startPos, int32_t endPos, const uint32_t frameCount)
@@ -767,14 +788,12 @@ namespace CPPRP
 
 		//FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
 
-		try
+		//try
 		{
 			//char writeBuffer[65536 * 5];
 			//rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
 
 			//rapidjson::Writer<rapidjson::FileWriteStream> writer;
-			int t = 0;
-			std::unordered_map<uint32_t, std::string> test;
 
 			networkReader.skip(startPos);
 
@@ -787,11 +806,16 @@ namespace CPPRP
 			const size_t namesSize = replayFile->names.size();
 			const size_t objectsSize = replayFile->objects.size();
 
+			const uint32_t engineVersion = replayFile->header.engineVersion;
+			const uint32_t licenseeVersion = replayFile->header.licenseeVersion;
 
-			std::vector<Frame> frames;
 			frames.resize(numFrames);
 			uint32_t currentFrame = 0;
-			while (networkReader.canRead() && currentFrame < numFrames)
+			while (
+				#ifndef PARSE_UNSAFE
+				networkReader.canRead() && 
+				#endif
+				currentFrame < numFrames)
 			{
 
 				Frame& f = frames[currentFrame];
@@ -802,12 +826,14 @@ namespace CPPRP
 				{
 					parseLog.push_back("New frame " + std::to_string(currentFrame) + " at " + std::to_string(f.time) + ", pos " + std::to_string(f.position));
 				}
+				#ifndef PARSE_UNSAFE
 				if (f.time < 0 || f.delta < 0
 					|| (f.time > 0 && f.time < 1E-10)
 					|| (f.delta > 0 && f.delta < 1E-10))
 				{
 					throw GeneralParseException("Frame time incorrect (parser at wrong position)", networkReader);
 				}
+				#endif
 
 				//While there are actors in buffer (this frame)
 				while (networkReader.read<bool>())
@@ -819,15 +845,16 @@ namespace CPPRP
 						if (networkReader.read<bool>())
 						{
 							uint32_t name_id;
-							if (replayFile->header.engineVersion > 868 || (replayFile->header.engineVersion == 868 && replayFile->header.licenseeVersion >= 20) || (replayFile->header.engineVersion == 868 && replayFile->header.licenseeVersion >= 14 && !isLan))
+							if (engineVersion > 868 || (engineVersion == 868 && licenseeVersion >= 20) || (engineVersion == 868 && licenseeVersion >= 14 && !isLan))
 							{
 								const uint32_t nameId = networkReader.read<uint32_t>();
 								name_id = nameId;
-
+								#ifndef PARSE_UNSAFE
 								if (nameId > namesSize)
 								{
 									throw GeneralParseException("nameId not in replayFile->objects " + std::to_string(nameId) + " > " + std::to_string(namesSize), networkReader);
 								}
+								#endif
 							}
 							else
 							{
@@ -836,30 +863,38 @@ namespace CPPRP
 							const bool unknownBool = networkReader.read<bool>();
 							const uint32_t typeId = networkReader.read<uint32_t>();
 
+							#ifndef PARSE_UNSAFE
 							if (typeId > objectsSize)
 							{
 								throw GeneralParseException("Typeid not in replayFile->objects " + std::to_string(typeId) + " > " + std::to_string(objectsSize), networkReader);
 							}
+							#endif
 
 							const std::string typeName = replayFile->objects.at(typeId);
 							auto classNet = GetClassnetByNameWithLookup(typeName);
 
+							#ifndef PARSE_UNSAFE
 							if (classNet == nullptr)
 							{
 								throw GeneralParseException("Classnet for " + typeName + " not found", networkReader);
 							}
+							#endif
 
 
 
 							const uint32_t classId = classNet->index;
 							const std::string className = replayFile->objects.at(classId);
-							auto found = createObjectFuncs.find(className);
-							if (found == createObjectFuncs.end())
+							//auto found = createObjectFuncs.find(className);
+
+							const auto& funcPtr = createFunctions[classId];
+							#ifndef PARSE_UNSAFE
+							if (funcPtr == nullptr)
 							{
 								std::cout << "Could not find class " << className << "\n";
 								return;
 							}
-							std::shared_ptr<Engine::Actor> actorObject = found->second();
+							#endif
+							std::shared_ptr<Engine::Actor> actorObject = funcPtr();
 							ActorStateData asd = { actorObject, classNet, name_id };
 							if constexpr (IncludeParseLog)
 							{
@@ -892,15 +927,18 @@ namespace CPPRP
 									snprintf(buff, sizeof(buff), "Calling parser for %s (%i, %i, %s)", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.nameId >= namesSize ? "unknown" : replayFile->names[actorState.nameId].c_str());
 									parseLog.push_back(std::string(buff));
 								}
-								const std::string& objName = replayFile->objects[propertyIndex];
-								auto found = parsePropertyFuncs.find(objName);
-								if (found == parsePropertyFuncs.end())
+								
+								const auto& funcPtr = parseFunctions[propertyIndex];
+								
+								#ifndef PARSE_UNSAFE
+								if(funcPtr == nullptr)
 								{
+									const std::string& objName = replayFile->objects[propertyIndex];
 									std::cout << "Property " << objName << " is undefined\n";
 									return;
 								}
-								found->second(actorState.actorObject, networkReader);
-								//std::shared_ptr<void> result = networkParser.Parse(propertyIndex, networkReader);
+								#endif
+								funcPtr(actorState.actorObject, networkReader);
 							}
 						}
 					}
@@ -908,6 +946,10 @@ namespace CPPRP
 					{
 						actorStates.erase(actorId);
 					}
+				}
+				for (const auto& tick : tickables)
+				{
+					tick(currentFrame, actorStates);
 				}
 				currentFrame++;
 			}
@@ -921,12 +963,12 @@ namespace CPPRP
 				throw GeneralParseException("Not enough bytes parsed! Expected ~" + std::to_string(networkReader.size) + ", parsed: " + std::to_string(networkReader.GetAbsoluteBitPosition()) + ". Diff(" + std::to_string(networkReader.size - networkReader.GetAbsoluteBitPosition()) + ")", networkReader);
 			}
 		}
-		catch (...)
+		//catch (...)
 		{
 			//printf("Caught ex\n");
 			//Parse(fileName, startPos, endPos);
 			//fclose(fp);
-			throw;
+			//throw;
 		}
 
 	}
