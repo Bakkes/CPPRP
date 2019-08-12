@@ -29,6 +29,9 @@ namespace CPPRP
 
 	typedef std::function<std::shared_ptr<Engine::Actor>()> createObjectFunc;
 	typedef std::function<void(std::shared_ptr<Engine::Actor>&, CPPBitReader<BitReaderType>& br)> parsePropertyFunc;
+	typedef std::function<void(const uint32_t, const std::unordered_map<int, ActorStateData>&)> tickable;
+	typedef std::function<void(const ActorStateData&)> actorCreated;
+	typedef std::function<void(const ActorStateData&, const std::vector<uint32_t>&)> actorUpdated;
 
 	class ReplayFile
 	{
@@ -45,7 +48,12 @@ namespace CPPRP
 		std::vector<parsePropertyFunc> parseFunctions;
 		std::vector<createObjectFunc> createFunctions;
 		std::vector<std::string> parseLog;
-		std::vector<std::function<void(const uint32_t, const std::unordered_map<int, ActorStateData>&)>> tickables;
+
+	public:
+		std::vector<tickable> tickables;
+		std::vector<actorCreated> createdCallbacks;
+		std::vector<actorUpdated> updatedCallbacks;
+
 	public:
 		ReplayFile(std::filesystem::path path_);
 		~ReplayFile();

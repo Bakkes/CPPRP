@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 	std::atomic<bool> allLoaded = false;
 	std::queue<std::shared_ptr<CPPRP::ReplayFile>> replayFileQueue;
 
-	auto parseReplay = [&success, &allLoaded, &queueMutex, &replayFileQueue]() 
+	auto parseReplay = [&success, &fail, &allLoaded, &queueMutex, &replayFileQueue]() 
 	{
 		while (true)
 		{
@@ -101,6 +101,11 @@ int main(int argc, char *argv[])
 				{
 					break;
 				}
+				else
+				{
+					std::this_thread::sleep_for(std::chrono::microseconds(100));
+				}
+				
 			}
 			if (replayFile != nullptr)
 			{
@@ -111,9 +116,13 @@ int main(int argc, char *argv[])
 					replayFile->DeserializeHeader();
 					replayFile->Parse();
 					success++;
+					
 					//printf("Parsed\n");
 				}
-				catch (...) { printf("err\n"); }
+				catch (...) { 
+					fail++;
+					printf("[%i/%i] %s\n", fail.load(), success.load() + fail.load(), replayFile->path.filename().u8string().c_str()); 
+				}
 			}
 		}
 	};
@@ -209,7 +218,9 @@ int main(int argc, char *argv[])
 				success++;
 				//printf("Parsed\n");
 			}
-			catch (...) { printf("err\n"); }
+			catch (...) { 
+				printf("err\n"); 
+			}
 			
 		}
 	};
@@ -261,7 +272,7 @@ int main(int argc, char *argv[])
 	{
 		auto start = std::chrono::steady_clock::now();
 		constexpr size_t loadReplayThreadCount = 4;
-		constexpr size_t parseReplayThreadCount = 10;
+		constexpr size_t parseReplayThreadCount = 6;
 		std::vector<std::thread> loadReplayThreads;
 		std::vector<std::thread> parseReplayThreads;
 		for (size_t i = 0; i < loadReplayThreadCount; ++i)
@@ -305,6 +316,7 @@ int main(int argc, char *argv[])
 			<< " ms" << std::endl;
 		float totalMs = (float)std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 		std::cout << "Average " << (totalMs/success) << std::endl;
+		std::cout << "Success: " << success.load() << ", fail: " << fail.load() << std::endl;
 	}
 	{
 		

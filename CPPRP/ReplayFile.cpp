@@ -3,7 +3,7 @@
 #include "NetworkData.h"
 #include "CRC.h"
 #include <functional>
-
+#include "GameClasses.h"
 namespace CPPRP
 {
 	ReplayFile::ReplayFile(std::filesystem::path path_) : path(path_)
@@ -289,11 +289,8 @@ namespace CPPRP
 	}
 
 
-#include "GameClasses.h"
-	//std::function<void(std::shared_ptr<Engine::Object>, CPPBitReader<BitReaderType>& br)>
-	static std::unordered_map<std::string, createObjectFunc> createObjectFuncs;
 
-	//typedef void(*parsePropertyFunc)(std::shared_ptr<Engine::Object>&, CPPBitReader<BitReaderType>& br);
+	static std::unordered_map<std::string, createObjectFunc> createObjectFuncs;
 	
 	static std::unordered_map<std::string, parsePropertyFunc> parsePropertyFuncs;
 
@@ -308,10 +305,6 @@ namespace CPPRP
 	{
 		createObjectFuncs[className] = &createObject<T1>;
 	}
-
-	//template<typename T1>
-	//constexpr void parseProp()
-
 
 	template<typename T>
 	constexpr inline static void RegisterField(const std::string& str, T callback)
@@ -891,6 +884,7 @@ namespace CPPRP
 							if (funcPtr == nullptr)
 							{
 								std::cout << "Could not find class " << className << "\n";
+								throw GeneralParseException("Could not find class " + className , networkReader);
 								return;
 							}
 							#endif
@@ -910,10 +904,15 @@ namespace CPPRP
 								actorObject->Rotation = networkReader.read<Rotator>();
 							}
 							actorStates[actorId] = asd;
+							for(const auto& createdFunc : createdCallbacks)
+							{
+								createdFunc(asd);
+							}
 						}
 						else //Is existing state
 						{
 							ActorStateData actorState = actorStates[actorId];
+							std::vector<uint32_t> updatedProperties;
 							//While there's data for this state to be updated
 							while (networkReader.read<bool>())
 							{
@@ -927,7 +926,7 @@ namespace CPPRP
 									snprintf(buff, sizeof(buff), "Calling parser for %s (%i, %i, %s)", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.nameId >= namesSize ? "unknown" : replayFile->names[actorState.nameId].c_str());
 									parseLog.push_back(std::string(buff));
 								}
-								
+								updatedProperties.push_back(propertyIndex);
 								const auto& funcPtr = parseFunctions[propertyIndex];
 								
 								#ifndef PARSE_UNSAFE
@@ -935,10 +934,16 @@ namespace CPPRP
 								{
 									const std::string& objName = replayFile->objects[propertyIndex];
 									std::cout << "Property " << objName << " is undefined\n";
-									return;
+
+									throw GeneralParseException("Property " + objName + " is undefined", networkReader);
+
 								}
 								#endif
 								funcPtr(actorState.actorObject, networkReader);
+							}
+							for(const auto& updateFunc : updatedCallbacks)
+							{
+								updateFunc(actorState, updatedProperties);
 							}
 						}
 					}

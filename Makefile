@@ -14,12 +14,12 @@ else
 endif
 BUILDFLAGS := -DDEBUG=$(DEBUG) -DRELEASE=$(RELEASE)
 CXX = g++-9
-CXXFLAGS ?= -fPIC -std=c++17 $(INC_FLAGS) -w -fopenmp -march=haswell -DPARSE_UNSAFE#-DPARSE_UNSAFE #-Wall -Wextra -Werror
+CXXFLAGS ?= -fPIC -std=c++17 $(INC_FLAGS) -w -fopenmp -march=haswell #-DPARSE_UNSAFE ##-DPARSE_UNSAFE #-Wall -Wextra -Werror
 LDFLAGS ?= ${LIB_FLAGS}
 ifeq ($(RELEASE),0)
 	CXXFLAGS += -O0 -ggdb
 else
-	CXXFLAGS += -O3 -s
+	CXXFLAGS += -O3 -s#-g #-s
 endif
 all: $(BUILD_DIR)/${TARGET_BIN}
 $(BUILD_DIR)/${TARGET_BIN}: $(OBJS) 

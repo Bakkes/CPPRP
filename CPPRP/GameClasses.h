@@ -16,7 +16,7 @@ namespace CPPRP
 			virtual ~Object() {} //Makes it polymorphic
 		};
 
-		CLASS(Actor);
+		CLASS(Actor, Object);
 		struct Actor : public Object
 		{
 			FIELD(Actor, DrawScale, float, "Engine.Actor:DrawScale");
@@ -50,19 +50,19 @@ namespace CPPRP
 			struct Rotator Rotation;
 		};
 
-		CLASS(Info);
+		CLASS(Info, Actor);
 		struct Info : public Actor
 		{
 
 		};
 
-		CLASS(ReplicationInfo)
+		CLASS(ReplicationInfo, Info)
 		struct ReplicationInfo : public Info
 		{
 
 		};
 
-		CLASS(GameReplicationInfo);
+		CLASS(GameReplicationInfo, ReplicationInfo);
 		struct GameReplicationInfo : public ReplicationInfo
 		{
 			FIELD(GameReplicationInfo, ServerName, std::string, "Engine.GameReplicationInfo:ServerName");
@@ -81,7 +81,7 @@ namespace CPPRP
 			bool bMatchHasBegun;
 		};
 
-		CLASS(Pawn);
+		CLASS(Pawn, Actor);
 		struct Pawn : public Actor
 		{
 			FIELD(Pawn, PlayerReplicationInfo, struct ActiveActor, "Engine.Pawn:PlayerReplicationInfo");
@@ -96,7 +96,7 @@ namespace CPPRP
 		};
 
 
-		CLASS(PlayerReplicationInfo);
+		CLASS(PlayerReplicationInfo, ReplicationInfo);
 		struct PlayerReplicationInfo : public ReplicationInfo
 		{
 			FIELD(PlayerReplicationInfo, Team, struct ActiveActor, "Engine.PlayerReplicationInfo:Team");
@@ -146,14 +146,14 @@ namespace CPPRP
 
 		};
 
-		CLASS(TeamInfo);
+		CLASS(TeamInfo, ReplicationInfo);
 		struct TeamInfo : public ReplicationInfo
 		{
 			FIELD(TeamInfo, Score, uint32_t, "Engine.TeamInfo:Score");
 			uint32_t Score;
 		};
 
-		CLASS(WorldInfo);
+		CLASS(WorldInfo, Info);
 		struct WorldInfo : public Info
 		{
 			FIELD(WorldInfo, WorldGravityZ, float, "Engine.WorldInfo:WorldGravityZ");
@@ -167,7 +167,7 @@ namespace CPPRP
 
 	namespace ProjectX
 	{
-		CLASS(GRI_X);
+		CLASS(GRI_X, Engine::GameReplicationInfo);
 		struct GRI_X : public Engine::GameReplicationInfo
 		{
 			FIELD(GRI_X, MatchGUID, std::string, "ProjectX.GRI_X:MatchGUID");
@@ -190,13 +190,13 @@ namespace CPPRP
 
 		};
 
-		CLASS(Pawn_X);
+		CLASS(Pawn_X, Engine::Pawn);
 		struct Pawn_X : public Engine::Pawn
 		{
 
 		};
 
-		CLASS(PRI_X)
+		CLASS(PRI_X, Engine::PlayerReplicationInfo)
 		struct PRI_X : public Engine::PlayerReplicationInfo
 		{
 
@@ -206,7 +206,7 @@ namespace CPPRP
 
 	namespace TAGame
 	{
-		CLASS(PRI_TA);
+		CLASS(PRI_TA, ProjectX::PRI_X);
 		struct PRI_TA : public ProjectX::PRI_X
 		{
 			FIELD(PRI_TA, MatchShots, uint32_t, "TAGame.PRI_TA:MatchShots");
@@ -346,7 +346,7 @@ namespace CPPRP
 
 		};
 
-		CLASS(RBActor_TA);
+		CLASS(RBActor_TA, ProjectX::Pawn_X);
 		struct RBActor_TA : public ProjectX::Pawn_X
 		{
 			FIELD(RBActor_TA, ReplicatedRBState, struct ReplicatedRBState, "TAGame.RBActor_TA:ReplicatedRBState");
@@ -366,7 +366,7 @@ namespace CPPRP
 
 		};
 
-		CLASS(CarComponent_TA);
+		CLASS(CarComponent_TA, Engine::ReplicationInfo);
 		struct CarComponent_TA : public Engine::ReplicationInfo
 		{
 			FIELD(CarComponent_TA, Vehicle, struct ActiveActor, "TAGame.CarComponent_TA:Vehicle");
@@ -379,19 +379,19 @@ namespace CPPRP
 			float ReplicatedActivityTime;
 		};
 
-		CLASS(CarComponent_Jump_TA);
+		CLASS(CarComponent_Jump_TA, CarComponent_TA);
 		struct CarComponent_Jump_TA : public CarComponent_TA
 		{
 
 		};
 
-		CLASS(CarComponent_DoubleJump_TA);
+		CLASS(CarComponent_DoubleJump_TA, CarComponent_TA);
 		struct CarComponent_DoubleJump_TA : public CarComponent_TA
 		{
 
 		};
 
-		CLASS(CarComponent_Boost_TA);
+		CLASS(CarComponent_Boost_TA, CarComponent_TA);
 		struct CarComponent_Boost_TA : public CarComponent_TA
 		{
 			FIELD(CarComponent_Boost_TA, RechargeDelay, float, "TAGame.CarComponent_Boost_TA:RechargeDelay");
@@ -417,7 +417,7 @@ namespace CPPRP
 
 		};
 
-		CLASS(CarComponent_Dodge_TA);
+		CLASS(CarComponent_Dodge_TA, CarComponent_TA);
 		struct CarComponent_Dodge_TA : public CarComponent_TA
 		{
 			FIELD(CarComponent_Dodge_TA, DodgeTorque, struct Vector3I, "TAGame.CarComponent_Dodge_TA:DodgeTorque");
@@ -426,7 +426,7 @@ namespace CPPRP
 		};
 
 
-		CLASS(CarComponent_FlipCar_TA);
+		CLASS(CarComponent_FlipCar_TA, CarComponent_TA);
 		struct CarComponent_FlipCar_TA : public CarComponent_TA
 		{
 			FIELD(CarComponent_FlipCar_TA, bFlipRight, bool, "TAGame.CarComponent_FlipCar_TA:bFlipRight");
@@ -437,7 +437,7 @@ namespace CPPRP
 
 		};
 
-		CLASS(Ball_TA);
+		CLASS(Ball_TA, RBActor_TA);
 		struct Ball_TA : public RBActor_TA
 		{
 			FIELD(Ball_TA, GameEvent, struct ActiveActor, "TAGame.Ball_TA:GameEvent");
@@ -472,7 +472,7 @@ namespace CPPRP
 
 		};
 
-		CLASS(Team_TA);
+		CLASS(Team_TA, Engine::TeamInfo);
 		struct Team_TA : public Engine::TeamInfo
 		{
 			FIELD(Team_TA, LogoData, struct LogoData, "TAGame.Team_TA:LogoData");
@@ -492,7 +492,7 @@ namespace CPPRP
 
 		};
 
-		CLASS(Team_Soccar_TA);
+		CLASS(Team_Soccar_TA, Team_TA);
 		struct Team_Soccar_TA : public Team_TA
 		{
 			FIELD(Team_Soccar_TA, GameScore, uint32_t, "TAGame.Team_Soccar_TA:GameScore");
@@ -500,7 +500,7 @@ namespace CPPRP
 
 		};
 
-		CLASS(BreakOutActor_Platform_TA);
+		CLASS(BreakOutActor_Platform_TA, Engine::Actor);
 		struct BreakOutActor_Platform_TA : public Engine::Actor
 		{
 			FIELD(BreakOutActor_Platform_TA, DamageState, struct DamageState, "TAGame.BreakOutActor_Platform_TA:DamageState");
@@ -508,13 +508,13 @@ namespace CPPRP
 
 		};
 
-		CLASS(SpecialPickup_TA);
+		CLASS(SpecialPickup_TA, CarComponent_TA);
 		struct SpecialPickup_TA : public CarComponent_TA
 		{
 
 		};
 
-		CLASS(SpecialPickup_Targeted_TA);
+		CLASS(SpecialPickup_Targeted_TA, SpecialPickup_TA);
 		struct SpecialPickup_Targeted_TA : public SpecialPickup_TA
 		{
 			FIELD(SpecialPickup_Targeted_TA, Targeted, struct ActiveActor, "TAGame.SpecialPickup_Targeted_TA:Targeted");
@@ -522,20 +522,20 @@ namespace CPPRP
 
 		};
 
-		CLASS(SpecialPickup_Tornado_TA);
+		CLASS(SpecialPickup_Tornado_TA, SpecialPickup_TA);
 		struct SpecialPickup_Tornado_TA : public SpecialPickup_TA
 		{
 
 		};
 
-		CLASS(SpecialPickup_HauntedBallBeam_TA);
+		CLASS(SpecialPickup_HauntedBallBeam_TA, SpecialPickup_TA);
 		struct SpecialPickup_HauntedBallBeam_TA : public SpecialPickup_TA
 		{
 
 		};
 
 
-		CLASS(SpecialPickup_BallVelcro_TA);
+		CLASS(SpecialPickup_BallVelcro_TA, SpecialPickup_TA);
 		struct SpecialPickup_BallVelcro_TA : public SpecialPickup_TA
 		{
 			FIELD(SpecialPickup_BallVelcro_TA, bHit, bool, "TAGame.SpecialPickup_BallVelcro_TA:bHit");
@@ -553,7 +553,7 @@ namespace CPPRP
 		};
 
 
-		CLASS(SpecialPickup_Rugby_TA);
+		CLASS(SpecialPickup_Rugby_TA, SpecialPickup_TA);
 		struct SpecialPickup_Rugby_TA : public SpecialPickup_TA
 		{
 			FIELD(SpecialPickup_Rugby_TA, bBallWelded, bool, "TAGame.SpecialPickup_Rugby_TA:bBallWelded");
@@ -561,7 +561,7 @@ namespace CPPRP
 
 		};
 
-		CLASS(SpecialPickup_BallFreeze_TA);
+		CLASS(SpecialPickup_BallFreeze_TA, SpecialPickup_Targeted_TA);
 		struct SpecialPickup_BallFreeze_TA : public SpecialPickup_Targeted_TA
 		{
 			FIELD(SpecialPickup_BallFreeze_TA, RepOrigSpeed, float, "TAGame.SpecialPickup_BallFreeze_TA:RepOrigSpeed");
@@ -569,61 +569,61 @@ namespace CPPRP
 
 		};
 
-		CLASS(SpecialPickup_Spring_TA);
+		CLASS(SpecialPickup_Spring_TA, SpecialPickup_Targeted_TA);
 		struct SpecialPickup_Spring_TA : public SpecialPickup_Targeted_TA
 		{
 
 		};
 
-		CLASS(SpecialPickup_BallCarSpring_TA);
+		CLASS(SpecialPickup_BallCarSpring_TA, SpecialPickup_Spring_TA);
 		struct SpecialPickup_BallCarSpring_TA : public SpecialPickup_Spring_TA
 		{
 
 		};
 
-		CLASS(SpecialPickup_BallGravity_TA);
+		CLASS(SpecialPickup_BallGravity_TA, SpecialPickup_TA);
 		struct SpecialPickup_BallGravity_TA : public SpecialPickup_TA
 		{
 
 		};
 
-		CLASS(SpecialPickup_GrapplingHook_TA);
+		CLASS(SpecialPickup_GrapplingHook_TA, SpecialPickup_Targeted_TA);
 		struct SpecialPickup_GrapplingHook_TA : public SpecialPickup_Targeted_TA
 		{
 
 		};
 
-		CLASS(SpecialPickup_BallLasso_TA);
+		CLASS(SpecialPickup_BallLasso_TA, SpecialPickup_GrapplingHook_TA);
 		struct SpecialPickup_BallLasso_TA : public SpecialPickup_GrapplingHook_TA
 		{
 
 		};
 
-		CLASS(SpecialPickup_BoostOverride_TA);
+		CLASS(SpecialPickup_BoostOverride_TA, SpecialPickup_Targeted_TA);
 		struct SpecialPickup_BoostOverride_TA : public SpecialPickup_Targeted_TA
 		{
 
 		};
 
-		CLASS(SpecialPickup_Batarang_TA);
+		CLASS(SpecialPickup_Batarang_TA, SpecialPickup_BallLasso_TA);
 		struct SpecialPickup_Batarang_TA : public SpecialPickup_BallLasso_TA
 		{
 
 		};
 
-		CLASS(SpecialPickup_HitForce_TA);
+		CLASS(SpecialPickup_HitForce_TA, SpecialPickup_TA);
 		struct SpecialPickup_HitForce_TA : public SpecialPickup_TA
 		{
 
 		};
 
-		CLASS(SpecialPickup_Swapper_TA);
+		CLASS(SpecialPickup_Swapper_TA, SpecialPickup_Targeted_TA);
 		struct SpecialPickup_Swapper_TA : public SpecialPickup_Targeted_TA
 		{
 
 		};
 
-		CLASS(CrowdManager_TA);
+		CLASS(CrowdManager_TA, Engine::ReplicationInfo);
 		struct CrowdManager_TA : public Engine::ReplicationInfo
 		{
 			FIELD(CrowdManager_TA, GameEvent, struct ActiveActor, "TAGame.CrowdManager_TA:GameEvent");
@@ -634,7 +634,7 @@ namespace CPPRP
 
 		};
 
-		CLASS(CrowdActor_TA);
+		CLASS(CrowdActor_TA, Engine::ReplicationInfo);
 		struct CrowdActor_TA : public Engine::ReplicationInfo
 		{
 			FIELD(CrowdActor_TA, GameEvent, struct ActiveActor, "TAGame.CrowdActor_TA:GameEvent");
@@ -654,13 +654,13 @@ namespace CPPRP
 
 		};
 
-		CLASS(InMapScoreboard_TA)
+		CLASS(InMapScoreboard_TA, Engine::Actor)
 		struct InMapScoreboard_TA : public Engine::Actor
 		{
 
 		};
 
-		CLASS(Vehicle_TA);
+		CLASS(Vehicle_TA, RBActor_TA);
 		struct Vehicle_TA : public RBActor_TA
 		{
 			FIELD(Vehicle_TA, ReplicatedThrottle, unsigned char, "TAGame.Vehicle_TA:ReplicatedThrottle");
@@ -677,7 +677,7 @@ namespace CPPRP
 
 		};
 
-		CLASS(Car_TA);
+		CLASS(Car_TA, Vehicle_TA);
 		struct Car_TA : public Vehicle_TA
 		{
 			FIELD(Car_TA, AttachedPickup, struct ActiveActor, "TAGame.Car_TA:AttachedPickup");
@@ -703,13 +703,13 @@ namespace CPPRP
 
 		};
 
-		CLASS(Car_Season_TA);
+		CLASS(Car_Season_TA, Car_TA);
 		struct Car_Season_TA : public Car_TA
 		{
 
 		};
 
-		CLASS(CameraSettingsActor_TA);
+		CLASS(CameraSettingsActor_TA, Engine::ReplicationInfo);
 		struct CameraSettingsActor_TA : public Engine::ReplicationInfo
 		{
 			FIELD(CameraSettingsActor_TA, PRI, struct ActiveActor, "TAGame.CameraSettingsActor_TA:PRI");
@@ -738,7 +738,7 @@ namespace CPPRP
 
 		};
 		
-		CLASS(GRI_TA);
+		CLASS(GRI_TA, ProjectX::GRI_X);
 		struct GRI_TA : public ProjectX::GRI_X
 		{
 			FIELD(GRI_TA, NewDedicatedServerIP, std::string, "TAGame.GRI_TA:NewDedicatedServerIP");
@@ -746,7 +746,7 @@ namespace CPPRP
 
 		};
 
-		CLASS(Ball_Breakout_TA);
+		CLASS(Ball_Breakout_TA, Ball_TA);
 		struct Ball_Breakout_TA : public Ball_TA
 		{
 			FIELD(Ball_Breakout_TA, DamageIndex, uint32_t, "TAGame.Ball_Breakout_TA:DamageIndex");
@@ -762,7 +762,7 @@ namespace CPPRP
 
 
 
-		CLASS(VehiclePickup_TA);
+		CLASS(VehiclePickup_TA, Engine::ReplicationInfo);
 		struct VehiclePickup_TA : public Engine::ReplicationInfo
 		{
 			FIELD(VehiclePickup_TA, bNoPickup, bool, "TAGame.VehiclePickup_TA:bNoPickup");
@@ -773,13 +773,13 @@ namespace CPPRP
 
 		};
 
-		CLASS(VehiclePickup_Boost_TA);
+		CLASS(VehiclePickup_Boost_TA, VehiclePickup_TA);
 		struct VehiclePickup_Boost_TA : public VehiclePickup_TA
 		{
 
 		};
 
-		CLASS(Ball_Haunted_TA);
+		CLASS(Ball_Haunted_TA, Ball_TA);
 		struct Ball_Haunted_TA : public Ball_TA
 		{
 			FIELD(Ball_Haunted_TA, DeactivatedGoalIndex, unsigned char, "TAGame.Ball_Haunted_TA:DeactivatedGoalIndex");
@@ -800,7 +800,7 @@ namespace CPPRP
 		};
 
 
-		CLASS(GameEvent_TA);
+		CLASS(GameEvent_TA, Engine::ReplicationInfo);
 		struct GameEvent_TA : public Engine::ReplicationInfo
 		{
 			FIELD(GameEvent_TA, ReplicatedRoundCountDownNumber, uint32_t, "TAGame.GameEvent_TA:ReplicatedRoundCountDownNumber");
@@ -838,7 +838,7 @@ namespace CPPRP
 
 		};
 
-		CLASS(GameEvent_Team_TA);
+		CLASS(GameEvent_Team_TA, GameEvent_TA);
 		struct GameEvent_Team_TA : public GameEvent_TA
 		{
 			FIELD(GameEvent_Team_TA, MaxTeamSize, uint32_t, "TAGame.GameEvent_Team_TA:MaxTeamSize");
@@ -854,7 +854,7 @@ namespace CPPRP
 
 
 
-		CLASS(GameEvent_Soccar_TA);
+		CLASS(GameEvent_Soccar_TA, GameEvent_Team_TA);
 		struct GameEvent_Soccar_TA : public GameEvent_Team_TA
 		{
 			FIELD(GameEvent_Soccar_TA, bOverTime, bool, "TAGame.GameEvent_Soccar_TA:bOverTime");
@@ -913,19 +913,19 @@ namespace CPPRP
 
 		};
 
-		CLASS(GameEvent_Breakout_TA);
+		CLASS(GameEvent_Breakout_TA, GameEvent_Soccar_TA);
 		struct GameEvent_Breakout_TA : public GameEvent_Soccar_TA
 		{
 
 		};
 
-		CLASS(GameEvent_Season_TA);
+		CLASS(GameEvent_Season_TA, GameEvent_Soccar_TA);
 		struct GameEvent_Season_TA : public GameEvent_Soccar_TA
 		{
 
 		};
 
-		CLASS(GameEvent_SoccarPrivate_TA);
+		CLASS(GameEvent_SoccarPrivate_TA, GameEvent_Soccar_TA);
 		struct GameEvent_SoccarPrivate_TA : public GameEvent_Soccar_TA
 		{
 			FIELD(GameEvent_SoccarPrivate_TA, MatchSettings, struct PrivateMatchSettings, "TAGame.GameEvent_SoccarPrivate_TA:MatchSettings");
@@ -933,13 +933,19 @@ namespace CPPRP
 
 		};
 
-		CLASS(GameEvent_SoccarSplitscreen_TA);
+		CLASS(GameEvent_SoccarSplitscreen_TA, GameEvent_SoccarPrivate_TA);
 		struct GameEvent_SoccarSplitscreen_TA : public GameEvent_SoccarPrivate_TA
 		{
 
 		};
 
-		CLASS(HauntedBallTrapTrigger_TA);
+		CLASS(GameEvent_Tutorial_TA, GameEvent_Soccar_TA);
+		struct GameEvent_Tutorial_TA : public GameEvent_Soccar_TA
+		{
+
+		};
+
+		CLASS(HauntedBallTrapTrigger_TA, Engine::Actor);
 		struct HauntedBallTrapTrigger_TA : public Engine::Actor
 		{
 

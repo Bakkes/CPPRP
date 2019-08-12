@@ -164,16 +164,18 @@ namespace CPPRP
 		const X get_bits_max(const X maxValue)
 		{
 			X result = 0;
-			T bt = *data;
-			const uint8_t max_bits = msbDeBruijn32(maxValue) + 1;
+			
+			const uint8_t max_bits = msbDeBruijn32(maxValue);
 
-			for (uint8_t i = 0; i < max_bits && (result + (1 << i)) < maxValue; ++i)
+			result = read<X>(max_bits);
+
+			if((result + (1 << max_bits)) < maxValue)
 			{
-				result |= ((bt >> bit_position++) & 1) << i;
+				result |= (((*data) >> bit_position++) & 1) << max_bits;
 
 				if (bit_position == sizeof(T) * 8)
 				{
-					bt = *(++data);
+					++data;
 					t_position++;
 					bit_position = 0;
 				}
@@ -417,11 +419,20 @@ namespace CPPRP
 		#endif
 
 		std::string str;
-		str.resize(final_length - 1);
-
-		for (int32_t i = 0; i < final_length; ++i)
+		
+		if(bit_position % 8 == 0)
 		{
-			str[i] = read<uint8_t>();
+			const char* text = ((char*)data) + (bit_position/8);
+			str = std::string(text);
+			skip(final_length * 8);
+		}
+		else
+		{
+			str.resize(final_length - 1);
+			for (int32_t i = 0; i < final_length; ++i)
+			{
+				str[i] = read<uint8_t>();
+			}
 		}
 
 		return str;
