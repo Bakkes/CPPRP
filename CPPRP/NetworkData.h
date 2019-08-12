@@ -202,13 +202,14 @@ namespace CPPRP
 		std::vector<Attributes> attributes_list;
 	};
 
-
+	__ParserAttribute__(Consume, false)
 	struct ProductAttributeUserColorSingle : public ProductAttribute 
 	{
 		bool hasValue;
 		uint32_t value;
 	};
 
+	__ParserAttribute__(Consume, false)
 	struct ProductAttributeUserColorRGB : public ProductAttribute
 	{
 		uint8_t r;
@@ -217,26 +218,31 @@ namespace CPPRP
 		uint8_t a;
 	};
 
+	__ParserAttribute__(Consume, false)
 	struct ProductAttributeTitle : public ProductAttribute
 	{
 		std::string title;
 	};
 
+	__ParserAttribute__(Consume, false)
 	struct ProductAttributeSingleValue : public ProductAttribute
 	{
 		uint32_t value;
 	};
 
+	__ParserAttribute__(Consume, false)
 	struct ProductAttributePainted : public ProductAttributeSingleValue
 	{
 		
 	};
 
+	__ParserAttribute__(Consume, false)
 	struct ProductAttributeTeamEdition : public ProductAttributeSingleValue
 	{
 
 	};
 
+	__ParserAttribute__(Consume, false)
 	struct ProductAttributeSpecialEdition : public ProductAttributeSingleValue
 	{
 

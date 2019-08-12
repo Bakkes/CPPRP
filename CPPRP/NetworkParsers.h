@@ -48,7 +48,6 @@ namespace CPPRP
 		std::shared_ptr<ProductAttribute> prodAttr;
 		bool unknown1 = reader.read<bool>();
 		uint32_t class_index = reader.read<uint32_t>();
-		//TODO: read classnames
 		if (class_index > reader.owner->objects.size())
 		{
 			throw AttributeParseException<BitReaderType>("ProductAttribute", reader);
@@ -57,8 +56,6 @@ namespace CPPRP
 
 		if (className.compare("TAGame.ProductAttribute_UserColor_TA") == 0)
 		{
-			//TODO: assign this
-			//const UserColorAttribute uca = Consume<UserColorAttribute>(reader);
 			if (reader.licenseeVersion >= 23)
 			{
 				std::shared_ptr<ProductAttributeUserColorRGB> ucargb = std::make_shared<ProductAttributeUserColorRGB>();
@@ -173,7 +170,7 @@ namespace CPPRP
 	inline const ReplicatedRBState Consume(CPPBitReader<BitReaderType>& reader) {
 		ReplicatedRBState item;
 		const uint32_t netVersion = reader.netVersion;
-		PREFETCH((char*)(reader.data));
+		//PREFETCH((char*)(reader.data));
 		item.sleeping = reader.read<bool>();
 
 		if (netVersion >= 5)

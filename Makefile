@@ -1,7 +1,9 @@
 TARGET_BIN ?= test
 BUILD_DIR ?= build
 SRC_DIRS ?= CPPRP \
-						CPPRPTest 
+						CPPRPJSON
+
+										#		CPPRPTest \
 						
 SRCS := $(shell find $(SRC_DIRS) -maxdepth 1 -name *.cpp) ${SRC_FILES}
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
