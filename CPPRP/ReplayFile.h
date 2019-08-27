@@ -80,11 +80,11 @@ namespace CPPRP
 		const bool HasProperty(const std::string& key) const;
 
 		template<typename T>
-		const T GetProperty(const std::string& key);
+		const T GetProperty(const std::string& key) const;
 	};
 
 	template<typename T>
-	inline const T ReplayFile::GetProperty(const std::string& key)
+	inline const T ReplayFile::GetProperty(const std::string& key) const
 	{
 		if (replayFile->properties.find(key) == replayFile->properties.end())
 		{

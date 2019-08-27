@@ -639,6 +639,7 @@ namespace CPPRP
 	  , {"TAGame.CarComponent_TA", "Engine.Actor"}
 	  , {"Engine.Info", "Engine.Actor"}
 	  , {"Engine.Pawn", "Engine.Actor"}
+	 
 	};
 
 	const std::vector<std::pair<std::string, std::vector<std::string>>> archetypeMap =
@@ -686,6 +687,7 @@ namespace CPPRP
 		{{"TAGame.SpecialPickup_HauntedBallBeam_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_HauntedBallBeam"}},
 		{{"TAGame.SpecialPickup_Rugby_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Rugby"}},
 		{{"TAGame.Cannon_TA"},  {"Archetypes.Tutorial.Cannon"}}
+		, {{"Engine.ReplicationInfo"}, {"ProjectX.Default__NetModeReplicator_X"}}
 	};
 
 	void ReplayFile::FixParents()
