@@ -10,7 +10,7 @@
 #include <atomic>
 #include <algorithm>
 #include <map>
-#include <filesystem>
+#include <experimental/filesystem>
 #include <queue>
 #include <unordered_map>
 #undef max
@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 			{
 				updatedActorsThisTick.push_back({ asd, props });
 			});
-		
+
 		replayFile->tickables.push_back([&](const CPPRP::Frame frame, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
 			{
 				writer.StartObject();
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 					writer.StartObject();
 					writer.String("Id");
 					writer.Uint(created.actorId);
-					
+
 					std::string name = replayFile->replayFile->names.at(created.nameId);
 					std::string className = replayFile->replayFile->objects.at(created.classNameId);
 					writer.String("Name");
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
 					writer.Uint(deleted.actorId);
 				}
 				writer.EndArray();
-				
+
 
 				writer.String("Updated");
 				writer.StartArray();
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 					for (auto updatedProp : updated.props)
 					{
 						writer.StartObject();
-						
+
 						std::string objectName = replayFile->replayFile->objects[updatedProp];
 						auto a = updated.asd.actorObject;
 						CPPRP::JSON::writerFuncs[objectName](writer, a);
