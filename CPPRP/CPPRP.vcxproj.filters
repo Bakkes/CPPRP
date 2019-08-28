@@ -21,12 +21,6 @@
     <ClInclude Include="ReplayFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ParseException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ReplayException.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="CRC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -54,15 +48,21 @@
     <ClInclude Include="generated\NetworkDataParsersGenerated.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="exceptions\ParseException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="exceptions\ReplayException.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ReplayFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ParseException.cpp">
+    <ClCompile Include="exceptions\ParseException.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ReplayException.cpp">
+    <ClCompile Include="exceptions\ReplayException.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

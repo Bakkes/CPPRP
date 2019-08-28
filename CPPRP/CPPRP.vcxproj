@@ -138,16 +138,16 @@
     <ClInclude Include="generated\properties.h" />
     <ClInclude Include="data\NetworkData.h" />
     <ClInclude Include="NetworkDataParsers.h" />
-    <ClInclude Include="ParseException.h" />
+    <ClInclude Include="exceptions\ParseException.h" />
     <ClInclude Include="PropertyParser.h" />
-    <ClInclude Include="ReplayException.h" />
+    <ClInclude Include="exceptions\ReplayException.h" />
     <ClInclude Include="ReplayFile.h" />
     <ClInclude Include="data\ReplayFileData.h" />
     <ClInclude Include="utils\tostring.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ParseException.cpp" />
-    <ClCompile Include="ReplayException.cpp" />
+    <ClCompile Include="exceptions\ParseException.cpp" />
+    <ClCompile Include="exceptions\ReplayException.cpp" />
     <ClCompile Include="ReplayFile.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

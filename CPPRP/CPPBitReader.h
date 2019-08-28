@@ -5,7 +5,7 @@
 #include <assert.h>
 //#include "ParseException.h"
 #include "./data/ReplayFileData.h"
-#include "ReplayException.h"
+#include "./exceptions/ReplayException.h"
 #include <cmath>
 #include <memory>
 

@@ -5,7 +5,7 @@
 //#include <omp.h>
 #pragma comment(lib, "CPPRP.lib")
 #include "../CPPRP/ReplayFile.h"
-#include "../CPPRP/ReplayException.h"
+#include "../CPPRP/exceptions/ReplayException.h"
 #include <iostream>
 #include "bench.h"
 #include <thread>

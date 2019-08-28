@@ -2,7 +2,7 @@
 #include <exception>
 #include <string>
 #include <sstream>
-#include "CPPBitReader.h"
+#include "../CPPBitReader.h"
 
 namespace CPPRP
 {

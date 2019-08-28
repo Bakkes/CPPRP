@@ -10,7 +10,7 @@
 #include <functional>
 #include "CPPBitReader.h"
 #include "./data/NetworkData.h"
-#include "ParseException.h"
+#include "./exceptions/ParseException.h"
 #include "NetworkDataParsers.h"
 #include "./data/ReplayFileData.h"
 #include "PropertyParser.h"

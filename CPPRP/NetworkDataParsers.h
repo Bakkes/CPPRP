@@ -3,7 +3,7 @@
 #include "./data/NetworkData.h"
 #include <vector>
 #include <sstream>
-#include "ParseException.h"
+#include "./exceptions/ParseException.h"
 
 /*
 File responsible for parsing network data, which are the fields in the game classes
