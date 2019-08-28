@@ -77,9 +77,13 @@ if __name__== "__main__":
                 struct.parent = struct.namespace + "::" + struct.parent
             structs.append(struct)
             
+    code = io.StringIO()
+    code.writelines(["template<typename T>\n", "constexpr inline static T Initializor()\n", "{\n"])
     for struct in structs:
         if struct.name is not "Object":
-            print(generateParserCode(struct))
+            code.write(generateParserCode(struct))
+    code.writelines(["return 0;\n", "}\n"])
+    print(code.getvalue())
     sys.exit(0)
     for line in s:
         line = line.strip()

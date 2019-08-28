@@ -133,15 +133,17 @@
   <ItemGroup>
     <ClInclude Include="CPPBitReader.h" />
     <ClInclude Include="CRC.h" />
-    <ClInclude Include="GameClasses.h" />
-    <ClInclude Include="generated.h" />
-    <ClInclude Include="NetworkData.h" />
-    <ClInclude Include="NetworkParsers.h" />
+    <ClInclude Include="data\GameClasses.h" />
+    <ClInclude Include="generated\NetworkDataParsersGenerated.h" />
+    <ClInclude Include="generated\properties.h" />
+    <ClInclude Include="data\NetworkData.h" />
+    <ClInclude Include="NetworkDataParsers.h" />
     <ClInclude Include="ParseException.h" />
     <ClInclude Include="PropertyParser.h" />
     <ClInclude Include="ReplayException.h" />
     <ClInclude Include="ReplayFile.h" />
-    <ClInclude Include="ReplayFileData.h" />
+    <ClInclude Include="data\ReplayFileData.h" />
+    <ClInclude Include="utils\tostring.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ParseException.cpp" />

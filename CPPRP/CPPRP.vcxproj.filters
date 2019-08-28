@@ -21,18 +21,6 @@
     <ClInclude Include="ReplayFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NetworkData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="generated.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NetworkParsers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ReplayFileData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ParseException.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -42,10 +30,28 @@
     <ClInclude Include="CRC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameClasses.h">
+    <ClInclude Include="PropertyParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PropertyParser.h">
+    <ClInclude Include="generated\properties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\GameClasses.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\NetworkData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\tostring.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="data\ReplayFileData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkDataParsers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="generated\NetworkDataParsersGenerated.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

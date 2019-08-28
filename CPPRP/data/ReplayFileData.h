@@ -7,6 +7,11 @@
 #include <iostream>
 #include <memory>
 
+/*
+This file contains all base types such as vectors and rotators (mostly classes that are read in the bitreader directly)
+It also contains data structures for things that are stored in the header of a replay
+*/
+
 namespace CPPRP
 {
 	struct Vector3

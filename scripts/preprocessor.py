@@ -29,7 +29,7 @@ def parseStruct(lines):
     iterator = iter(lines)
     for line in iterator:
         if line.strip().startswith("//"):
-            print(line)
+            #print(line)
             continue
         if line.startswith("__ParserAttribute__") and not parseFields:
             options = parseOption(line)
@@ -67,8 +67,8 @@ def parseStruct(lines):
                     callconsume = options[1].lower() == "true" or options[1] == "1"
                 if options[0].lower() == "calltostring":
                     calltostring = options[1].lower() == "true" or options[1] == "1"
-                    print(calltostring)
-                print("{0} = {1}".format(options[0], options[1]))
+                    #print(calltostring)
+                #print("{0} = {1}".format(options[0], options[1]))
                 
                 line = next(iterator).strip()
                 #print("next")
@@ -78,7 +78,7 @@ def parseStruct(lines):
                     #print(line)
                 
             data = [x.replace(';', '') for x in line.strip().split(" ")];
-            print(data)
+            #print(data)
             if len(data) < 2:
                 continue
             
@@ -108,12 +108,12 @@ def parseStruct(lines):
                 
             if data[0].lower().startswith("std::vector"):
                     vector_type = data[0][data[0].find('<') + 1:data[0].find('>')]
-            if calltostring:
-                print("AAAAAAAAAAA")
-                code.tostringIO.write("ss {1}<< \"{0} = \" << ToString(item.{0});\n".format(data[1], "" if field_index == 0 else "<< \",\\n \" "))
-            else:
-                print("BBBBBBBB")
-                code.tostringIO.write("ss {1}<< \"{0} = \" << item.{0};\n".format(data[1], "" if field_index == 0 else "<< \",\\n \" "))
+            #if calltostring:
+               # print("AAAAAAAAAAA")
+            code.tostringIO.write("ss {1}<< \"{0} = \" << ToString(item.{0});\n".format(data[1], "" if field_index == 0 else "<< \",\\n \" "))
+           # else:
+                #print("BBBBBBBB")
+                #code.tostringIO.write("ss {1}<< \"{0} = \" << item.{0};\n".format(data[1], "" if field_index == 0 else "<< \",\\n \" "))
             
             if setVersionReq:
                 code.consumeIO.write("} else {\n")
@@ -130,7 +130,7 @@ def parseStruct(lines):
 
 
 def generateClasses(code):
-    f = open(sys.argv[2], "a")
+    #f = open(sys.argv[2], "a")
     
     consumeFunc = io.StringIO()
     consumeFunc.write("template<>\n")
@@ -159,19 +159,21 @@ def generateClasses(code):
     [jsonFunc.write("\t{0}\n".format(x)) for x in code.jsonIO.getvalue().splitlines()]
     jsonFunc.write("}\n\n")
     if code.consume:
-        f.write(consumeFunc.getvalue())
-    if code.to_string:
-        f.write(tostringFunc.getvalue())
+        print(consumeFunc.getvalue())
+    #if code.consume:
+    #    f.write(consumeFunc.getvalue())
+   # if code.to_string:
+    #    f.write(tostringFunc.getvalue())
     #f.write(jsonFunc.getvalue())
     
-if os.path.exists(sys.argv[2]):
-    os.remove(sys.argv[2])
-f = open(sys.argv[2], "a")
-f.write('#pragma once\n#include "CPPBitReader.h"\n#include "NetworkData.h"\n#include <sstream>\nnamespace CPPRP {\n')
+#if os.path.exists(sys.argv[2]):
+#    os.remove(sys.argv[2])
+#f = open(sys.argv[2], "a")
+#f.write('#pragma once\n#include "CPPBitReader.h"\n#include "NetworkData.h"\n#include <sstream>\nnamespace CPPRP {\n')
     
 if __name__== "__main__":
     print("??")
-    f = open(sys.argv[1], "r")
+    f = open("C:/Users/Bakkes/Documents/repos/CPPRP/CPPRP/data/NetworkData.h", "r")
     s = f.readlines()
     totalStr = ""
     active = False
@@ -186,9 +188,10 @@ if __name__== "__main__":
         if "}" in line:
             code = parseStruct(totalStr.splitlines())
             if(code.struct_name.strip().lower() != "error"):
-                print(code.struct_name.strip().lower())
+                #print(code.struct_name.strip().lower())
                 generateClasses(code)
             totalStr = ""
             active = False
-f = open(sys.argv[2], "a")
-f.write('\n};')
+
+#f = open(sys.argv[2], "a")
+#f.write('\n};')

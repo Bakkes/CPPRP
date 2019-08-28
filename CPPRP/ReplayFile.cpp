@@ -1,9 +1,9 @@
 #include "ReplayFile.h"
 #include <fstream>
-#include "NetworkData.h"
+#include "./data/NetworkData.h"
 #include "CRC.h"
 #include <functional>
-#include "GameClasses.h"
+#include "./data/GameClasses.h"
 namespace CPPRP
 {
 	constexpr bool IncludeParseLog = false;

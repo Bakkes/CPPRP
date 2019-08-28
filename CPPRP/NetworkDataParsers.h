@@ -1,35 +1,23 @@
 #pragma once
 #include "CPPBitReader.h"
-#include "NetworkData.h"
+#include "./data/NetworkData.h"
+#include <vector>
 #include <sstream>
 #include "ParseException.h"
 
+/*
+File responsible for parsing network data, which are the fields in the game classes
+Basically means it should parse all structs defined in data/NetworkData.h.
+This file parses all which need special treatment (for example when stuff has changed in a version, and we need to do version checks)
+Others are auto generated and written to ./generated/NetworkDataParserGenerated.h
+*/
+
 namespace CPPRP
 {
-
-
 	template<typename T>
 	inline const T Consume(CPPBitReader<BitReaderType>& reader) { return reader.read<T>(); }
 
 
-	template<typename T>
-	inline const std::string ToString(const T& item) {
-		std::stringstream ss;
-		ss << "ERR. ToString not declared for " << typeid(T).name() << "\n";
-		return ss.str();
-	}
-
-	template<typename T>
-	inline const std::string ToString(const std::vector<T>& item) {
-		std::stringstream ss;
-		const size_t size = item.size();
-		for (size_t i = 0; i < size; ++i)
-		{
-			ss << "\t[" << i << "] - " << ToString(item.at(i)) << "\n";
-		}
-		//ss << "ERR. ToString not declared for " << typeid(T).name() << "\n";
-		return ss.str();
-	}
 
 	template<typename T>
 	inline const std::vector<T> ConsumeVector(CPPBitReader<BitReaderType>& reader) {
@@ -103,7 +91,7 @@ namespace CPPRP
 			prodAttr = teamEdition;
 
 		}
-		else if(className.compare("TAGame.ProductAttribute_SpecialEdition_TA") == 0)
+		else if (className.compare("TAGame.ProductAttribute_SpecialEdition_TA") == 0)
 		{
 			std::shared_ptr<ProductAttributeSpecialEdition> specialEdition = std::make_shared<ProductAttributeSpecialEdition>();
 			specialEdition->value = reader.read<uint32_t>(31);
@@ -114,7 +102,7 @@ namespace CPPRP
 			std::shared_ptr<ProductAttributeTitle> title = std::make_shared<ProductAttributeTitle>();
 			title->title = reader.read<std::string>();
 			prodAttr = title;
-			
+
 		}
 		else
 		{
@@ -129,7 +117,6 @@ namespace CPPRP
 	template<>
 	inline const ClientLoadout Consume(CPPBitReader<BitReaderType>& reader) {
 		ClientLoadout item;
-		PREFETCH((char*)(reader.data));
 		item.version = reader.read<uint8_t>();
 		item.body = reader.read<uint32_t>();
 		item.skin = reader.read<uint32_t>();
@@ -246,7 +233,7 @@ namespace CPPRP
 		item.player_id = reader.read<std::shared_ptr<UniqueId>>();
 		if (item.player_id->platform == Platform_Unknown && (reader.licenseeVersion < 18 || reader.netVersion != 0))
 		{
-			
+
 		}
 		else
 		{
@@ -265,42 +252,5 @@ namespace CPPRP
 
 		return item;
 	}
-
-	template<>
-	inline const std::string ToString(const std::shared_ptr<UniqueId>& item)
-	{
-		return "ERR";
-	}
-
-	template<>
-	inline const std::string ToString(const Vector3I& item) { return item.ToString(); }
-
-	template<>
-	inline const std::string ToString(const Vector3& item) { return item.ToString(); }
-	template<>
-	inline const std::string ToString(const Quat& item) { return item.ToString(); }
-	template<>
-	inline const std::string ToString(const Rotator& item) { return item.ToString(); }
-	template<>
-	inline const std::string ToString(const std::string& item) { return item; }
-	template<>
-	inline const std::string ToString(const bool& item) { return item ? "true" : "false"; }
-	template<>
-	inline const std::string ToString(const uint8_t& item) { return std::to_string((int)item); }
-	template<>
-	inline const std::string ToString(const float& item) { return std::to_string(item); }
-	template<>
-	inline const std::string ToString(const uint64_t& item) { return std::to_string(item); }
-
-
-#define ToStringStd(type)\
-template<>\
-inline const std::string ToString(const type & item) { return std::to_string(item); }
-
-
-	ToStringStd(uint16_t);
-	ToStringStd(uint32_t);
-	ToStringStd(int);
-
 }
-#include "generated.h"
+#include "./generated/NetworkDataParsersGenerated.h"

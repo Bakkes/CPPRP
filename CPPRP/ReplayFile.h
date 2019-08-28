@@ -9,10 +9,10 @@
 #include <mutex>
 #include <functional>
 #include "CPPBitReader.h"
-#include "NetworkData.h"
+#include "./data/NetworkData.h"
 #include "ParseException.h"
-#include "NetworkParsers.h"
-#include "ReplayFileData.h"
+#include "NetworkDataParsers.h"
+#include "./data/ReplayFileData.h"
 #include "PropertyParser.h"
 
 namespace CPPRP
