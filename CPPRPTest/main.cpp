@@ -35,14 +35,14 @@ int main(int argc, char *argv[])
 			}
 		}
 		std::map<uint32_t, std::unordered_map<uint32_t, CPPRP::Vector3>> locations;
-		replayFile->tickables.push_back([&](const uint32_t frameNumber, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
+		replayFile->tickables.push_back([&](const CPPRP::Frame frame, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
 		{
 			for (auto& actor : actorStats)
 			{
 				std::shared_ptr<CPPRP::TAGame::Car_TA> car = std::dynamic_pointer_cast<CPPRP::TAGame::Car_TA>(actor.second.actorObject);
 				if (car)
 				{
-					locations[frameNumber][actor.first] = car->ReplicatedRBState.position;
+					locations[frame.frameNumber][actor.first] = car->ReplicatedRBState.position;
 				}
 			}
 		});

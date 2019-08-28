@@ -33,6 +33,7 @@ namespace CPPRP
 		std::string errorMsg;
 	public:
 		explicit PropertyDoesNotExistException(const std::string& propertyName_);
+		virtual ~PropertyDoesNotExistException();
 		const char* what() const throw();
 	};
 

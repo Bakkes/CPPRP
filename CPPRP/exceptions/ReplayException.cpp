@@ -10,6 +10,8 @@ namespace CPPRP
 		errorMsg = ss.str();
 	}
 
+	InvalidVersionException::~InvalidVersionException() {}
+
 	const char * InvalidVersionException::what() const throw()
 	{
 		return errorMsg.c_str();

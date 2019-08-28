@@ -1,7 +1,7 @@
 
 #pragma comment(lib, "CPPRP.lib")
 #include "../CPPRP/ReplayFile.h"
-#include "../CPPRP/exceptions/ReplayException.h"
+//#include "../CPPRP/exceptions/ReplayException.h"
 #include "SerializeFunctions.h"
 #include <iostream>
 #include <thread>
@@ -24,7 +24,7 @@ struct UpdateData
 int main(int argc, char* argv[])
 {
 	if constexpr (true) {
-		auto replayFile = std::make_shared<CPPRP::ReplayFile>("J:/74B3720B43DEF8267DD3EB932BED44B5.replay");
+		auto replayFile = std::make_shared<CPPRP::ReplayFile>(argv[1]);
 		replayFile->Load();
 		replayFile->DeserializeHeader();
 		replayFile->PreprocessTables();

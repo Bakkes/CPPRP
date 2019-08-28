@@ -10,6 +10,7 @@ namespace CPPRP
 		errorMsg = ss.str().c_str();
 	}
 
+	PropertyDoesNotExistException::~PropertyDoesNotExistException() {}
 	const char * PropertyDoesNotExistException::what() const throw()
 	{
 

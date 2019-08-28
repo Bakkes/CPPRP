@@ -1,4 +1,4 @@
-#include <iostream>
+/*#include <iostream>
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
@@ -6,45 +6,12 @@
 
 #pragma comment(lib, "CPPRP.lib")
 #include "../CPPRP/ReplayFile.h"
-#include "../CPPRP/ReplayException.h"
+#include "../CPPRP/Exceptions/ReplayException.h"
 #include <vector>
 #include <memory>
 #include <unordered_map>
 #include <stdint.h>
 #include <string>
-int main()
-{
-    auto replayFile = std::make_shared<CPPRP::ReplayFile>("/windows2/alpaca/FEC14EA54A3153397D27ABAF6C7D1413.replay");
-    replayFile->Load();
-    replayFile->DeserializeHeader();
-    for (auto it : replayFile->GetProperty<std::vector<std::unordered_map<std::string, std::shared_ptr<CPPRP::Property>>>>("PlayerStats"))
-    {
-        for (auto it2 : it)
-        {
-            printf("%s\n", it2.first.c_str());
-        }
-    }
-
-    replayFile->createdCallbacks.push_back([&](const CPPRP::ActorStateData& aa)
-    {
-        printf("Create");
-    });
-
-    std::map<uint32_t, std::unordered_map<uint32_t, CPPRP::Vector3>> locations;
-    replayFile->tickables.push_back([&](const uint32_t frameNumber, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
-    {
-        //printf("Tick %i\n", frameNumber);
-        // for (auto& actor : actorStats)
-        // {
-        //     std::shared_ptr<CPPRP::TAGame::Car_TA> car = std::dynamic_pointer_cast<CPPRP::TAGame::Car_TA>(actor.second.actorObject);
-        //     if (car)
-        //     {
-        //         locations[frameNumber][actor.first] = car->ReplicatedRBState.position;
-        //     }
-        // }
-    });
-    replayFile->Parse();
-}
 
 template<typename T>
 void Serialize(T wot)
@@ -1618,4 +1585,4 @@ RegisterJSONSerializer("TAGame.GameEvent_SoccarPrivate_TA:MatchSettings", [](aut
                 Serialize<CPPRP::PrivateMatchSettings>(std::static_pointer_cast<CPPRP::TAGame::GameEvent_SoccarPrivate_TA>(struc)->MatchSettings);
         });
 
-}
+}*/

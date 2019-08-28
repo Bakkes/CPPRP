@@ -11,6 +11,7 @@
 #include "CPPBitReader.h"
 #include "./data/NetworkData.h"
 #include "./exceptions/ParseException.h"
+#include "./exceptions/ReplayException.h"
 #include "NetworkDataParsers.h"
 #include "./data/ReplayFileData.h"
 #include "PropertyParser.h"

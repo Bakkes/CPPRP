@@ -764,12 +764,12 @@ namespace CPPRP
 			static std::unordered_map<std::string, writerFunc> writerFuncs;
 
 			template<typename T>
-			constexpr inline static void RegisterSerializer(const std::string& str, T callback)
+			inline static void RegisterSerializer(const std::string& str, T callback)
 			{
 				writerFuncs[str] = callback;
 			}
 
-			static constexpr int Test()
+			static inline int Test()
 			{
 				RegisterSerializer("Engine.Actor:DrawScale", [](Writer& writer, std::shared_ptr<Engine::Actor>& struc) { writer.String("DrawScale"); Serialize<float>(writer, std::static_pointer_cast<CPPRP::Engine::Actor>(struc)->DrawScale); });
 				RegisterSerializer("Engine.Actor:bCollideActors", [](Writer& writer, std::shared_ptr<Engine::Actor>& struc) { writer.String("bCollideActors"); Serialize<bool>(writer, std::static_pointer_cast<CPPRP::Engine::Actor>(struc)->bCollideActors); });

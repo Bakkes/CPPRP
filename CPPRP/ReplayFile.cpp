@@ -4,6 +4,8 @@
 #include "./data/NetworkData.h"
 #include "./data/ArcheTypes.h"
 #include "./generated/ClassExtensions.h"
+#include "./exceptions/ParseException.h"
+#include "./exceptions/ReplayException.h"
 #include "CRC.h"
 #include <functional>
 
