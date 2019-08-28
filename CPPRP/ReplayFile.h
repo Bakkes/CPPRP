@@ -24,6 +24,7 @@ namespace CPPRP
 	{
 		std::shared_ptr<Engine::Actor> actorObject;
 		std::shared_ptr<ClassNet> classNet;
+		uint32_t actorId{0};
 		uint32_t nameId{ 0 };
 	};
 
@@ -32,12 +33,14 @@ namespace CPPRP
 	typedef std::function<void(const uint32_t, const std::unordered_map<int, ActorStateData>&)> tickable;
 	typedef std::function<void(const ActorStateData&)> actorCreated;
 	typedef std::function<void(const ActorStateData&, const std::vector<uint32_t>&)> actorUpdated;
+	typedef std::function<void(const ActorStateData&)> actorDeleted;
+	typedef std::function<void(uint32_t, const ActorStateData&)> propertyUpdated;
 
 	class ReplayFile
 	{
 	private:
 		std::vector<char> data;
-		CPPBitReader<BitReaderType> fullReplayBitReader;
+		std::shared_ptr<CPPBitReader<BitReaderType>> fullReplayBitReader;
 		std::map<std::string, std::shared_ptr<ClassNet>> classnetMap;
 	public:
 		std::filesystem::path path;
@@ -53,7 +56,9 @@ namespace CPPRP
 		std::vector<tickable> tickables;
 		std::vector<actorCreated> createdCallbacks;
 		std::vector<actorUpdated> updatedCallbacks;
+		std::vector<actorDeleted> actorDeleteCallbacks;
 
+		std::unordered_map<std::string, uint32_t> objectToId;
 	public:
 		ReplayFile(std::filesystem::path path_);
 		~ReplayFile();
@@ -62,6 +67,8 @@ namespace CPPRP
 		void DeserializeHeader();
 		const bool VerifyCRC(CrcCheck verifyWhat);
 		void Parse(const uint32_t startPos = 0, int32_t endPos = -1, const uint32_t frameCount = 0);
+	
+		void PreprocessTables();
 	protected:
 		void MergeDuplicates();
 		void FixParents();
@@ -80,11 +87,11 @@ namespace CPPRP
 		const bool HasProperty(const std::string& key) const;
 
 		template<typename T>
-		const T GetProperty(const std::string& key);
+		const T GetProperty(const std::string& key) const;
 	};
 
 	template<typename T>
-	inline const T ReplayFile::GetProperty(const std::string& key)
+	inline const T ReplayFile::GetProperty(const std::string& key) const
 	{
 		if (replayFile->properties.find(key) == replayFile->properties.end())
 		{

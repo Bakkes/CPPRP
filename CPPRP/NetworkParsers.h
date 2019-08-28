@@ -269,7 +269,7 @@ namespace CPPRP
 	template<>
 	inline const std::string ToString(const std::shared_ptr<UniqueId>& item)
 	{
-		return "";
+		return "ERR";
 	}
 
 	template<>

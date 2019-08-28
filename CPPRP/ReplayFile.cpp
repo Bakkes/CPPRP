@@ -42,26 +42,26 @@ namespace CPPRP
 	{
 		const size_t dataSizeBits = data.size() * 8;
 		replayFile = std::make_shared<ReplayFileData>();
-		fullReplayBitReader = CPPBitReader<BitReaderType>((const BitReaderType*)data.data(), dataSizeBits, replayFile, 0, 0, 0);
+		fullReplayBitReader = std::make_shared<CPPBitReader<BitReaderType>>((const BitReaderType*)data.data(), dataSizeBits, replayFile);
 
 		replayFile->header = {
-			fullReplayBitReader.read<uint32_t>(),	//Size
-			fullReplayBitReader.read<uint32_t>(),	//CRC
-			fullReplayBitReader.read<uint32_t>(),	//engineVersion
-			fullReplayBitReader.read<uint32_t>()	//licenseeVersion
+			fullReplayBitReader->read<uint32_t>(),	//Size
+			fullReplayBitReader->read<uint32_t>(),	//CRC
+			fullReplayBitReader->read<uint32_t>(),	//engineVersion
+			fullReplayBitReader->read<uint32_t>()	//licenseeVersion
 		};
 
 		if (replayFile->header.engineVersion >= 868 && replayFile->header.licenseeVersion >= 18)
 		{
-			replayFile->header.netVersion = fullReplayBitReader.read<uint32_t>();
+			replayFile->header.netVersion = fullReplayBitReader->read<uint32_t>();
 		}
 
 		//Reconstruct cause we got version info now,  find something better for this
-		size_t bitPos = fullReplayBitReader.GetAbsoluteBitPosition();
-		fullReplayBitReader = CPPBitReader<BitReaderType>((const BitReaderType*)data.data(), dataSizeBits, replayFile);
-		fullReplayBitReader.skip(bitPos);
+		size_t bitPos = fullReplayBitReader->GetAbsoluteBitPosition();
+		fullReplayBitReader = std::make_shared<CPPBitReader<BitReaderType>>((const BitReaderType*)data.data(), dataSizeBits, replayFile);
+		fullReplayBitReader->skip(bitPos);
 
-		replayFile->replayType = fullReplayBitReader.read<std::string>(); //Not sure what this is
+		replayFile->replayType = fullReplayBitReader->read<std::string>(); //Not sure what this is
 
 
 		while (true) {
@@ -74,106 +74,106 @@ namespace CPPRP
 			replayFile->properties[baseProperty->property_name] = baseProperty;
 		}
 
-		replayFile->body_size = fullReplayBitReader.read<uint32_t>();
-		replayFile->crc2 = fullReplayBitReader.read<uint32_t>();
+		replayFile->body_size = fullReplayBitReader->read<uint32_t>();
+		replayFile->crc2 = fullReplayBitReader->read<uint32_t>();
 
-		const uint32_t levelCount = fullReplayBitReader.read<uint32_t>();
+		const uint32_t levelCount = fullReplayBitReader->read<uint32_t>();
 		for (uint32_t i = 0; i < levelCount; ++i)
 		{
-			replayFile->levels.push_back(fullReplayBitReader.read<std::string>());
+			replayFile->levels.push_back(fullReplayBitReader->read<std::string>());
 		}
 
-		const uint32_t keyframeCount = fullReplayBitReader.read<uint32_t>();
+		const uint32_t keyframeCount = fullReplayBitReader->read<uint32_t>();
 		for (uint32_t i = 0; i < keyframeCount; ++i)
 		{
 			replayFile->keyframes.push_back(
 				{
-					fullReplayBitReader.read<float>(),		//Time
-					fullReplayBitReader.read<uint32_t>(),	//Frame
-					fullReplayBitReader.read<uint32_t>()	//File position
+					fullReplayBitReader->read<float>(),		//Time
+					fullReplayBitReader->read<uint32_t>(),	//Frame
+					fullReplayBitReader->read<uint32_t>()	//File position
 				});
 		}
 
-		const uint32_t netstreamCount = static_cast<uint32_t>(fullReplayBitReader.read<int32_t>());
-		replayFile->netstream_data = data.data() + fullReplayBitReader.GetAbsoluteBytePosition(); //We know this is always aligned, so valid
+		const uint32_t netstreamCount = static_cast<uint32_t>(fullReplayBitReader->read<int32_t>());
+		replayFile->netstream_data = data.data() + fullReplayBitReader->GetAbsoluteBytePosition(); //We know this is always aligned, so valid
 		uint32_t test = netstreamCount * 8;
-		fullReplayBitReader.skip(test);
+		fullReplayBitReader->skip(test);
 		replayFile->netstream_size = netstreamCount;
 
-		if (!fullReplayBitReader.canRead())
+		if (!fullReplayBitReader->canRead())
 		{
 			//Replay is corrupt
-			throw GeneralParseException("ReplayFile corrupt. header + netstream_size > filesize", fullReplayBitReader);
+			throw GeneralParseException("ReplayFile corrupt. header + netstream_size > filesize", *fullReplayBitReader);
 		}
 
-		const int32_t debugStringSize = fullReplayBitReader.read<int32_t>();
+		const int32_t debugStringSize = fullReplayBitReader->read<int32_t>();
 		for (int32_t i = 0; i < debugStringSize; ++i)
 		{
-			uint32_t frame = fullReplayBitReader.read<uint32_t>();
-			std::string key = fullReplayBitReader.read<std::string>();
-			std::string value = fullReplayBitReader.read<std::string>();
+			uint32_t frame = fullReplayBitReader->read<uint32_t>();
+			std::string key = fullReplayBitReader->read<std::string>();
+			std::string value = fullReplayBitReader->read<std::string>();
 			///printf("%s = %s", key.c_str(), value.c_str());
 		}
-		//fullReplayBitReader.skip(4*8); //debug_log apparently
+		//fullReplayBitReader->skip(4*8); //debug_log apparently
 
-		const uint32_t replayTickCount = fullReplayBitReader.read<uint32_t>();
+		const uint32_t replayTickCount = fullReplayBitReader->read<uint32_t>();
 		for (uint32_t i = 0; i < replayTickCount; ++i)
 		{
 			replayFile->replayticks.push_back(
 				{
-					fullReplayBitReader.read<std::string>(),	//Type
-					fullReplayBitReader.read<uint32_t>()		//Frame
+					fullReplayBitReader->read<std::string>(),	//Type
+					fullReplayBitReader->read<uint32_t>()		//Frame
 				});
 		}
 
 
-		const uint32_t replicatedPackagesCount = fullReplayBitReader.read<uint32_t>();
+		const uint32_t replicatedPackagesCount = fullReplayBitReader->read<uint32_t>();
 		for (uint32_t i = 0; i < replicatedPackagesCount; ++i)
 		{
 			replayFile->replicated_packages.push_back(
 				{
-					fullReplayBitReader.read<std::string>()
+					fullReplayBitReader->read<std::string>()
 				});
 		}
 
-		const uint32_t objectsCount = fullReplayBitReader.read<uint32_t>();
+		const uint32_t objectsCount = fullReplayBitReader->read<uint32_t>();
 		for (uint32_t i = 0; i < objectsCount; ++i)
 		{
 			replayFile->objects.push_back(
 				{
-					fullReplayBitReader.read<std::string>()
+					fullReplayBitReader->read<std::string>()
 				});
 		}
 
-		const uint32_t namesCount = fullReplayBitReader.read<uint32_t>();
+		const uint32_t namesCount = fullReplayBitReader->read<uint32_t>();
 		for (uint32_t i = 0; i < namesCount; ++i)
 		{
 			replayFile->names.push_back(
 				{
-					fullReplayBitReader.read<std::string>()
+					fullReplayBitReader->read<std::string>()
 				});
 		}
 
-		const uint32_t classIndexCount = fullReplayBitReader.read<uint32_t>();
+		const uint32_t classIndexCount = fullReplayBitReader->read<uint32_t>();
 		for (uint32_t i = 0; i < classIndexCount; ++i)
 		{
 			replayFile->class_indices.push_back(
 				{
-					fullReplayBitReader.read<std::string>(),	//Class_name
-					fullReplayBitReader.read<uint32_t>()		//Index
+					fullReplayBitReader->read<std::string>(),	//Class_name
+					fullReplayBitReader->read<uint32_t>()		//Index
 				});
 		}
 
-		const uint32_t classNetsCount = fullReplayBitReader.read<uint32_t>();
+		const uint32_t classNetsCount = fullReplayBitReader->read<uint32_t>();
 		replayFile->classnets.resize(classNetsCount);
 		for (uint32_t i = 0; i < classNetsCount; ++i)
 		{
 			ClassNet cn = {
-				fullReplayBitReader.read<int32_t>(),		//Index
-				fullReplayBitReader.read<int32_t>(),		//Parent
+				fullReplayBitReader->read<int32_t>(),		//Index
+				fullReplayBitReader->read<int32_t>(),		//Parent
 				NULL,							//Parent class, not known yet
-				fullReplayBitReader.read<int32_t>(),		//Id
-				fullReplayBitReader.read<int32_t>(),		//Prop_indexes_size
+				fullReplayBitReader->read<int32_t>(),		//Id
+				fullReplayBitReader->read<int32_t>(),		//Prop_indexes_size
 				std::vector<PropIndexId>(),		//Empty propindexid array
 				0,								//Max_prop_id
 				std::vector<uint16_t>()			//Property_id_cache
@@ -185,8 +185,8 @@ namespace CPPRP
 			{
 				cn.prop_indexes[j] = (
 					PropIndexId{
-						fullReplayBitReader.read<int32_t>(),	//Prop_index
-						fullReplayBitReader.read<int32_t>()	//Prop_id
+						fullReplayBitReader->read<int32_t>(),	//Prop_index
+						fullReplayBitReader->read<int32_t>()	//Prop_id
 					});
 			}
 			std::shared_ptr<ClassNet> classNet = std::make_shared<ClassNet>(cn);
@@ -205,7 +205,7 @@ namespace CPPRP
 		}
 		if (replayFile->header.netVersion >= 10)
 		{
-			fullReplayBitReader.read<int32_t>();
+			fullReplayBitReader->read<int32_t>();
 		}
 		this->FixParents();
 
@@ -271,6 +271,16 @@ namespace CPPRP
 		return bodyReadCrc == bodyCalculatedCRC;
 	}
 
+	void ReplayFile::PreprocessTables()
+	{
+		const size_t size = replayFile->objects.size();
+		for(size_t i = 0; i < size; ++i)
+		{
+			objectToId[replayFile->objects.at(i)] = (uint32_t)i;
+			//printf("[%i] %s", i, replayFile->objects.at(i).c_str());
+		}
+	}
+
 	void ReplayFile::MergeDuplicates()
 	{
 		std::unordered_map<std::string, int> counts;
@@ -284,7 +294,7 @@ namespace CPPRP
 		}
 		if (counts.size() != classnetMap.size())
 		{
-			throw GeneralParseException("Found duplicate class!", fullReplayBitReader);
+			throw GeneralParseException("Found duplicate class!", *fullReplayBitReader);
 		}
 	}
 
@@ -889,7 +899,7 @@ namespace CPPRP
 							}
 							#endif
 							std::shared_ptr<Engine::Actor> actorObject = funcPtr();
-							ActorStateData asd = { actorObject, classNet, name_id };
+							ActorStateData asd = { actorObject, classNet, actorId, name_id };
 							if constexpr (IncludeParseLog)
 							{
 								parseLog.push_back("New actor for " + typeName + ", classname " + className);
@@ -911,7 +921,7 @@ namespace CPPRP
 						}
 						else //Is existing state
 						{
-							ActorStateData actorState = actorStates[actorId];
+							ActorStateData& actorState = actorStates[actorId];
 							std::vector<uint32_t> updatedProperties;
 							//While there's data for this state to be updated
 							while (networkReader.read<bool>())
@@ -949,6 +959,11 @@ namespace CPPRP
 					}
 					else
 					{
+						ActorStateData& actorState = actorStates[actorId];
+						for(const auto& deleteFunc : actorDeleteCallbacks)
+						{
+							deleteFunc(actorState);
+						}
 						actorStates.erase(actorId);
 					}
 				}
@@ -1022,14 +1037,14 @@ namespace CPPRP
 
 	const bool ReplayFile::ParseProperty(const std::shared_ptr<Property>& currentProperty)
 	{
-		currentProperty->property_name = fullReplayBitReader.read<std::string>();
+		currentProperty->property_name = fullReplayBitReader->read<std::string>();
 		if (currentProperty->property_name.compare("None") == 0) //We're done parsing this prop
 		{
 			return false;
 		}
-		currentProperty->property_type = fullReplayBitReader.read<std::string>();
-		const uint32_t propertySize = fullReplayBitReader.read<uint32_t>();
-		const uint32_t idk = fullReplayBitReader.read<uint32_t>();
+		currentProperty->property_type = fullReplayBitReader->read<std::string>();
+		const uint32_t propertySize = fullReplayBitReader->read<uint32_t>();
+		const uint32_t idk = fullReplayBitReader->read<uint32_t>();
 
 		//Not sure why I'm doing these micro optimizations here, kinda hurts readability and its only like a nanosecond
 		switch (currentProperty->property_type[0])
@@ -1042,18 +1057,18 @@ namespace CPPRP
 			}
 			else //Type is "Name"
 			{
-				currentProperty->value = fullReplayBitReader.read<std::string>();
+				currentProperty->value = fullReplayBitReader->read<std::string>();
 			}
 		}
 		break;
 		case 'I': //IntProperty
 		{
-			currentProperty->value = fullReplayBitReader.read<int32_t>();
+			currentProperty->value = fullReplayBitReader->read<int32_t>();
 		}
 		break;
 		case 'S': //StringProperty
 		{
-			currentProperty->value = fullReplayBitReader.read<std::string>();
+			currentProperty->value = fullReplayBitReader->read<std::string>();
 		}
 		break;
 		case 'B':
@@ -1061,15 +1076,15 @@ namespace CPPRP
 			if (currentProperty->property_type[1] == 'y') //Type is "ByteProperty"
 			{
 				EnumProperty ep;
-				ep.type = fullReplayBitReader.read<std::string>();
+				ep.type = fullReplayBitReader->read<std::string>();
 				if (ep.type.compare("OnlinePlatform_Steam") == 0 || ep.type.compare("OnlinePlatform_PS4") == 0) //for some reason if string is this, there's no value.
 				{
 					ep.value = "";
-					//fullReplayBitReader.read<uint32_t>();
+					//fullReplayBitReader->read<uint32_t>();
 				}
 				else
 				{
-					ep.value = fullReplayBitReader.read<std::string>(); //Value
+					ep.value = fullReplayBitReader->read<std::string>(); //Value
 				}
 				currentProperty->value = ep;
 			}
@@ -1079,11 +1094,11 @@ namespace CPPRP
 					replayFile->header.licenseeVersion == 0 &&
 					replayFile->header.netVersion == 0)
 				{
-					currentProperty->value = fullReplayBitReader.read<uint32_t>();
+					currentProperty->value = fullReplayBitReader->read<uint32_t>();
 				}
 				else
 				{
-					currentProperty->value = fullReplayBitReader.read<uint8_t>();
+					currentProperty->value = fullReplayBitReader->read<uint8_t>();
 				}
 
 			}
@@ -1091,17 +1106,17 @@ namespace CPPRP
 		break;
 		case 'Q': //QWordProperty
 		{
-			currentProperty->value = fullReplayBitReader.read<uint64_t>();
+			currentProperty->value = fullReplayBitReader->read<uint64_t>();
 		}
 		break;
 		case 'F': //FloatProperty
 		{
-			currentProperty->value = fullReplayBitReader.read<float>();
+			currentProperty->value = fullReplayBitReader->read<float>();
 		}
 		break;
 		case 'A': //ArrayProperty
 		{
-			const int32_t count = fullReplayBitReader.read<int32_t>();
+			const int32_t count = fullReplayBitReader->read<int32_t>();
 			std::vector<std::unordered_map<std::string, std::shared_ptr<Property>>> properties;
 			properties.resize(count);
 

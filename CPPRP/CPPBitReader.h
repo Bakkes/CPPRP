@@ -75,19 +75,19 @@ namespace CPPRP
 	class CPPBitReader
 	{
 	public:
-		const T *start;
-		const T *data;
+		const T * start;
+		const T * data;
 		uint32_t t_position;
 		uint32_t bit_position;
-		size_t size; //Should be in bits?
+		const size_t size; //Should be in bits?
 
 		//Let's store this data in here, saves a call to owner.
 		//Use during network stream parsing
-		uint16_t engineVersion{ 0 };
-		uint8_t licenseeVersion{ 0 };
-		uint8_t netVersion{ 0 };
+		const uint16_t engineVersion;
+		const uint8_t licenseeVersion;
+		const uint8_t netVersion;
 
-		std::shared_ptr<ReplayFileData> owner;
+		const std::shared_ptr<ReplayFileData> owner;
 
 	private:
 		template<typename X>
@@ -186,6 +186,7 @@ namespace CPPRP
 		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_);
 		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_, 
 			const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV);
+		CPPBitReader(const CPPBitReader& other);
 		CPPBitReader();
 		
 
@@ -243,6 +244,7 @@ namespace CPPRP
 		const int32_t bias = 1 << (int)(num_bits + 1);
 		const int32_t max = (int)num_bits + 2;
 
+		//printf("Test %i\n", num_bits);
 		const int32_t dx = read<int32_t>(max);
 		const int32_t dy = read<int32_t>(max);
 		const int32_t dz = read<int32_t>(max);
@@ -446,24 +448,35 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_) : engineVersion(owner_->header.engineVersion), licenseeVersion(owner_->header.licenseeVersion), netVersion(owner_->header.netVersion), owner(owner_)
+	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFileData> owner_) 
+	: engineVersion(owner_->header.engineVersion), licenseeVersion(owner_->header.licenseeVersion), 
+	netVersion(owner_->header.netVersion), owner(owner_), size(sizee)
 	{
 		this->start = data;
 		this->data = data;
-		this->size = size;
 		this->t_position = 0;
 		this->bit_position = 0;
 	}
 
 	template<typename T>
-	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_, 
-		const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV) : engineVersion(engineV), licenseeVersion(licenseeV), netVersion(netV), owner(owner_)
+	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFileData> owner_, 
+		const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV) : engineVersion(engineV), 
+		licenseeVersion(licenseeV), netVersion(netV), owner(owner_), size(sizee)
 	{
 		this->start = data;
 		this->data = data;
-		this->size = size;
 		this->t_position = 0;
 		this->bit_position = 0;
+	}
+
+	template<typename T>
+	inline CPPBitReader<T>::CPPBitReader(const CPPBitReader& other) 
+	: engineVersion(other.engineVersion), licenseeVersion(other.licenseeVersion), netVersion(other.netVersion), owner(other.owner), size(other.size)
+	{
+		this->start = other.start;
+		this->data = other.data;
+		this->t_position = other.t_position;
+		this->bit_position = other.bit_position;
 	}
 
 	template<typename T>
