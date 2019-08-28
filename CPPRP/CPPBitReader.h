@@ -68,7 +68,7 @@ namespace CPPRP
 
 	private:
 		template<typename X>
-		const X get_bits(uint16_t n)
+		const X get_bits(X n)
 		{
 			#ifndef PARSE_UNSAFE
 			if (GetAbsoluteBitPosition() + n > size)
@@ -79,7 +79,7 @@ namespace CPPRP
 
 			constexpr uint16_t SIZE_T = sizeof(T) * 8;
 			X result = 0;
-			uint16_t bit_pos = 0;
+			X bit_pos = 0;
 			T bt = *data;
 			if (bit_position > 0)
 			{
@@ -113,7 +113,7 @@ namespace CPPRP
 			//If we reached this point, we know n > 0
 			while (n > (SIZE_T - 1))
 			{
-				result |= bt << (bit_pos);
+				result |= static_cast<X>(bt) << (bit_pos);
 				++t_position;
 				bt = *(++data); //Valgrind says this has invalid reads, probably at end of replay and there's no bytes left?
 				n -= SIZE_T;
@@ -148,7 +148,7 @@ namespace CPPRP
 
 			if((result + (1 << max_bits)) < maxValue)
 			{
-				result |= (((*data) >> bit_position++) & 1) << max_bits;
+				result |= (((*data) >> bit_position++) & 1ULL) << max_bits;
 
 				if (bit_position == sizeof(T) * 8)
 				{

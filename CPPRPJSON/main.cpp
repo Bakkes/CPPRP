@@ -21,6 +21,96 @@ struct UpdateData
 	const CPPRP::ActorStateData asd;
 	const std::vector<uint32_t> props;
 };
+void SerializeProp(CPPRP::JSON::Writer& writer, const std::string& name, std::shared_ptr<CPPRP::Property>& currentProperty, const bool specialByteProp)
+{
+
+	writer.String(name.c_str());
+	switch (currentProperty->property_type[0])
+	{
+	case 'N':
+	{
+		if (currentProperty->property_type[1] == 'o') //Type is "None"
+		{
+			writer.Null();
+		}
+		else //Type is "Name"
+		{
+			writer.String(std::any_cast<std::string>(currentProperty->value).c_str());
+		}
+	}
+	break;
+	case 'I': //IntProperty
+	{
+		writer.Int(std::any_cast<int32_t>(currentProperty->value));
+	}
+	break;
+	case 'S': //StringProperty
+	{
+		writer.String(std::any_cast<std::string>(currentProperty->value).c_str());
+	}
+	break;
+	case 'B':
+	{
+		if (currentProperty->property_type[1] == 'y') //Type is "ByteProperty"
+		{
+			CPPRP::EnumProperty ep = std::any_cast<CPPRP::EnumProperty>(currentProperty->value);
+			writer.StartObject();
+			writer.String("Type");
+			writer.String(ep.type.c_str());
+			writer.String("Value");
+			writer.String(ep.value.c_str());
+			writer.EndObject();
+		}
+		else //Type is "BoolProperty", but unlike network data, is stored as entire byte
+		{
+			if (specialByteProp)
+			{
+				writer.Int(std::any_cast<uint32_t>(currentProperty->value));
+			}
+			else
+			{
+				writer.Int(std::any_cast<uint8_t>(currentProperty->value));
+			}
+			
+		}
+	}
+	break;
+	case 'Q': //QWordProperty
+	{
+		writer.Uint64(std::any_cast<uint64_t>(currentProperty->value));
+	}
+	break;
+	case 'F': //FloatProperty
+	{
+		writer.Double(std::any_cast<float>(currentProperty->value));
+	}
+	break;
+	case 'A': //ArrayProperty
+	{
+		auto temp = (std::any_cast<std::vector<std::unordered_map<std::string, std::shared_ptr<CPPRP::Property>>>>(currentProperty->value));
+		
+		writer.StartArray();
+		for (auto& wot : temp)
+		{
+			writer.StartObject();
+			for (auto& wot2 : wot)
+			{
+				SerializeProp(writer, wot2.first, wot2.second, specialByteProp);
+			}
+			writer.EndObject();
+		}
+		writer.EndArray();
+	}
+	break;
+	default: //Die
+		writer.Null();
+		//assert(1 == 2);
+		break;
+	}
+
+
+}
+
 int main(int argc, char* argv[])
 {
 	if constexpr (true) {
@@ -43,10 +133,35 @@ int main(int argc, char* argv[])
 		writer.StartObject();
 		writer.String("Header");
 		writer.StartObject();
+
+		writer.String("EngineVersion");
+		writer.Uint(headerData->header.engineVersion);
+		writer.String("LicenseeVersion");
+		writer.Uint(headerData->header.licenseeVersion);
+		writer.String("NetVersion");
+		writer.Uint(headerData->header.netVersion);
+		writer.String("CRC");
+		writer.Uint(headerData->header.crc);
+		writer.String("Size");
+		writer.Uint(headerData->header.size);
+		writer.String("ReplayType");
+		writer.String(headerData->replayType.c_str());
+
+		writer.String("Properties");
+		const bool useSpecialByteProp = headerData->header.engineVersion == 0 &&
+			headerData->header.licenseeVersion == 0 &&
+			headerData->header.netVersion == 0;
+		writer.StartObject();
+		for (auto prop : headerData->properties)
+		{
+			SerializeProp(writer, prop.first, prop.second, useSpecialByteProp);
+		}
+		writer.EndObject();
+
 		writer.String("Keyframes");
 		writer.StartArray();
 
-		for (auto kv : replayFile->replayFile->keyframes)
+		for (auto kv : headerData->keyframes)
 		{
 			writer.StartObject();
 			writer.String("Time");
@@ -174,6 +289,6 @@ int main(int argc, char* argv[])
 		writer.EndObject();
 		int fdfsd = 5;
 		std::cout << s.GetString();
-		getchar();
+		
 	}
 }

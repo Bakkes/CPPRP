@@ -20,7 +20,7 @@ namespace CPPRP
 			std::stringstream ss;
 			ss << "unsupported " << typeid(T).name();
 			std::string o = ss.str();
-			printf("%s\n", o.c_str());
+			//printf("%s\n", o.c_str());
 			//assert(1 == 2);
 			writer.String(o.c_str(), o.size());
 		}
