@@ -36,13 +36,16 @@ if __name__== "__main__":
 
             code.write("RegisterClass<{1}::{0}>(\"{1}.{0}\");\n".format(options[0], namespace))
             serializer.write("template<typename Writer>\n")
-            serializer.write("inline const void Serialize(Writer& writer, const std::shared_ptr<CPPRP::Engine::Actor>& struc)\n".format(options[0], namespace))
+            serializer.write("inline const void Serialize(Writer& writer, const std::shared_ptr<CPPRP::{1}::{0}>& item)\n".format(options[0], namespace))
             serializer.write("{\n")
-            serializer.write("\tauto item = std::static_pointer_cast<CPPRP::{1}::{0}>(struc);\n".format(options[0], namespace))
+            #serializer.write("\tauto item = std::static_pointer_cast<CPPRP::{1}::{0}>(struc);\n".format(options[0], namespace))
             #serializer.write("\twriter.StartObject();\n")
             #serializer.write("\twriter.String(\"actor_id\");\n")
             #serializer.write("\twriter.Uint({0});\n".format(0))
-            serializer.write("\tSerialize<CPPRP::{1}::{0}>(writer, item);\n".format(options[1], namespace))
+            
+            #tempName = options[1]  if "::" not in options[1] else options[1][options[1].rfind(':') + 1:]
+            namesp = namespace + "::" if "::" not in options[1] else ""
+            serializer.write("\tSerialize<CPPRP::{0}{1}>(writer, item);\n".format(namesp, options[1]))
             
             #print(options)
         if line.startswith("FIELD"):
@@ -51,9 +54,9 @@ if __name__== "__main__":
             #<{4}::{0}, {2}>
             code.write("RegisterField({3}, [](std::shared_ptr<Engine::Actor>& struc, CPPBitReader<BitReaderType>& br) {{ std::static_pointer_cast<CPPRP::{4}::{0}>(struc)->{1} = Consume<{2}>(br); }});\n".format(options[0], options[1], options[2], options[3], namespace))
             serializer.write("\twriter.String(\"{0}\");\n".format(options[1]))
-            serializer.write("\tSerialize<{0}>(writer, item.{1});\n".format(options[2].replace("struct ", "CPPRP::"), options[1]))
+            serializer.write("\tSerialize<{0}>(writer, item->{1});\n".format(options[2].replace("struct ", "CPPRP::"), options[1]))
             serializerSingle.write("RegisterJSONSerializer({0}, ".format(options[3]))
-            serializerSingle.write("[](Writer& writer, std::shared_ptr<CPPRP::Engine::Actor>& struc) {\n")
+            serializerSingle.write("[](auto& writer, std::shared_ptr<CPPRP::Engine::Actor>& struc) {\n")
             serializerSingle.write("\t\twriter.String(\"{0}\");\n".format(options[1]))
             serializerSingle.write("\t\tSerialize<{2}>(std::static_pointer_cast<CPPRP::{4}::{0}>(struc)->{1});\n".format(options[0].replace("struct ", "CPPRP::"), options[1], options[2].replace("struct ", "CPPRP::"), options[3], namespace))
             serializerSingle.write("\t});\n")
@@ -64,5 +67,5 @@ if __name__== "__main__":
     serializer.write("}\n")
 
     #print(code.getvalue())
-    #print(serializer.getvalue())
-    print(serializerSingle.getvalue())
+    print(serializer.getvalue())
+    #print(serializerSingle.getvalue())

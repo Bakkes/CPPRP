@@ -167,6 +167,7 @@ namespace CPPRP
 		uint32_t value;
 		bool has_value;
 		bool unknown1;
+		virtual ~ProductAttribute(){}
 	};
 
 
