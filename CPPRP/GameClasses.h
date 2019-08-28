@@ -190,11 +190,11 @@ namespace CPPRP
 
 		};
 
-		//CLASS(GRI_X, Engine::GameReplicationInfo);
-		//struct GRI_X : public Engine::GameReplicationInfo
-		//{
+		CLASS(NetModeReplicator_X, Engine::ReplicationInfo);
+		struct NetModeReplicator_X : public Engine::ReplicationInfo
+		{
 
-		//};
+		};
 
 		CLASS(Pawn_X, Engine::Pawn);
 		struct Pawn_X : public Engine::Pawn

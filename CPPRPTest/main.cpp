@@ -23,8 +23,8 @@
 
 int main(int argc, char *argv[])
 {
-	if constexpr (false) {
-		auto replayFile = std::make_shared<CPPRP::ReplayFile>("F:/Alpaca/2F6924754EEC41B468694D9537E4C1D7.replay");
+	if constexpr (true) {
+		auto replayFile = std::make_shared<CPPRP::ReplayFile>("J:/74B3720B43DEF8267DD3EB932BED44B5.replay");
 		replayFile->Load();
 		replayFile->DeserializeHeader();
 		for (auto it : replayFile->GetProperty<std::vector<std::unordered_map<std::string, std::shared_ptr<CPPRP::Property>>>>("PlayerStats"))

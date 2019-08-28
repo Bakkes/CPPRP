@@ -599,6 +599,7 @@ namespace CPPRP
 	  , {"ProjectX.GRI_X", "Engine.GameReplicationInfo"}
 	  , {"ProjectX.Pawn_X", "Engine.Pawn"}
 	  , {"ProjectX.PRI_X", "Engine.PlayerReplicationInfo"}
+	  , {"ProjectX.NetModeReplicator_X", "Engine.ReplicationInfo"}
 	  , {"TAGame.Ball_TA", "TAGame.RBActor_TA"}
 	  , {"TAGame.CameraSettingsActor_TA", "Engine.ReplicationInfo"}
 	  , {"TAGame.Car_Season_TA", "TAGame.PRI_TA"}
@@ -686,8 +687,9 @@ namespace CPPRP
 		{{"TAGame.HauntedBallTrapTrigger_TA"}, {"Haunted_TrainStation_P.TheWorld:PersistentLevel.HauntedBallTrapTrigger_TA_1", "Haunted_TrainStation_P.TheWorld:PersistentLevel.HauntedBallTrapTrigger_TA_0"}},
 		{{"TAGame.SpecialPickup_HauntedBallBeam_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_HauntedBallBeam"}},
 		{{"TAGame.SpecialPickup_Rugby_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Rugby"}},
-		{{"TAGame.Cannon_TA"},  {"Archetypes.Tutorial.Cannon"}}
-		, {{"Engine.ReplicationInfo"}, {"ProjectX.Default__NetModeReplicator_X"}}
+		{{"TAGame.Cannon_TA"},  {"Archetypes.Tutorial.Cannon"}},
+		{{"ProjectX.NetModeReplicator_X"}, {"ProjectX.Default__NetModeReplicator_X"}}
+		
 	};
 
 	void ReplayFile::FixParents()
