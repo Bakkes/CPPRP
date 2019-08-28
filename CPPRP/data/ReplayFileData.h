@@ -193,10 +193,11 @@ namespace CPPRP
 
 	struct Frame
 	{
+		uint32_t frameNumber;
 		float time;
 		float delta;
 		size_t position;
-		std::unordered_map<uint32_t, ActorState> states;
+		//std::unordered_map<uint32_t, ActorState> states;
 	};
 
 	struct EnumProperty

@@ -158,8 +158,10 @@ def generateClasses(code):
     jsonFunc.write("{\n")
     [jsonFunc.write("\t{0}\n".format(x)) for x in code.jsonIO.getvalue().splitlines()]
     jsonFunc.write("}\n\n")
-    if code.consume:
-        print(consumeFunc.getvalue())
+
+    print(jsonFunc.getvalue())
+    #if code.consume:
+    #    print(consumeFunc.getvalue())
     #if code.consume:
     #    f.write(consumeFunc.getvalue())
    # if code.to_string:

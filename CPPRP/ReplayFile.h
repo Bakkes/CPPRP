@@ -30,9 +30,10 @@ namespace CPPRP
 		std::shared_ptr<ClassNet> classNet;
 		uint32_t actorId{0};
 		uint32_t nameId{ 0 };
+		uint32_t classNameId{ 0 };
 	};
 
-	typedef std::function<void(const uint32_t, const std::unordered_map<int, ActorStateData>&)> tickable;
+	typedef std::function<void(const Frame, const std::unordered_map<int, ActorStateData>&)> tickable;
 	typedef std::function<void(const ActorStateData&)> actorCreated;
 	typedef std::function<void(const ActorStateData&, const std::vector<uint32_t>&)> actorUpdated;
 	typedef std::function<void(const ActorStateData&)> actorDeleted;
@@ -75,9 +76,6 @@ namespace CPPRP
 		void MergeDuplicates();
 		void FixParents();
 
-		const bool HasInitialPosition(const std::string& name) const;
-		const bool HasRotation(const std::string& name) const;
-
 		const std::pair<const uint32_t, const KeyFrame> GetNearestKeyframe(uint32_t frame) const;
 		const bool ParseProperty(const std::shared_ptr<Property>& currentProperty);
 		const std::shared_ptr<ClassNet>& GetClassnetByNameWithLookup(const std::string& name) const;
@@ -87,7 +85,8 @@ namespace CPPRP
 
 	public:
 		const bool HasProperty(const std::string& key) const;
-
+		const bool HasInitialPosition(const std::string& name) const;
+		const bool HasRotation(const std::string& name) const;
 		template<typename T>
 		const T GetProperty(const std::string& key) const;
 	};

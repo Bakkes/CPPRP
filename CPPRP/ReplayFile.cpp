@@ -416,6 +416,7 @@ namespace CPPRP
 			{
 
 				Frame& f = frames[currentFrame];
+				f.frameNumber = currentFrame;
 				f.position = networkReader.GetAbsoluteBitPosition();
 				f.time = networkReader.read<float>();
 				f.delta = networkReader.read<float>();
@@ -493,7 +494,7 @@ namespace CPPRP
 							}
 							#endif
 							std::shared_ptr<Engine::Actor> actorObject = funcPtr();
-							ActorStateData asd = { actorObject, classNet, actorId, name_id };
+							ActorStateData asd = { actorObject, classNet, actorId, name_id, classId };
 							if constexpr (IncludeParseLog)
 							{
 								parseLog.push_back("New actor for " + typeName + ", classname " + className);
@@ -561,9 +562,10 @@ namespace CPPRP
 						actorStates.erase(actorId);
 					}
 				}
+				
 				for (const auto& tick : tickables)
 				{
-					tick(currentFrame, actorStates);
+					tick(f, actorStates);
 				}
 				currentFrame++;
 			}

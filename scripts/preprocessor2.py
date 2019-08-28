@@ -46,6 +46,26 @@ def generateParserCode(struct):
         code.write("RegisterField(\"{0}.{1}:{2}\", [](std::shared_ptr<Engine::Actor>& struc, CPPBitReader<BitReaderType>& br) {{ std::static_pointer_cast<CPPRP::{0}::{1}>(struc)->{2} = Consume<{3}>(br); }});\n".format(struct.namespace, struct.name, field[1], field[0]))#0namespace, 1 classname, 2 propname, 3 typename
     return (code.getvalue())
 
+a = """
+template<typename Writer>
+		inline const void Serialize(Writer& writer, const UniqueId& item)
+		{
+			writer.StartObject();
+			writer.String("platform");
+			writer.Uint(item.platform);
+			writer.String("playernumber");
+			writer.Uint(item.playerNumber);
+			writer.String("uniqueid");
+			//writer.Uint64(item.uniqueID);
+			writer.EndObject();
+		}
+"""
+def generateJsonCode(struct):
+    code = io.StringIO()
+    for field in struct.fields:
+        code.write("RegisterSerializer(\"{0}.{1}:{2}\", [](Writer& writer, std::shared_ptr<Engine::Actor>& struc) {{ writer.String(\"{2}\"); Serialize<{3}>(writer, std::static_pointer_cast<CPPRP::{0}::{1}>(struc)->{2}); }});\n".format(struct.namespace, struct.name, field[1], field[0]))#0namespace, 1 classname, 2 propname, 3 typename
+    return code.getvalue()
+
 if __name__== "__main__":
     f = open("C:/Users/Bakkes/Documents/repos/CPPRP/CPPRP/data/GameClasses.h", "r")
     s = f.readlines()
@@ -83,7 +103,12 @@ if __name__== "__main__":
         if struct.name != "Object":
             code.write(generateParserCode(struct))
     code.writelines(["return 0;\n", "}\n"])
-    print(code.getvalue())
+    #print(code.getvalue())
+
+    json = io.StringIO()
+    for struct in structs:
+         json.write(generateJsonCode(struct))
+    print(json.getvalue())
 
     classext = io.StringIO()
     classext.writelines(["#pragma once\n", "#include <unordered_map>\n", "#include <string>\n", "namespace CPPRP {\n", "\tstatic const std::unordered_map<std::string, std::string> class_extensions =\n", 
@@ -93,7 +118,7 @@ if __name__== "__main__":
         if struct.name != "Object" and struct.name != "Actor":
             classext.write("\t\t, {{\"{0}.{1}\",\"{2}\"}}\n".format(struct.namespace, struct.name, struct.parent.replace("::", ".")))
     classext.writelines(["\t};\n", "};\n"])
-    print(classext.getvalue())
+    #print(classext.getvalue())
     sys.exit(0)
     for line in s:
         line = line.strip()
