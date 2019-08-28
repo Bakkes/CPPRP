@@ -29,12 +29,41 @@ int main(int argc, char* argv[])
 		replayFile->DeserializeHeader();
 		replayFile->PreprocessTables();
 
+		auto headerData = replayFile->replayFile;
+
+
 		std::vector<CPPRP::ActorStateData> createdActorsThisTick;
 		std::vector<CPPRP::ActorStateData> deletedActorsThisTick;
 		std::vector<UpdateData> updatedActorsThisTick;
 
 		rapidjson::StringBuffer s;
 		CPPRP::JSON::Writer writer(s);
+		writer.StartObject();
+		writer.String("Replay");
+		writer.StartObject();
+		writer.String("Header");
+		writer.StartObject();
+		writer.String("Keyframes");
+		writer.StartArray();
+
+		for (auto kv : replayFile->replayFile->keyframes)
+		{
+			writer.StartObject();
+			writer.String("Time");
+			writer.Double(kv.time);
+			writer.String("Frame");
+			writer.Uint(kv.frame);
+			writer.String("Filepos");
+			writer.Uint(kv.filepos);
+			writer.EndObject();
+		}
+		writer.EndArray();
+
+		writer.EndObject();
+		
+		writer.String("Body");
+		//writer.StartObject();
+
 		replayFile->createdCallbacks.push_back([&](const CPPRP::ActorStateData& asd)
 			{
 				createdActorsThisTick.push_back(asd);
@@ -139,6 +168,10 @@ int main(int argc, char* argv[])
 		writer.StartArray();
 		replayFile->Parse();
 		writer.EndArray();
+
+		//writer.EndObject();
+		writer.EndObject();
+		writer.EndObject();
 		int fdfsd = 5;
 		std::cout << s.GetString();
 		getchar();

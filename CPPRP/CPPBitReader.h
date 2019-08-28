@@ -299,12 +299,13 @@ namespace CPPRP
 		switch (platform)
 		{
 		case Platform_Steam:
-			uniqueId = std::make_shared<XBoxID>();
-			std::static_pointer_cast<XBoxID>(uniqueId)->xboxID = read<uint64_t>(sizeof(uint64_t) * 8);
-			break;
-		case Platform_Dingo:
 			uniqueId = std::make_shared<SteamID>();
 			std::static_pointer_cast<SteamID>(uniqueId)->steamID = read<uint64_t>(sizeof(uint64_t) * 8);
+
+			break;
+		case Platform_Dingo:
+			uniqueId = std::make_shared<XBoxID>();
+			std::static_pointer_cast<XBoxID>(uniqueId)->xboxID = read<uint64_t>(sizeof(uint64_t) * 8);
 			break;
 		case Platform_PS4:
 			uniqueId = std::make_shared<PS4ID>();

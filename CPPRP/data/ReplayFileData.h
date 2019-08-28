@@ -88,6 +88,7 @@ namespace CPPRP
 		{
 			return "";// return std::to_string(platform) + "|" + std::to_string(uniqueID) + "|" + std::to_string(playerNumber);
 		}
+		virtual ~UniqueId() {}
 	};
 
 

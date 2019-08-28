@@ -145,6 +145,52 @@ namespace CPPRP
 			writer.Bool(item);
 		}
 
+		template<>
+		inline const void Serialize(Writer& writer, const std::shared_ptr<CPPRP::UniqueId>& item)
+		{
+			writer.StartObject();
+			writer.String("Platform");
+			writer.Uint(item->platform);
+			writer.String("PlayerNumber");
+			writer.Uint(item->playerNumber);
+			writer.String("UniqueID");
+			if (std::shared_ptr<CPPRP::SteamID> steamId = std::dynamic_pointer_cast<CPPRP::SteamID>(item); steamId)
+			{
+				writer.Uint64(steamId->steamID);
+			}
+			else if (std::shared_ptr<CPPRP::XBoxID> xboxId = std::dynamic_pointer_cast<CPPRP::XBoxID>(item); xboxId)
+			{
+				writer.Uint64(xboxId->xboxID);
+			}
+			else if (std::shared_ptr<CPPRP::SwitchID> switchId = std::dynamic_pointer_cast<CPPRP::SwitchID>(item); switchId)
+			{
+				writer.StartArray();
+				writer.Uint64(switchId->a);
+				writer.Uint64(switchId->b);
+				writer.Uint64(switchId->c);
+				writer.Uint64(switchId->d);
+				writer.EndArray();
+			}
+			else if (std::shared_ptr<CPPRP::PS4ID> ps4Id = std::dynamic_pointer_cast<CPPRP::PS4ID>(item); ps4Id)
+			{
+				writer.Uint64(ps4Id->psId);
+			}
+			else if (std::shared_ptr<CPPRP::PsyNetID> psynetId = std::dynamic_pointer_cast<CPPRP::PsyNetID>(item); psynetId)
+			{
+				writer.StartArray();
+				writer.Uint64(psynetId->a);
+				writer.Uint64(psynetId->b);
+				writer.Uint64(psynetId->c);
+				writer.Uint64(psynetId->d);
+				writer.EndArray();
+			}
+			else
+			{
+				writer.Uint64(1337);
+			}
+			writer.EndObject();
+		}
+
 		//template<>
 		//inline const void Serialize(Writer& writer, const uint8_t& item)
 		//{
@@ -756,7 +802,7 @@ namespace CPPRP
 			writer.EndObject();
 		}
 
-
+		
 
 
 			
