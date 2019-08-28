@@ -31,7 +31,7 @@ namespace CPPRP
 		parsePropertyFuncs[str] = callback;
 	}
 
-#include "./generated/properties.h"
+#include "./generated/GameClassParser.h"
 
 	static int T = Initializor<int>();
 }

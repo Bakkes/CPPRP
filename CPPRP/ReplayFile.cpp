@@ -1,9 +1,12 @@
 #include "ReplayFile.h"
 #include <fstream>
+#include "./data/GameClasses.h"
 #include "./data/NetworkData.h"
+#include "./data/ArcheTypes.h"
+#include "./generated/ClassExtensions.h"
 #include "CRC.h"
 #include <functional>
-#include "./data/GameClasses.h"
+
 namespace CPPRP
 {
 	constexpr bool IncludeParseLog = false;
@@ -287,119 +290,7 @@ namespace CPPRP
 		}
 	}
 
-
 	
-	
-
-	const std::unordered_map<std::string, std::string> class_extensions =
-	{
-		{"Engine.Actor", "Core.Object"}
-	  , {"TAGame.CarComponent_Boost_TA", "TAGame.CarComponent_TA"}
-	  , {"TAGame.CarComponent_Dodge_TA", "TAGame.CarComponent_TA"}
-	  , {"TAGame.CarComponent_DoubleJump_TA", "TAGame.CarComponent_TA"}
-	  , {"TAGame.CarComponent_FlipCar_TA", "TAGame.CarComponent_TA"}
-	  , {"TAGame.CarComponent_Jump_TA", "TAGame.CarComponent_TA"}
-	  , {"Engine.GameReplicationInfo", "Engine.ReplicationInfo"}
-	  , {"Engine.Info", "Engine.Actor"}
-	  , {"Engine.Pawn", "Engine.Actor"}
-	  , {"Engine.PlayerReplicationInfo", "Engine.ReplicationInfo"}
-	  , {"Engine.ReplicationInfo", "Engine.Info"}
-	  , {"Engine.TeamInfo", "Engine.ReplicationInfo"}
-	  , {"ProjectX.GRI_X", "Engine.GameReplicationInfo"}
-	  , {"ProjectX.Pawn_X", "Engine.Pawn"}
-	  , {"ProjectX.PRI_X", "Engine.PlayerReplicationInfo"}
-	  , {"ProjectX.NetModeReplicator_X", "Engine.ReplicationInfo"}
-	  , {"TAGame.Ball_TA", "TAGame.RBActor_TA"}
-	  , {"TAGame.CameraSettingsActor_TA", "Engine.ReplicationInfo"}
-	  , {"TAGame.Car_Season_TA", "TAGame.PRI_TA"}
-	  , {"TAGame.Car_TA", "TAGame.Vehicle_TA"}
-	  , {"TAGame.CarComponent_TA", "Engine.ReplicationInfo"}
-	  , {"TAGame.CrowdActor_TA", "Engine.ReplicationInfo"}
-	  , {"TAGame.CrowdManager_TA", "Engine.ReplicationInfo"}
-	  , {"TAGame.GameEvent_Season_TA", "TAGame.GameEvent_Soccar_TA"}
-	  , {"TAGame.GameEvent_Soccar_TA", "TAGame.GameEvent_Team_TA"}
-	  , {"TAGame.GameEvent_SoccarPrivate_TA", "TAGame.GameEvent_Soccar_TA"}
-	  , {"TAGame.GameEvent_SoccarSplitscreen_TA", "TAGame.GameEvent_SoccarPrivate_TA"}
-	  , {"TAGame.GameEvent_TA", "Engine.ReplicationInfo"}
-	  , {"TAGame.GameEvent_Team_TA", "TAGame.GameEvent_TA"}
-	  , {"TAGame.GRI_TA", "ProjectX.GRI_X"}
-	  , {"TAGame.InMapScoreboard_TA", "Engine.Actor"}
-	  , {"TAGame.PRI_TA", "ProjectX.PRI_X"}
-	  , {"TAGame.RBActor_TA", "ProjectX.Pawn_X"}
-	  , {"TAGame.SpecialPickup_BallCarSpring_TA", "TAGame.SpecialPickup_Spring_TA"}
-	  , {"TAGame.SpecialPickup_BallFreeze_TA", "TAGame.SpecialPickup_Targeted_TA"}
-	  , {"TAGame.SpecialPickup_BallGravity_TA", "TAGame.SpecialPickup_TA"}
-	  , {"TAGame.SpecialPickup_BallLasso_TA", "TAGame.SpecialPickup_GrapplingHook_TA"}
-	  , {"TAGame.SpecialPickup_BallVelcro_TA", "TAGame.SpecialPickup_TA"}
-	  , {"TAGame.SpecialPickup_Batarang_TA", "TAGame.SpecialPickup_BallLasso_TA"}
-	  , {"TAGame.SpecialPickup_BoostOverride_TA", "TAGame.SpecialPickup_Targeted_TA"}
-	  , {"TAGame.SpecialPickup_GrapplingHook_TA", "TAGame.SpecialPickup_Targeted_TA"}
-	  , {"TAGame.SpecialPickup_HitForce_TA", "TAGame.SpecialPickup_TA"}
-	  , {"TAGame.SpecialPickup_Spring_TA", "TAGame.SpecialPickup_Targeted_TA"}
-	  , {"TAGame.SpecialPickup_Swapper_TA", "TAGame.SpecialPickup_Targeted_TA"}
-	  , {"TAGame.SpecialPickup_TA", "TAGame.CarComponent_TA"}
-	  , {"TAGame.SpecialPickup_Targeted_TA", "TAGame.SpecialPickup_TA"}
-	  , {"TAGame.SpecialPickup_Tornado_TA", "TAGame.SpecialPickup_TA"}
-	  , {"TAGame.Team_Soccar_TA", "TAGame.Team_TA"}
-	  , {"TAGame.Team_TA", "Engine.TeamInfo"}
-	  , {"TAGame.Vehicle_TA", "TAGame.RBActor_TA"}
-	  , {"TAGame.VehiclePickup_Boost_TA", "TAGame.VehiclePickup_TA"}
-	  , {"TAGame.VehiclePickup_TA", "Engine.ReplicationInfo"}
-	  , {"TAGame.SpecialPickup_HauntedBallBeam_TA", "TAGame.SpecialPickup_TA"}
-	  , {"TAGame.CarComponent_TA", "Engine.Actor"}
-	  , {"Engine.Info", "Engine.Actor"}
-	  , {"Engine.Pawn", "Engine.Actor"}
-	 
-	};
-
-	const std::vector<std::pair<std::string, std::vector<std::string>>> archetypeMap =
-	{
-		{{"TAGame.Car_TA"}, {"Archetypes.Car.Car_Default"}},
-		{{"TAGame.Car_TA"}, {"Mutators.Mutators.Mutators.FreePlay:CarArchetype"}},
-		{{"TAGame.Ball_TA"}, { "Archetypes.Ball.Ball_Training"}},
-		{{"TAGame.Ball_TA"},  {"Archetypes.Ball.Ball_GameEditor", "Archetypes.Ball.Ball_Default", "Archetypes.Ball.Ball_Basketball", "Archetypes.Ball.Ball_BasketBall", "Archetypes.Ball.Ball_BasketBall_Mutator", "Archetypes.Ball.Ball_Puck", "Archetypes.Ball.CubeBall", "Archetypes.Ball.Ball_Beachball"}},
-		{{"TAGame.Ball_Breakout_TA"}, {"Archetypes.Ball.Ball_Breakout"}},
-		{{"TAGame.Ball_TA"},{"Archetypes.Ball.Ball_Trajectory"}},
-		{{"TAGame.CarComponent_Boost_TA"}, {"Archetypes.CarComponents.CarComponent_Boost"}},
-		{{"TAGame.CarComponent_Dodge_TA"}, {"Archetypes.CarComponents.CarComponent_Dodge"}},
-		{{"TAGame.CarComponent_DoubleJump_TA"}, {"Archetypes.CarComponents.CarComponent_DoubleJump"}},
-		{{"TAGame.CarComponent_FlipCar_TA"}, {"Archetypes.CarComponents.CarComponent_FlipCar"}},
-		{{"TAGame.CarComponent_Jump_TA"}, {"Archetypes.CarComponents.CarComponent_Jump"}},
-		{{"TAGame.Team_Soccar_TA"}, {"Archetypes.Teams.Team0", "Archetypes.Teams.Team1"}},
-		{{"TAGame.PRI_TA"}, {"TAGame.Default__PRI_TA"}},
-		{{"TAGame.GameEvent_TrainingEditor_TA"}, {"Archetypes.GameEvent.GameEvent_TrainingEditor"}},
-		{{"TAGame.GameEvent_Tutorial_TA"}, {"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Aerial"}},
-		{{"TAGame.GameEvent_Soccar_TA"}, {/*"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Aerial",*/ "Archetypes.GameEvent.GameEvent_Basketball", "Archetypes.GameEvent.GameEvent_Hockey", "Archetypes.GameEvent.GameEvent_Soccar", "Archetypes.GameEvent.GameEvent_Items", "Archetypes.GameEvent.GameEvent_SoccarLan"}},
-		{{"TAGame.GameEvent_SoccarPrivate_TA"}, {"Archetypes.GameEvent.GameEvent_SoccarPrivate", "Archetypes.GameEvent.GameEvent_BasketballPrivate", "Archetypes.GameEvent.GameEvent_HockeyPrivate"}},
-		{{"TAGame.GameEvent_SoccarSplitscreen_TA"}, {"Archetypes.GameEvent.GameEvent_SoccarSplitscreen", "Archetypes.GameEvent.GameEvent_BasketballSplitscreen", "Archetypes.GameEvent.GameEvent_HockeySplitscreen"}},
-		{{"TAGame.GameEvent_Season_TA"}, {"Archetypes.GameEvent.GameEvent_Season"}},
-		{{"TAGame.Car_TA"}, {"Archetypes.GameEvent.GameEvent_Season:CarArchetype"}},
-		{{"TAGame.GameEvent_Breakout_TA"}, {"Archetypes.GameEvent.GameEvent_Breakout"}},
-		{{"TAGame.GRI_TA"}, {"GameInfo_TrainingEditor.GameInfo.GameInfo_TrainingEditor:GameReplicationInfoArchetype", "GameInfo_Tutorial.GameInfo.GameInfo_Tutorial:GameReplicationInfoArchetype", "GameInfo_Basketball.GameInfo.GameInfo_Basketball:GameReplicationInfoArchetype", "Gameinfo_Hockey.GameInfo.Gameinfo_Hockey:GameReplicationInfoArchetype", "GameInfo_Season.GameInfo.GameInfo_Season:GameReplicationInfoArchetype", "GameInfo_Soccar.GameInfo.GameInfo_Soccar:GameReplicationInfoArchetype", "GameInfo_Items.GameInfo.GameInfo_Items:GameReplicationInfoArchetype", "GameInfo_Breakout.GameInfo.GameInfo_Breakout:GameReplicationInfoArchetype"}},
-		{{"TAGame.CameraSettingsActor_TA"}, {"TAGame.Default__CameraSettingsActor_TA"}},
-		{{"TAGame.InMapScoreboard_TA"}, {"Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_0", "NeoTokyo_P.TheWorld:PersistentLevel.InMapScoreboard_TA_0", "NeoTokyo_P.TheWorld:PersistentLevel.InMapScoreboard_TA_1", "NeoTokyo_Standard_P.TheWorld:PersistentLevel.InMapScoreboard_TA_1", "NeoTokyo_Standard_P.TheWorld:PersistentLevel.InMapScoreboard_TA_0", "Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_1"}},
-		{{"TAGame.SpecialPickup_BallGravity_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_GravityWell"}},
-		{{"TAGame.SpecialPickup_BallVelcro_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BallVelcro"}},
-		{{"TAGame.SpecialPickup_BallLasso_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BallLasso"}},
-		{{"TAGame.SpecialPickup_GrapplingHook_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BallGrapplingHook"}},
-		{{"TAGame.SpecialPickup_Swapper_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Swapper"}},
-		{{"TAGame.SpecialPickup_BallFreeze_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BallFreeze"}},
-		{{"TAGame.SpecialPickup_BoostOverride_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BoostOverride"}},
-		{{"TAGame.SpecialPickup_Tornado_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Tornado"}},
-		{{"TAGame.SpecialPickup_BallCarSpring_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_CarSpring", "Archetypes.SpecialPickups.SpecialPickup_BallSpring"}},
-		{{"TAGame.SpecialPickup_HitForce_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_StrongHit"}},
-		{{"TAGame.SpecialPickup_Batarang_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Batarang"}},
-		//{{"TAGame.SpecialPickup_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Swapper"}},
-		//{{"TAGame.SpecialPickup_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_GravityWell"}},
-		//{{"TAGame.InMapScoreboard_TA"}, {"Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_1"}},
-		{{"TAGame.Ball_Haunted_TA"}, {"Archetypes.Ball.Ball_Haunted"}},
-		{{"TAGame.HauntedBallTrapTrigger_TA"}, {"Haunted_TrainStation_P.TheWorld:PersistentLevel.HauntedBallTrapTrigger_TA_1", "Haunted_TrainStation_P.TheWorld:PersistentLevel.HauntedBallTrapTrigger_TA_0"}},
-		{{"TAGame.SpecialPickup_HauntedBallBeam_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_HauntedBallBeam"}},
-		{{"TAGame.SpecialPickup_Rugby_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Rugby"}},
-		{{"TAGame.Cannon_TA"},  {"Archetypes.Tutorial.Cannon"}},
-		{{"ProjectX.NetModeReplicator_X"}, {"ProjectX.Default__NetModeReplicator_X"}}
-		
-	};
 
 	void ReplayFile::FixParents()
 	{

@@ -47,7 +47,7 @@ def generateParserCode(struct):
     return (code.getvalue())
 
 if __name__== "__main__":
-    f = open("C:/Users/Bakkes/Documents/repos/CPPRP/CPPRP/GameClasses.h", "r")
+    f = open("C:/Users/Bakkes/Documents/repos/CPPRP/CPPRP/data/GameClasses.h", "r")
     s = f.readlines()
     totalStr = ""
     active = False
@@ -80,10 +80,20 @@ if __name__== "__main__":
     code = io.StringIO()
     code.writelines(["template<typename T>\n", "constexpr inline static T Initializor()\n", "{\n"])
     for struct in structs:
-        if struct.name is not "Object":
+        if struct.name != "Object":
             code.write(generateParserCode(struct))
     code.writelines(["return 0;\n", "}\n"])
     print(code.getvalue())
+
+    classext = io.StringIO()
+    classext.writelines(["#pragma once\n", "#include <unordered_map>\n", "#include <string>\n", "namespace CPPRP {\n", "\tstatic const std::unordered_map<std::string, std::string> class_extensions =\n", 
+                "\t{\n",
+                "\t\t  {\"Engine.Actor\", \"Core.Object\"}\n"])
+    for struct in structs:
+        if struct.name != "Object" and struct.name != "Actor":
+            classext.write("\t\t, {{\"{0}.{1}\",\"{2}\"}}\n".format(struct.namespace, struct.name, struct.parent.replace("::", ".")))
+    classext.writelines(["\t};\n", "};\n"])
+    print(classext.getvalue())
     sys.exit(0)
     for line in s:
         line = line.strip()

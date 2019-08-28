@@ -133,9 +133,11 @@
   <ItemGroup>
     <ClInclude Include="CPPBitReader.h" />
     <ClInclude Include="CRC.h" />
+    <ClInclude Include="data\ArcheTypes.h" />
     <ClInclude Include="data\GameClasses.h" />
+    <ClInclude Include="generated\ClassExtensions.h" />
     <ClInclude Include="generated\NetworkDataParsersGenerated.h" />
-    <ClInclude Include="generated\properties.h" />
+    <ClInclude Include="generated\GameClassParser.h" />
     <ClInclude Include="data\NetworkData.h" />
     <ClInclude Include="NetworkDataParsers.h" />
     <ClInclude Include="exceptions\ParseException.h" />
