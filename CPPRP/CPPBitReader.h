@@ -287,10 +287,10 @@ namespace CPPRP
 	inline const Quat CPPBitReader<BitReaderType>::read<Quat>()
 	{
 		uint8_t largest = read<uint8_t>(2);
-		float a = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
-		float b = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
-		float c = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
-		float extra = std::sqrt(1.f - (a*a) - (b*b) - (c * c));
+		const float a = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
+		const float b = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
+		const float c = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
+		const float extra = std::sqrt(1.f - (a*a) - (b*b) - (c * c));
 
 		Quat q = { 0 };
 		switch (largest)
@@ -398,7 +398,7 @@ namespace CPPRP
 	inline const std::string CPPBitReader<BitReaderType>::read<std::string>()
 	{
 		const int32_t length = read<int32_t>();
-		const int32_t final_length = length * (length > 0 ? 1 : -2);
+		const size_t final_length = static_cast<size_t>(length) * (length > 0 ? 1 : -2);
 		if (final_length == 0)
 		{
 			return "";
@@ -490,33 +490,26 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline const float CPPBitReader<T>::readFixedCompressedFloat(const int32_t maxValue, int32_t numBits)
-
+	inline const float CPPBitReader<T>::readFixedCompressedFloat(const int32_t maxValue, const int32_t numBits)
 	{
-		float value = 0;
+		const int32_t maxBitValue = (1 << (numBits - 1)) - 1;
+		const int32_t bias = (1 << (numBits - 1));
+		const int32_t serIntMax = (1 << (numBits - 0));
 
-		int32_t maxBitValue = (1 << (numBits - 1)) - 1;
-		int32_t bias = (1 << (numBits - 1));
-		int32_t serIntMax = (1 << (numBits - 0));
-
-		int32_t delta = readBitsMax<int32_t>(serIntMax);
-		float unscaledValue = static_cast<float>(delta - bias);
+		const int32_t delta = readBitsMax<int32_t>(serIntMax);
+		const float unscaledValue = static_cast<float>(delta - bias);
 
 		if (maxValue > maxBitValue)
 		{
 			// We have to scale down, scale needs to be a float:
-			float invScale = maxValue / (float)maxBitValue;
-			value = unscaledValue * invScale;
+			const float invScale = maxValue / (float)maxBitValue;
+			return unscaledValue * invScale;
 		}
-		else
-		{
-			float scale = maxBitValue / (float)maxValue;
-			float invScale = 1.0f / (float)scale;
+		
+		const float scale = maxBitValue / (float)maxValue;
+		const float invScale = 1.0f / (float)scale;
 
-			value = unscaledValue * invScale;
-		}
-
-		return value;
+		return unscaledValue * invScale;
 	}
 
 	template <typename T>
