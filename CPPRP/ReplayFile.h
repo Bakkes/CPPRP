@@ -13,6 +13,8 @@
 #include "ParseException.h"
 #include "NetworkParsers.h"
 #include "ReplayFileData.h"
+#include "PropertyParser.h"
+
 namespace CPPRP
 {
 	enum CrcCheck
@@ -30,8 +32,6 @@ namespace CPPRP
 		uint32_t nameId{ 0 };
 	};
 
-	typedef std::function<std::shared_ptr<Engine::Actor>()> createObjectFunc;
-	typedef std::function<void(std::shared_ptr<Engine::Actor>&, CPPBitReader<BitReaderType>& br)> parsePropertyFunc;
 	typedef std::function<void(const uint32_t, const std::unordered_map<int, ActorStateData>&)> tickable;
 	typedef std::function<void(const ActorStateData&)> actorCreated;
 	typedef std::function<void(const ActorStateData&, const std::vector<uint32_t>&)> actorUpdated;

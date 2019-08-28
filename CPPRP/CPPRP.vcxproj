@@ -138,6 +138,7 @@
     <ClInclude Include="NetworkData.h" />
     <ClInclude Include="NetworkParsers.h" />
     <ClInclude Include="ParseException.h" />
+    <ClInclude Include="PropertyParser.h" />
     <ClInclude Include="ReplayException.h" />
     <ClInclude Include="ReplayFile.h" />
     <ClInclude Include="ReplayFileData.h" />

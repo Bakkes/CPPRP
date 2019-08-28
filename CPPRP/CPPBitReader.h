@@ -431,7 +431,7 @@ namespace CPPRP
 		else
 		{
 			str.resize(final_length - 1);
-			for (int32_t i = 0; i < final_length; ++i)
+			for (size_t i = 0; i < final_length; ++i)
 			{
 				str[i] = read<uint8_t>();
 			}
@@ -578,10 +578,4 @@ namespace CPPRP
 	{
 		return get_bits<U>(customSize);
 	}
-	
-	
-	/*const bool CPPBitReader<BitReaderType>::read<bool>()
-	{
-		
-	}*/
 }
