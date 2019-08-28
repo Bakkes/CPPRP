@@ -12,7 +12,7 @@
 namespace CPPRP
 {
 	constexpr bool IncludeParseLog = false;
-	ReplayFile::ReplayFile(std::filesystem::path path_) : path(path_)
+	ReplayFile::ReplayFile(std::experimental::filesystem::path path_) : path(path_)
 	{
 
 	}
@@ -24,7 +24,7 @@ namespace CPPRP
 
 	const bool ReplayFile::Load()
 	{
-		if (!std::filesystem::exists(path))
+		if (!std::experimental::filesystem::exists(path))
 			return false;
 		std::ifstream file(path, std::ios::binary | std::ios::ate);
 
@@ -63,7 +63,7 @@ namespace CPPRP
 		replayFile->replayType = fullReplayBitReader->read<std::string>(); //Not sure what this is
 
 
-		while (true) 
+		while (true)
 		{
 			auto baseProperty = std::make_shared<Property>();
 			const bool moreToParse = ParseProperty(baseProperty);
@@ -219,7 +219,7 @@ namespace CPPRP
 		{
 			return false;
 		}
-		CPPBitReader<BitReaderType> bitReader((const BitReaderType*)data.data(), 
+		CPPBitReader<BitReaderType> bitReader((const BitReaderType*)data.data(),
 			dataSizeBits, replayFile, 0, 0, 0);
 		const uint32_t headerSize = bitReader.read<uint32_t>();
 		const uint32_t headerReadCrc = bitReader.read<uint32_t>();
@@ -234,7 +234,7 @@ namespace CPPRP
 		if (verifyWhat & CRC_Header)
 		{
 			const uint32_t headerCalculatedCRC = CalculateCRC(data,
-				static_cast<size_t>(bitReader.GetAbsoluteBytePosition()), 
+				static_cast<size_t>(bitReader.GetAbsoluteBytePosition()),
 				static_cast<size_t>(headerSize), CRC_SEED);
 			const bool result = headerCalculatedCRC == headerReadCrc;
 			//If only verify header, or if already failed here
@@ -259,8 +259,8 @@ namespace CPPRP
 			return false;
 		}
 
-		const uint32_t bodyCalculatedCRC = CalculateCRC(data, 
-			static_cast<size_t>(bitReader.GetAbsoluteBytePosition()), 
+		const uint32_t bodyCalculatedCRC = CalculateCRC(data,
+			static_cast<size_t>(bitReader.GetAbsoluteBytePosition()),
 			static_cast<size_t>(bodySize), CRC_SEED);
 		return bodyReadCrc == bodyCalculatedCRC;
 	}
@@ -292,7 +292,7 @@ namespace CPPRP
 		}
 	}
 
-	
+
 
 	void ReplayFile::FixParents()
 	{
@@ -341,7 +341,7 @@ namespace CPPRP
 			}
 		}
 
-		
+
 
 		const size_t objectsSize = replayFile->objects.size();
 		parseFunctions.resize(objectsSize);
@@ -382,7 +382,7 @@ namespace CPPRP
 			endPos = replayFile->netstream_size * 8;
 		}
 
-		
+
 		CPPBitReader<BitReaderType> networkReader((BitReaderType*)(replayFile->netstream_data), static_cast<size_t>(endPos), replayFile);
 
 		//FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
@@ -412,7 +412,7 @@ namespace CPPRP
 			uint32_t currentFrame = 0;
 			while (
 				#ifndef PARSE_UNSAFE
-				networkReader.canRead() && 
+				networkReader.canRead() &&
 				#endif
 				currentFrame < numFrames)
 			{
@@ -535,7 +535,7 @@ namespace CPPRP
 								}
 								updatedProperties.push_back(propertyIndex);
 								const auto& funcPtr = parseFunctions[propertyIndex];
-								
+
 								#ifndef PARSE_UNSAFE
 								if(funcPtr == nullptr)
 								{

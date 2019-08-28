@@ -47,11 +47,11 @@ namespace CPPRP
 		std::shared_ptr<CPPBitReader<BitReaderType>> fullReplayBitReader;
 		std::map<std::string, std::shared_ptr<ClassNet>> classnetMap;
 	public:
-		std::filesystem::path path;
+		std::experimental::filesystem::path path;
 		std::vector<Frame> frames;
 		std::unordered_map<int, ActorStateData> actorStates;
 		std::shared_ptr<ReplayFileData> replayFile;
-		
+
 		std::vector<parsePropertyFunc> parseFunctions;
 		std::vector<createObjectFunc> createFunctions;
 		std::vector<std::string> parseLog;
@@ -64,14 +64,14 @@ namespace CPPRP
 
 		std::unordered_map<std::string, uint32_t> objectToId;
 	public:
-		ReplayFile(std::filesystem::path path_);
+		ReplayFile(std::experimental::filesystem::path path_);
 		~ReplayFile();
 
 		const bool Load();
 		void DeserializeHeader();
 		const bool VerifyCRC(CrcCheck verifyWhat);
 		void Parse(const uint32_t startPos = 0, int32_t endPos = -1, const uint32_t frameCount = 0);
-	
+
 		void PreprocessTables();
 	protected:
 		void MergeDuplicates();

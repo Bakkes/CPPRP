@@ -50,16 +50,16 @@ int main(int argc, char *argv[])
 		int fdfsd = 5;
 	}
 	//printf("hi");
-	std::queue<std::filesystem::path> replayFilesToLoad;
+	std::queue<std::experimental::filesystem::path> replayFilesToLoad;
 	{
-		std::filesystem::path p(argv[1]);
-		if (std::filesystem::is_regular_file(p))
+		std::experimental::filesystem::path p(argv[1]);
+		if (std::experimental::filesystem::is_regular_file(p))
 		{
 			replayFilesToLoad.push(p);
 		}
 		else 
 		{
-			for (const auto & entry : std::filesystem::recursive_directory_iterator(argv[1]))
+			for (const auto & entry : std::experimental::filesystem::recursive_directory_iterator(argv[1]))
 			{
 				if (entry.path().filename().u8string().find(".replay") == std::string::npos)
 					continue;
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 	{
 		while (true)
 		{
-			std::filesystem::path replayName;
+			std::experimental::filesystem::path replayName;
 			{
 				std::lock_guard<std::mutex> fileLockGuard(filesMutex);
 				if (!replayFilesToLoad.empty())
@@ -162,7 +162,7 @@ int main(int argc, char *argv[])
 	{
 		while (true)
 		{
-			std::filesystem::path replayName;
+			std::experimental::filesystem::path replayName;
 			{
 				std::lock_guard<std::mutex> lockGuard(queueMutex);
 				if (!replayFilesToLoad.empty())

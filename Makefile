@@ -3,9 +3,9 @@ BUILD_DIR ?= build
 SRC_DIRS ?= CPPRP \
 			CPPRP/exceptions \
 						CPPRPJSON
-						
+
 										#		CPPRPTest \
-						
+
 
 INC_DIRS ?= CPPRP \
 	./CPPRP/data \
@@ -28,9 +28,10 @@ else
 endif
 BUILDFLAGS := -DDEBUG=$(DEBUG) -DRELEASE=$(RELEASE)
 CXX = g++72
-CXXFLAGS ?= -lstdc++fs -fPIC -std=c++17 $(INC_FLAGS) -w -fopenmp -static-libstdc++
+CXXFLAGS ?= -fPIC -std=c++17 $(INC_FLAGS) -w -fopenmp -lstdc++fs -static-libstdc++
 #-DPARSE_UNSAFE ##-DPARSE_UNSAFE #-Wall -Wextra -Werror
 # -march=haswell
+# -arch i386
 LDFLAGS ?= ${LIB_FLAGS}
 ifeq ($(RELEASE),0)
 	CXXFLAGS += -O0 -ggdb
@@ -38,9 +39,9 @@ else
 	CXXFLAGS += -O3 -s#-g #-s
 endif
 all: preprocess $(BUILD_DIR)/${TARGET_BIN}
-$(BUILD_DIR)/${TARGET_BIN}: $(OBJS) 
+$(BUILD_DIR)/${TARGET_BIN}: $(OBJS)
 	$(CXX) -o $@ $(CXXFLAGS) $(OBJS) $(LDFLAGS) -pthread
-	
+
 $(BUILD_DIR)/%.cpp.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -c $(BUILDFLAGS) $(CXXFLAGS) -o $@ $<
