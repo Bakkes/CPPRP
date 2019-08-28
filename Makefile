@@ -27,8 +27,10 @@ else
 	DEBUG ?= 1
 endif
 BUILDFLAGS := -DDEBUG=$(DEBUG) -DRELEASE=$(RELEASE)
-CXX = g++-9
-CXXFLAGS ?= -fPIC -std=c++17 $(INC_FLAGS) -w -fopenmp -march=haswell -static-libstdc++ #-DPARSE_UNSAFE ##-DPARSE_UNSAFE #-Wall -Wextra -Werror
+CXX = g++72
+CXXFLAGS ?= -lstdc++fs -fPIC -std=c++17 $(INC_FLAGS) -w -fopenmp -static-libstdc++
+#-DPARSE_UNSAFE ##-DPARSE_UNSAFE #-Wall -Wextra -Werror
+# -march=haswell
 LDFLAGS ?= ${LIB_FLAGS}
 ifeq ($(RELEASE),0)
 	CXXFLAGS += -O0 -ggdb
