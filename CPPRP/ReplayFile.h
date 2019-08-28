@@ -8,8 +8,10 @@
 #include <unordered_map>
 #include <mutex>
 #include <functional>
-#include "NetworkStreamParser.h"
 #include "CPPBitReader.h"
+#include "NetworkData.h"
+#include "ParseException.h"
+#include "NetworkParsers.h"
 #include "ReplayFileData.h"
 namespace CPPRP
 {
@@ -47,7 +49,7 @@ namespace CPPRP
 		std::vector<Frame> frames;
 		std::unordered_map<int, ActorStateData> actorStates;
 		std::shared_ptr<ReplayFileData> replayFile;
-		NetworkStreamParser networkParser;
+		
 		std::vector<parsePropertyFunc> parseFunctions;
 		std::vector<createObjectFunc> createFunctions;
 		std::vector<std::string> parseLog;

@@ -6,6 +6,7 @@
 #include "GameClasses.h"
 namespace CPPRP
 {
+	constexpr bool IncludeParseLog = false;
 	ReplayFile::ReplayFile(std::filesystem::path path_) : path(path_)
 	{
 
@@ -209,10 +210,10 @@ namespace CPPRP
 		}
 		this->FixParents();
 
-		if (replayFile->classnets.size() > 0)
-		{
-			networkParser.RegisterParsers(replayFile);
-		}
+		//if (replayFile->classnets.size() > 0)
+		//{
+		//	//networkParser.RegisterParsers(replayFile);
+		//}
 	}
 
 	const bool ReplayFile::VerifyCRC(CrcCheck verifyWhat)

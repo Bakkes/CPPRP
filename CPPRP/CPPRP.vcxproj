@@ -137,14 +137,12 @@
     <ClInclude Include="generated.h" />
     <ClInclude Include="NetworkData.h" />
     <ClInclude Include="NetworkParsers.h" />
-    <ClInclude Include="NetworkStreamParser.h" />
     <ClInclude Include="ParseException.h" />
     <ClInclude Include="ReplayException.h" />
     <ClInclude Include="ReplayFile.h" />
     <ClInclude Include="ReplayFileData.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="NetworkStreamParser.cpp" />
     <ClCompile Include="ParseException.cpp" />
     <ClCompile Include="ReplayException.cpp" />
     <ClCompile Include="ReplayFile.cpp" />
