@@ -18,6 +18,9 @@
     <ClInclude Include="SerializeFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OptionsParser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

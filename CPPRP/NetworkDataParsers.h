@@ -206,7 +206,9 @@ namespace CPPRP
 		}
 		else
 		{
-
+			item.id = std::make_shared<UniqueId>();
+			item.id->platform = 0;
+			item.id->playerNumber = -1;
 		}
 		return item;
 	}

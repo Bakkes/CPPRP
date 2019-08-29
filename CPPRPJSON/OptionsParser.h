@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <map>
+#include <algorithm>
 
 class OptionsParser
 {
@@ -39,11 +40,18 @@ public:
 				continue;
 			}
 
-			if (!key.empty() && arg + 1 < argc)
+			if (!key.empty())
 			{
-				std::string value = argv[arg + 1];
-				arg++;
-				args[key] = value;
+				if (arg + 1 < argc && argv[arg + 1][0] != '-')
+				{
+					std::string value = argv[arg + 1];
+					arg++;
+					args[key] = value;
+				}
+				else
+				{
+					args[key] = "true";
+				}
 			}
 		}
 	}
@@ -53,7 +61,7 @@ public:
 		return args.find(key) != args.end();
 	}
 
-	std::string GetValue(std::initializer_list<std::string> optionNames)
+	std::string GetStringValue(std::initializer_list<std::string> optionNames)
 	{
 		for (auto it : optionNames)
 		{
@@ -63,5 +71,21 @@ public:
 			}
 		}
 		return "";
+	}
+
+	bool GetBoolValue(std::initializer_list<std::string> optionNames, bool defaultValue)
+	{
+		for (auto it : optionNames)
+		{
+			if (HasKey(it))
+			{
+				std::string val = args[it];
+				std::transform(val.begin(), val.end(), val.begin(),
+					[](unsigned char c) { return std::tolower(c); });
+
+				return val.compare("1") == 0 || val.compare("true") == 0;
+			}
+		}
+		return defaultValue;
 	}
 };

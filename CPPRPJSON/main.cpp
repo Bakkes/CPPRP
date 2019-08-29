@@ -12,6 +12,7 @@
 #include <filesystem>
 #include <queue>
 #include <unordered_map>
+#include <fstream>
 #include "OptionsParser.h"
 #undef max
 static int a = CPPRP::JSON::Test();
@@ -113,26 +114,42 @@ void SerializeProp(CPPRP::JSON::Writer& writer, const std::string& name, std::sh
 
 int main(int argc, char* argv[])
 {
-	//OptionsParser op(argc, argv);
-	//std::string inputFile = op.looseOption;
-	//if (inputFile.size() == 0)
-	//{
-	//	inputFile = op.GetValue({ "i", "input" });
-	//}
-	//if (inputFile.size() == 0)
-	//{
-	//	std::cout << "No input file given! Pass path to replay file as default argument via -i or --input\n";
-	//	return;
-	//}
+	OptionsParser op(argc, argv);
+	std::string inputFile = op.looseOption;
+	if (inputFile.size() == 0)
+	{
+		inputFile = op.GetStringValue({ "i", "input" });
+	}
+	if (inputFile.size() == 0)
+	{
+		std::cout << "No input file given! Pass path to replay file as default argument via -i or --input\n";
+		return 0;
+	}
+	if (!std::filesystem::exists(inputFile))
+	{
+		std::cout << "Failed to open file " << inputFile << "\n";
+		return 0;
+	}
 
-	auto replayFile = std::make_shared<CPPRP::ReplayFile>(argv[1]);
-	replayFile->Load();
-	replayFile->DeserializeHeader();
+	auto replayFile = std::make_shared<CPPRP::ReplayFile>(inputFile);
+	if (!replayFile->Load())
+	{
+		std::cout << "Cannot open file, it exists but cannot open? " << inputFile << "\n";
+		return 0;
+	}
+
+	try
+	{
+		replayFile->DeserializeHeader();
+	}
+	catch (CPPRP::GeneralParseException<BitReaderType>& gpe)
+	{
+		std::cout << "DeserializeHeader threw exception: " << gpe.errorMsg << "\n";
+		return 0;
+	}
 	replayFile->PreprocessTables();
 
 	auto headerData = replayFile->replayFile;
-
-
 	std::vector<CPPRP::ActorStateData> createdActorsThisTick;
 	std::vector<CPPRP::ActorStateData> deletedActorsThisTick;
 	std::vector<UpdateData> updatedActorsThisTick;
@@ -292,14 +309,58 @@ int main(int argc, char* argv[])
 			deletedActorsThisTick.clear();
 		});
 	writer.StartArray();
-	replayFile->Parse();
+	try
+	{
+		if (!op.GetBoolValue({ "ho", "header" }, false))
+		{
+			replayFile->Parse();
+		}
+	}
+	catch (const CPPRP::InvalidVersionException& e)
+	{
+		std::cout << "InvalidVersionException: " << e.what() << " on file " << inputFile << "\n";
+		return 0;
+	}
+	catch (const CPPRP::PropertyDoesNotExistException& e)
+	{
+		std::cout << "PropertyDoesNotExistException: " << e.what() << " on file " << inputFile << "\n";
+		return 0;
+	}
+	catch (const CPPRP::AttributeParseException<uint32_t>& e)
+	{
+		std::cout << "AttributeParseException: " << e.what() << " on file " << inputFile << "\n";
+		return 0;
+	}
+	catch (const CPPRP::GeneralParseException<uint32_t>& e)
+	{
+		std::cout << "GeneralParseException: " << e.what() << " on file " << inputFile << "\n";
+		return 0;
+	}
+	catch(const std::exception &e) //e
+	{
+		std::cout << "GeneralException: " << e.what() <<  "on file " << inputFile << "\n";
+		return 0;
+	}
+	catch (...)
+	{
+		std::cout << "UnknownException: on file " << inputFile << "\n";
+		return 0;
+	}
 	writer.EndArray();
 
 	//writer.EndObject();
 	writer.EndObject();
 	writer.EndObject();
-	int fdfsd = 5;
-	std::cout << s.GetString();
-		
-	
+
+	std::string outJsonString = s.GetString();
+	std::string outFile = op.GetStringValue({ "o", "output" });
+	if (outFile.size() > 0)
+	{
+		std::ofstream outFileStream(outFile);
+		outFileStream << outJsonString;
+	}
+	if (outFile.size() > 0 && op.GetBoolValue({ "stdout", "print" }, false) || outFile.size() == 0)
+	{
+		std::cout << outJsonString;
+	}
 }
