@@ -68,7 +68,7 @@ namespace CPPRP
 
 	private:
 		template<typename X>
-		const X get_bits(X n)
+		const X get_bits(uint16_t n)
 		{
 			#ifndef PARSE_UNSAFE
 			if (GetAbsoluteBitPosition() + n > size)

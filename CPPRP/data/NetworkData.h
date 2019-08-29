@@ -120,9 +120,9 @@ namespace CPPRP
 
 	struct ReplicatedDemolish
 	{
-		bool unknown1;
+		bool attacker_flag;
 		int32_t attacker_actor_id;
-		bool unknown2;
+		bool victim_flag;
 		int32_t victim_actor_id;
 		__ParserAttribute__(CallToString, true)
 		Vector3 attacker_velocity;

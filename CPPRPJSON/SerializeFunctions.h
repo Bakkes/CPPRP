@@ -394,16 +394,16 @@ namespace CPPRP
 		}
 
 
-		template<>
+		template<typename Writer>
 		inline const void Serialize(Writer& writer, const ReplicatedDemolish& item)
 		{
 			writer.StartObject();
-			writer.String("unknown1");
-			Serialize(writer, item.unknown1);
+			writer.String("attacker_flag");
+			Serialize(writer, item.attacker_flag);
 			writer.String("attacker_actor_id");
 			Serialize(writer, item.attacker_actor_id);
-			writer.String("unknown2");
-			Serialize(writer, item.unknown2);
+			writer.String("victim_flag");
+			Serialize(writer, item.victim_flag);
 			writer.String("victim_actor_id");
 			Serialize(writer, item.victim_actor_id);
 			writer.String("attacker_velocity");

@@ -82,9 +82,9 @@ namespace CPPRP {
 	inline const ReplicatedDemolish Consume(CPPBitReader<BitReaderType>& reader)
 	{
 		ReplicatedDemolish item;
-		item.unknown1 = reader.read<bool>();
+		item.attacker_flag = reader.read<bool>();
 		item.attacker_actor_id = reader.read<int32_t>();
-		item.unknown2 = reader.read<bool>();
+		item.victim_flag = reader.read<bool>();
 		item.victim_actor_id = reader.read<int32_t>();
 		item.attacker_velocity = reader.read<Vector3>();
 		item.victim_velocity = reader.read<Vector3>();

@@ -1,7 +1,6 @@
 
 #pragma comment(lib, "CPPRP.lib")
 #include "../CPPRP/ReplayFile.h"
-//#include "../CPPRP/exceptions/ReplayException.h"
 #include "SerializeFunctions.h"
 #include <iostream>
 #include <thread>
@@ -13,6 +12,7 @@
 #include <filesystem>
 #include <queue>
 #include <unordered_map>
+#include "OptionsParser.h"
 #undef max
 static int a = CPPRP::JSON::Test();
 
@@ -113,182 +113,193 @@ void SerializeProp(CPPRP::JSON::Writer& writer, const std::string& name, std::sh
 
 int main(int argc, char* argv[])
 {
-	if constexpr (true) {
-		auto replayFile = std::make_shared<CPPRP::ReplayFile>(argv[1]);
-		replayFile->Load();
-		replayFile->DeserializeHeader();
-		replayFile->PreprocessTables();
+	//OptionsParser op(argc, argv);
+	//std::string inputFile = op.looseOption;
+	//if (inputFile.size() == 0)
+	//{
+	//	inputFile = op.GetValue({ "i", "input" });
+	//}
+	//if (inputFile.size() == 0)
+	//{
+	//	std::cout << "No input file given! Pass path to replay file as default argument via -i or --input\n";
+	//	return;
+	//}
 
-		auto headerData = replayFile->replayFile;
+	auto replayFile = std::make_shared<CPPRP::ReplayFile>(argv[1]);
+	replayFile->Load();
+	replayFile->DeserializeHeader();
+	replayFile->PreprocessTables();
+
+	auto headerData = replayFile->replayFile;
 
 
-		std::vector<CPPRP::ActorStateData> createdActorsThisTick;
-		std::vector<CPPRP::ActorStateData> deletedActorsThisTick;
-		std::vector<UpdateData> updatedActorsThisTick;
+	std::vector<CPPRP::ActorStateData> createdActorsThisTick;
+	std::vector<CPPRP::ActorStateData> deletedActorsThisTick;
+	std::vector<UpdateData> updatedActorsThisTick;
 
-		rapidjson::StringBuffer s;
-		CPPRP::JSON::Writer writer(s);
+	rapidjson::StringBuffer s;
+	CPPRP::JSON::Writer writer(s);
+	writer.StartObject();
+	writer.String("Replay");
+	writer.StartObject();
+	writer.String("Header");
+	writer.StartObject();
+
+	writer.String("EngineVersion");
+	writer.Uint(headerData->header.engineVersion);
+	writer.String("LicenseeVersion");
+	writer.Uint(headerData->header.licenseeVersion);
+	writer.String("NetVersion");
+	writer.Uint(headerData->header.netVersion);
+	writer.String("CRC");
+	writer.Uint(headerData->header.crc);
+	writer.String("Size");
+	writer.Uint(headerData->header.size);
+	writer.String("ReplayType");
+	writer.String(headerData->replayType.c_str());
+
+	writer.String("Properties");
+	const bool useSpecialByteProp = headerData->header.engineVersion == 0 &&
+		headerData->header.licenseeVersion == 0 &&
+		headerData->header.netVersion == 0;
+	writer.StartObject();
+	for (auto prop : headerData->properties)
+	{
+		SerializeProp(writer, prop.first, prop.second, useSpecialByteProp);
+	}
+	writer.EndObject();
+
+	writer.String("Keyframes");
+	writer.StartArray();
+
+	for (auto kv : headerData->keyframes)
+	{
 		writer.StartObject();
-		writer.String("Replay");
-		writer.StartObject();
-		writer.String("Header");
-		writer.StartObject();
-
-		writer.String("EngineVersion");
-		writer.Uint(headerData->header.engineVersion);
-		writer.String("LicenseeVersion");
-		writer.Uint(headerData->header.licenseeVersion);
-		writer.String("NetVersion");
-		writer.Uint(headerData->header.netVersion);
-		writer.String("CRC");
-		writer.Uint(headerData->header.crc);
-		writer.String("Size");
-		writer.Uint(headerData->header.size);
-		writer.String("ReplayType");
-		writer.String(headerData->replayType.c_str());
-
-		writer.String("Properties");
-		const bool useSpecialByteProp = headerData->header.engineVersion == 0 &&
-			headerData->header.licenseeVersion == 0 &&
-			headerData->header.netVersion == 0;
-		writer.StartObject();
-		for (auto prop : headerData->properties)
-		{
-			SerializeProp(writer, prop.first, prop.second, useSpecialByteProp);
-		}
+		writer.String("Time");
+		writer.Double(kv.time);
+		writer.String("Frame");
+		writer.Uint(kv.frame);
+		writer.String("Filepos");
+		writer.Uint(kv.filepos);
 		writer.EndObject();
+	}
+	writer.EndArray();
 
-		writer.String("Keyframes");
-		writer.StartArray();
+	writer.EndObject();
+		
+	writer.String("Body");
+	//writer.StartObject();
 
-		for (auto kv : headerData->keyframes)
+	replayFile->createdCallbacks.push_back([&](const CPPRP::ActorStateData& asd)
+		{
+			createdActorsThisTick.push_back(asd);
+		});
+	replayFile->actorDeleteCallbacks.push_back([&](const CPPRP::ActorStateData& asd)
+		{
+			deletedActorsThisTick.push_back(asd);
+		});
+
+	replayFile->updatedCallbacks.push_back([&](const CPPRP::ActorStateData& asd, const std::vector<uint32_t>& props)
+		{
+			updatedActorsThisTick.push_back({ asd, props });
+		});
+		
+	replayFile->tickables.push_back([&](const CPPRP::Frame frame, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
 		{
 			writer.StartObject();
-			writer.String("Time");
-			writer.Double(kv.time);
 			writer.String("Frame");
-			writer.Uint(kv.frame);
-			writer.String("Filepos");
-			writer.Uint(kv.filepos);
-			writer.EndObject();
-		}
-		writer.EndArray();
+			writer.Uint(frame.frameNumber);
 
-		writer.EndObject();
-		
-		writer.String("Body");
-		//writer.StartObject();
+			writer.String("Time");
+			writer.Double(frame.time);
 
-		replayFile->createdCallbacks.push_back([&](const CPPRP::ActorStateData& asd)
-			{
-				createdActorsThisTick.push_back(asd);
-			});
-		replayFile->actorDeleteCallbacks.push_back([&](const CPPRP::ActorStateData& asd)
-			{
-				deletedActorsThisTick.push_back(asd);
-			});
+			writer.String("Delta");
+			writer.Double(frame.delta);
 
-		replayFile->updatedCallbacks.push_back([&](const CPPRP::ActorStateData& asd, const std::vector<uint32_t>& props)
-			{
-				updatedActorsThisTick.push_back({ asd, props });
-			});
-		
-		replayFile->tickables.push_back([&](const CPPRP::Frame frame, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
+			writer.String("Created");
+			writer.StartArray();
+			for (auto created : createdActorsThisTick)
 			{
 				writer.StartObject();
-				writer.String("Frame");
-				writer.Uint(frame.frameNumber);
-
-				writer.String("Time");
-				writer.Double(frame.time);
-
-				writer.String("Delta");
-				writer.Double(frame.delta);
-
-				writer.String("Created");
-				writer.StartArray();
-				for (auto created : createdActorsThisTick)
-				{
-					writer.StartObject();
-					writer.String("Id");
-					writer.Uint(created.actorId);
+				writer.String("Id");
+				writer.Uint(created.actorId);
 					
-					std::string name = replayFile->replayFile->names.at(created.nameId);
-					std::string className = replayFile->replayFile->objects.at(created.classNameId);
-					writer.String("Name");
-					writer.String(name.c_str());
+				std::string name = replayFile->replayFile->names.at(created.nameId);
+				std::string className = replayFile->replayFile->objects.at(created.classNameId);
+				writer.String("Name");
+				writer.String(name.c_str());
 
-					writer.String("ClassName");
-					writer.String(className.c_str());
-					bool hasInitialPosition = replayFile->HasInitialPosition(className);
-					writer.String("HasInitialPosition");
-					writer.Bool(hasInitialPosition);
-					if (hasInitialPosition)
-					{
-						writer.String("InitialPosition");
-						CPPRP::JSON::Serialize<CPPRP::Vector3I>(writer, created.actorObject->Location);
-					}
-
-					bool hasInitialRotation = replayFile->HasRotation(className);
-					writer.String("HasInitialRotation");
-					writer.Bool(hasInitialRotation);
-					if (hasInitialRotation)
-					{
-						writer.String("InitialRotation");
-						CPPRP::JSON::Serialize<CPPRP::Rotator>(writer, created.actorObject->Rotation);
-					}
-					writer.EndObject();
-				}
-				writer.EndArray();
-
-				writer.String("Deleted");
-				writer.StartArray();
-				for (auto deleted : deletedActorsThisTick)
+				writer.String("ClassName");
+				writer.String(className.c_str());
+				bool hasInitialPosition = replayFile->HasInitialPosition(className);
+				writer.String("HasInitialPosition");
+				writer.Bool(hasInitialPosition);
+				if (hasInitialPosition)
 				{
-					writer.Uint(deleted.actorId);
+					writer.String("InitialPosition");
+					CPPRP::JSON::Serialize<CPPRP::Vector3I>(writer, created.actorObject->Location);
 				}
-				writer.EndArray();
+
+				bool hasInitialRotation = replayFile->HasRotation(className);
+				writer.String("HasInitialRotation");
+				writer.Bool(hasInitialRotation);
+				if (hasInitialRotation)
+				{
+					writer.String("InitialRotation");
+					CPPRP::JSON::Serialize<CPPRP::Rotator>(writer, created.actorObject->Rotation);
+				}
+				writer.EndObject();
+			}
+			writer.EndArray();
+
+			writer.String("Deleted");
+			writer.StartArray();
+			for (auto deleted : deletedActorsThisTick)
+			{
+				writer.Uint(deleted.actorId);
+			}
+			writer.EndArray();
 				
 
-				writer.String("Updated");
+			writer.String("Updated");
+			writer.StartArray();
+			for (auto updated : updatedActorsThisTick)
+			{
+				writer.StartObject();
+				writer.String("Id");
+				writer.Uint(updated.asd.actorId);
+				writer.String("UpdatedProperties");
 				writer.StartArray();
-				for (auto updated : updatedActorsThisTick)
+
+				for (auto updatedProp : updated.props)
 				{
 					writer.StartObject();
-					writer.String("Id");
-					writer.Uint(updated.asd.actorId);
-					writer.String("UpdatedProperties");
-					writer.StartArray();
-
-					for (auto updatedProp : updated.props)
-					{
-						writer.StartObject();
 						
-						std::string objectName = replayFile->replayFile->objects[updatedProp];
-						auto a = updated.asd.actorObject;
-						CPPRP::JSON::writerFuncs[objectName](writer, a);
-						writer.EndObject();
-					}
-
-					writer.EndArray();
-
+					std::string objectName = replayFile->replayFile->objects[updatedProp];
+					auto a = updated.asd.actorObject;
+					CPPRP::JSON::writerFuncs[objectName](writer, a);
 					writer.EndObject();
 				}
-				writer.EndArray();
-				writer.EndObject();
-				createdActorsThisTick.clear();
-				updatedActorsThisTick.clear();
-				deletedActorsThisTick.clear();
-			});
-		writer.StartArray();
-		replayFile->Parse();
-		writer.EndArray();
 
-		//writer.EndObject();
-		writer.EndObject();
-		writer.EndObject();
-		int fdfsd = 5;
-		std::cout << s.GetString();
+				writer.EndArray();
+
+				writer.EndObject();
+			}
+			writer.EndArray();
+			writer.EndObject();
+			createdActorsThisTick.clear();
+			updatedActorsThisTick.clear();
+			deletedActorsThisTick.clear();
+		});
+	writer.StartArray();
+	replayFile->Parse();
+	writer.EndArray();
+
+	//writer.EndObject();
+	writer.EndObject();
+	writer.EndObject();
+	int fdfsd = 5;
+	std::cout << s.GetString();
 		
-	}
+	
 }
