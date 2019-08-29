@@ -359,7 +359,7 @@ int main(int argc, char* argv[])
 		std::ofstream outFileStream(outFile);
 		outFileStream << outJsonString;
 	}
-	if (outFile.size() > 0 && op.GetBoolValue({ "stdout", "print" }, false) || outFile.size() == 0)
+	if ((outFile.size() > 0 && op.GetBoolValue({ "stdout", "print" }, false)) || (outFile.size() == 0 && op.GetBoolValue({ "stdout", "print" }, true)))
 	{
 		std::cout << outJsonString;
 	}
