@@ -63,11 +63,11 @@ template<typename Writer>
 def generateJsonCode(struct):
     code = io.StringIO()
     for field in struct.fields:
-        code.write("RegisterSerializer(\"{0}.{1}:{2}\", [](Writer& writer, std::shared_ptr<Engine::Actor>& struc) {{ writer.String(\"{0}.{1}:{2}\"); Serialize<{3}>(writer, std::static_pointer_cast<CPPRP::{0}::{1}>(struc)->{2}); }});\n".format(struct.namespace, struct.name, field[1], field[0]))#0namespace, 1 classname, 2 propname, 3 typename
+        code.write("RegisterSerializer(\"{0}.{1}:{2}\", [](Writer& writer, std::shared_ptr<Engine::Actor>& struc) {{ writer.String(\"{0}.{1}:{2}\"); Serialize<Writer>(writer, std::static_pointer_cast<CPPRP::{0}::{1}>(struc)->{2}); }});\n".format(struct.namespace, struct.name, field[1], field[0]))#0namespace, 1 classname, 2 propname, 3 typename
     return code.getvalue()
 
 if __name__== "__main__":
-    f = open("C:/Users/Bakkes/Documents/repos/CPPRP/CPPRP/data/GameClasses.h", "r")
+    f = open(sys.argv[1], "r")
     s = f.readlines()
     totalStr = ""
     active = False

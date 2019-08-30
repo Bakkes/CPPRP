@@ -49,7 +49,7 @@ namespace CPPRP
 	{
 		__ParserAttribute__(NumBits, 3)
 		__ParserAttribute__(CallToString, true)
-		uint8_t unknown;
+		uint8_t number;
 
 		__ParserAttribute__(CallToString, true)
 		std::shared_ptr<UniqueId> player_id;

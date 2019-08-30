@@ -158,7 +158,7 @@ def generateClasses(code):
     jsonFunc.write("{\n")
     [jsonFunc.write("\t{0}\n".format(x)) for x in code.jsonIO.getvalue().splitlines()]
     jsonFunc.write("}\n\n")
-
+    
     print(jsonFunc.getvalue())
     #if code.consume:
     #    print(consumeFunc.getvalue())
@@ -175,7 +175,7 @@ def generateClasses(code):
     
 if __name__== "__main__":
     print("??")
-    f = open("C:/Users/Bakkes/Documents/repos/CPPRP/CPPRP/data/NetworkData.h", "r")
+    f = open(sys.argv[1], "r")
     s = f.readlines()
     totalStr = ""
     active = False
