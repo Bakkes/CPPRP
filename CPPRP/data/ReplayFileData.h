@@ -81,7 +81,7 @@ namespace CPPRP
 	struct UniqueId
 	{
 		uint8_t platform{ 0 };
-		uint8_t playerNumber{ 0 };
+		uint8_t splitscreenID{ 0 };
 		//uint64_t uniqueID{ 0 };
 
 		std::string ToString() const

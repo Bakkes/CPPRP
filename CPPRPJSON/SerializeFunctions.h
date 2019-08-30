@@ -138,8 +138,8 @@ namespace CPPRP
 			writer.StartObject();
 			writer.String("Platform");
 			writer.Uint(item->platform);
-			writer.String("PlayerNumber");
-			writer.Uint(item->playerNumber);
+			writer.String("SplitscreenID");
+			writer.Uint(item->splitscreenID);
 			writer.String("UniqueID");
 			if (std::shared_ptr<CPPRP::SteamID> steamId = std::dynamic_pointer_cast<CPPRP::SteamID>(item); steamId)
 			{

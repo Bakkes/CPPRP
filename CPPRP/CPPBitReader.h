@@ -366,7 +366,7 @@ namespace CPPRP
 			break;
 		}
 		uniqueId->platform = platform;
-		uniqueId->playerNumber= read<uint8_t>();
+		uniqueId->splitscreenID= read<uint8_t>();
 		return uniqueId;
 	}
 

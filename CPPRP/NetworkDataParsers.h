@@ -208,7 +208,7 @@ namespace CPPRP
 		{
 			item.id = std::make_shared<UniqueId>();
 			item.id->platform = 0;
-			item.id->playerNumber = -1;
+			item.id->splitscreenID = 0;
 		}
 		return item;
 	}
