@@ -88,4 +88,16 @@ public:
 		}
 		return defaultValue;
 	}
+
+	int GetIntValue(std::initializer_list<std::string> optionNames, bool defaultValue)
+	{
+		for (auto it : optionNames)
+		{
+			if (HasKey(it))
+			{
+				return std::stoi(args[it]);
+			}
+		}
+		return defaultValue;
+	}
 };

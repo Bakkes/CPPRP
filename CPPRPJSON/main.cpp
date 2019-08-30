@@ -221,7 +221,7 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 				if (hasInitialPosition)
 				{
 					writer.String("InitialPosition");
-					CPPRP::JSON::Serialize<Writer, CPPRP::Vector3I>(writer, created.actorObject->Location);
+					CPPRP::JSON::Serialize<Writer>(writer, created.actorObject->Location);
 				}
 
 				bool hasInitialRotation = replayFile->HasRotation(className);
@@ -230,7 +230,7 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 				if (hasInitialRotation)
 				{
 					writer.String("InitialRotation");
-					CPPRP::JSON::Serialize<Writer, CPPRP::Rotator>(writer, created.actorObject->Rotation);
+					CPPRP::JSON::Serialize<Writer>(writer, created.actorObject->Rotation);
 				}
 				writer.EndObject();
 			}
@@ -360,6 +360,11 @@ int main(int argc, char* argv[])
 	rapidjson::StringBuffer s;
 
 	rapidjson::Writer<rapidjson::StringBuffer> abc(s);
+	const int precision = op.GetIntValue({"p", "precision"}, 0);
+	if(precision > 0)
+	{
+		abc.SetMaxDecimalPlaces(precision);
+	}
 	const bool parseBody = !op.GetBoolValue({ "ho", "header" }, false);
 	bool result = SerializeReplay(abc, replayFile, parseBody);//
 	if(result != 0) //we got an error
