@@ -20,7 +20,7 @@ LoadoutExtractor is a binary which prints out camera settings for all the player
 Since C++ doesn't have reflection, but we still need to generate a lot of code for the parsing/serialization logic, I wrote some preprocessor scripts which outputs code to automatically parse certain classes/properties.
 
 # Usage
-To use the CPPRPJSON accepts the following arguments
+The CPPRPJSON accepts the following arguments
 ```
 -i  --input     Path to the input file
 -o  --output    Path to write output json to
