@@ -8,7 +8,7 @@ CPPRPTest currently contains only internal test things/benchmarking, so probably
 The core library is CPPRP, and should be built as a dynamic/static library so it can be included in other projects. From testing, the library should be able to parse all replays up to and including Rocket League v1.66. I've ran tests on a set of 10k replays from between mid 2017 till august 2019. Out of this set, 6 could not be parsed (for unknown reasons). I've also ran some random sampling tests on the RocketLeagueReplays.com replay dump, and on those there seems to be 99.6% coverage.
 
 # CPPRPJSON
-Uses CPPRP to parse the replay and then serializes the replaydata to JSON. Currently, it is able to serialize any and all fields, except for those relating to the client's loadout (WIP)
+Uses CPPRP to parse the replay and then serializes the replaydata to JSON. Currently, it is able to serialize any and all fields, except for some relating to the client's loadout (WIP). Also the code's a mess but it's still a WIP.
 
 # Functionality
 
