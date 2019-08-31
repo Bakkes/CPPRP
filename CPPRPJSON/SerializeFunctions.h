@@ -28,13 +28,30 @@ namespace CPPRP
 		template<typename Writer>
 		inline const void Serialize(Writer& writer, const uint64_t& item)
 		{
-			writer.Uint64(item);
+			char tmp[21], buf[21];
+
+			char *tempPos = tmp;
+			uint64_t q = item;
+			do {
+				*tempPos++ = "0123456789"[ q % 10 ];
+				q /= 10;
+			} while ( q );
+
+			char *bufPos = buf;
+			while(tempPos != tmp)
+			{
+				*bufPos++ = *--tempPos;
+			}
+			*bufPos = '\0';
+			writer.String(buf);
 		}
 
 		template<typename Writer>
 		inline const void Serialize(Writer& writer, const int64_t& item)
 		{
-			writer.Int64(item);
+			//Unoptimized since I don't think this is called much
+			const std::string str = std::to_string(item);
+			writer.String(str.c_str());
 		}
 
 		template<typename Writer>
@@ -61,124 +78,6 @@ namespace CPPRP
 			writer.String(item.c_str(), item.size());
 		}
 
-		template<typename Writer>
-		inline const void Serialize(Writer& writer, const Vector3& item)
-		{
-			writer.StartObject();
-			writer.String("X");
-			writer.Double(item.x);
-			writer.String("Y");
-			writer.Double(item.y);
-			writer.String("Z");
-			writer.Double(item.z);
-			writer.EndObject();
-		}
-
-		template<typename Writer>
-		inline const void Serialize(Writer& writer, const Vector3I& item)
-		{
-			writer.StartObject();
-			writer.String("X");
-			writer.Int(item.x);
-			writer.String("Y");
-			writer.Int(item.y);
-			writer.String("Z");
-			writer.Int(item.z);
-			writer.EndObject();
-		}
-
-		template<typename Writer>
-		inline const void Serialize(Writer& writer, const struct Quat& item)
-		{
-			writer.StartObject();
-			writer.String("X");
-			writer.Double(item.x);
-			writer.String("Y");
-			writer.Double(item.y);
-			writer.String("Z");
-			writer.Double(item.z);
-			writer.String("W");
-			writer.Double(item.w);
-			writer.EndObject();
-		}
-
-		template<typename Writer>
-		inline const void Serialize(Writer& writer, const Rotator& item)
-		{
-			writer.StartObject();
-			writer.String("Pitch");
-			writer.Int(item.pitch);
-			writer.String("Yaw");
-			writer.Int(item.yaw);
-			writer.String("Roll");
-			writer.Int(item.roll);
-			writer.EndObject();
-		}
-
-		template<typename Writer, typename T>
-		inline const void Serialize(Writer& writer, const std::vector<T>& item) {
-			writer.StartArray();
-			const size_t size = item.size();
-			for (size_t i = 0; i < size; ++i)
-			{
-				Serialize(writer, item.at(i));
-			}
-			writer.EndArray();
-		}
-
-		template<typename Writer>
-		inline const void Serialize(Writer& writer, const bool& item)
-		{
-			writer.Bool(item);
-		}
-
-		template<typename Writer>
-		inline const void Serialize(Writer& writer, const std::shared_ptr<CPPRP::UniqueId>& item)
-		{
-			writer.StartObject();
-			writer.String("Platform");
-			writer.Uint(item->platform);
-			writer.String("SplitscreenID");
-			writer.Uint(item->splitscreenID);
-			writer.String("UniqueID");
-			if (std::shared_ptr<CPPRP::SteamID> steamId = std::dynamic_pointer_cast<CPPRP::SteamID>(item); steamId)
-			{
-				writer.Uint64(steamId->steamID);
-			}
-			else if (std::shared_ptr<CPPRP::XBoxID> xboxId = std::dynamic_pointer_cast<CPPRP::XBoxID>(item); xboxId)
-			{
-				writer.Uint64(xboxId->xboxID);
-			}
-			else if (std::shared_ptr<CPPRP::SwitchID> switchId = std::dynamic_pointer_cast<CPPRP::SwitchID>(item); switchId)
-			{
-				writer.StartArray();
-				writer.Uint64(switchId->a);
-				writer.Uint64(switchId->b);
-				writer.Uint64(switchId->c);
-				writer.Uint64(switchId->d);
-				writer.EndArray();
-			}
-			else if (std::shared_ptr<CPPRP::PS4ID> ps4Id = std::dynamic_pointer_cast<CPPRP::PS4ID>(item); ps4Id)
-			{
-				writer.Uint64(ps4Id->psId);
-			}
-			else if (std::shared_ptr<CPPRP::PsyNetID> psynetId = std::dynamic_pointer_cast<CPPRP::PsyNetID>(item); psynetId)
-			{
-				writer.StartArray();
-				writer.Uint64(psynetId->a);
-				writer.Uint64(psynetId->b);
-				writer.Uint64(psynetId->c);
-				writer.Uint64(psynetId->d);
-				writer.EndArray();
-			}
-			else
-			{
-				writer.Uint64(1337);
-			}
-			writer.EndObject();
-		}
-
-		
 
 		template<typename Writer>
 		inline const void Serialize(Writer& writer, const uint16_t& item)
@@ -210,6 +109,123 @@ namespace CPPRP
 			writer.Int(item);
 		}
 
+		template<typename Writer>
+		inline const void Serialize(Writer& writer, const bool& item)
+		{
+			writer.Bool(item);
+		}
+
+		template<typename Writer>
+		inline const void Serialize(Writer& writer, const Vector3& item)
+		{
+			writer.StartObject();
+			writer.String("X");
+			Serialize<Writer>(writer, item.x);
+			writer.String("Y");
+			Serialize<Writer>(writer, item.y);
+			writer.String("Z");
+			Serialize<Writer>(writer, item.z);
+			writer.EndObject();
+		}
+
+		template<typename Writer>
+		inline const void Serialize(Writer& writer, const Vector3I& item)
+		{
+			writer.StartObject();
+			writer.String("X");
+			Serialize<Writer>(writer, item.x);
+			writer.String("Y");
+			Serialize<Writer>(writer, item.y);
+			writer.String("Z");
+			Serialize<Writer>(writer, item.z);
+			writer.EndObject();
+		}
+
+		template<typename Writer>
+		inline const void Serialize(Writer& writer, const struct Quat& item)
+		{
+			writer.StartObject();
+			writer.String("X");
+			Serialize<Writer>(writer, item.x);
+			writer.String("Y");
+			Serialize<Writer>(writer, item.y);
+			writer.String("Z");
+			Serialize<Writer>(writer, item.z);
+			writer.String("W");
+			Serialize<Writer>(writer, item.w);
+			writer.EndObject();
+		}
+
+		template<typename Writer>
+		inline const void Serialize(Writer& writer, const Rotator& item)
+		{
+			writer.StartObject();
+			writer.String("Pitch");
+			Serialize<Writer>(writer, item.pitch);
+			writer.String("Yaw");
+			Serialize<Writer>(writer, item.yaw);
+			writer.String("Roll");
+			Serialize<Writer>(writer, item.roll);
+			writer.EndObject();
+		}
+
+		template<typename Writer, typename T>
+		inline const void Serialize(Writer& writer, const std::vector<T>& item) {
+			writer.StartArray();
+			const size_t size = item.size();
+			for (size_t i = 0; i < size; ++i)
+			{
+				Serialize(writer, item.at(i));
+			}
+			writer.EndArray();
+		}
+
+		template<typename Writer>
+		inline const void Serialize(Writer& writer, const std::shared_ptr<CPPRP::UniqueId>& item)
+		{
+			writer.StartObject();
+			writer.String("Platform");
+			Serialize<Writer>(writer, item->platform);
+			writer.String("SplitscreenID");
+			Serialize<Writer>(writer, item->splitscreenID);
+			writer.String("UniqueID");
+			if (std::shared_ptr<CPPRP::SteamID> steamId = std::dynamic_pointer_cast<CPPRP::SteamID>(item); steamId)
+			{
+				Serialize<Writer>(writer, steamId->steamID);
+				//writer.Uint64(steamId->steamID);
+			}
+			else if (std::shared_ptr<CPPRP::XBoxID> xboxId = std::dynamic_pointer_cast<CPPRP::XBoxID>(item); xboxId)
+			{
+				Serialize<Writer>(writer, xboxId->xboxID);
+			}
+			else if (std::shared_ptr<CPPRP::SwitchID> switchId = std::dynamic_pointer_cast<CPPRP::SwitchID>(item); switchId)
+			{
+				writer.StartArray();
+				Serialize<Writer>(writer, switchId->a);
+				Serialize<Writer>(writer, switchId->b);
+				Serialize<Writer>(writer, switchId->c);
+				Serialize<Writer>(writer, switchId->d);
+				writer.EndArray();
+			}
+			else if (std::shared_ptr<CPPRP::PS4ID> ps4Id = std::dynamic_pointer_cast<CPPRP::PS4ID>(item); ps4Id)
+			{
+				Serialize<Writer>(writer, ps4Id->psId);
+			}
+			else if (std::shared_ptr<CPPRP::PsyNetID> psynetId = std::dynamic_pointer_cast<CPPRP::PsyNetID>(item); psynetId)
+			{
+				writer.StartArray();
+				Serialize<Writer>(writer, psynetId->a);
+				Serialize<Writer>(writer, psynetId->b);
+				Serialize<Writer>(writer, psynetId->c);
+				Serialize<Writer>(writer, psynetId->d);
+				writer.EndArray();
+			}
+			else
+			{
+				Serialize<Writer>(writer, 1337);
+			}
+			writer.EndObject();
+		}
 		#include "GeneratedSerializeFunctions.h"
 		
 		template<typename Writer>
