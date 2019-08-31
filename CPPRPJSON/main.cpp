@@ -376,8 +376,7 @@ int main(int argc, char* argv[])
 
 	if(false){}
 #ifdef CPPRP_PRETTYSUPPORT
-	const bool writePretty = op.GetBoolValue({"pretty", "prettify"}, false);
-	else if(writePretty)
+	else if(const bool writePretty = op.GetBoolValue({"pretty", "prettify"}, false); writePretty)
 	{
 		auto writer = rapidjson::PrettyWriter<rapidjson::StringBuffer>(s);
 		result = ParseBodyAndSerializeReplay(writer, replayFile, parseBody, precision);
