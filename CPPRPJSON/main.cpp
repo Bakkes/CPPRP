@@ -17,7 +17,6 @@
 #undef max
 
 
-
 //static int a = serializer.Test();
 
 
@@ -367,22 +366,27 @@ int main(int argc, char* argv[])
 	replayFile->PreprocessTables();
 
 
-	const bool writePretty = op.GetBoolValue({"pretty", "prettify"}, false);
+	
 
 	rapidjson::StringBuffer s;
 
 	const int precision = op.GetIntValue({"p", "precision"}, 0);
 	const bool parseBody = !op.GetBoolValue({ "ho", "header" }, false);
 	bool result = 0;
-	if(writePretty)
+
+	if(false){}
+#ifdef CPPRP_PRETTYSUPPORT
+	const bool writePretty = op.GetBoolValue({"pretty", "prettify"}, false);
+	else if(writePretty)
 	{
 		auto writer = rapidjson::PrettyWriter<rapidjson::StringBuffer>(s);
-		ParseBodyAndSerializeReplay(writer, replayFile, parseBody, precision);
+		result = ParseBodyAndSerializeReplay(writer, replayFile, parseBody, precision);
 	}
+#endif
 	else
 	{
 		auto writer = rapidjson::Writer<rapidjson::StringBuffer>(s);
-		ParseBodyAndSerializeReplay(writer, replayFile, parseBody, precision);
+		result = ParseBodyAndSerializeReplay(writer, replayFile, parseBody, precision);
 	}
 	
 	
