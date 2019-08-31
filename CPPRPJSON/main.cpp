@@ -118,6 +118,8 @@ void SerializeProp(Writer& writer, const std::string& name, std::shared_ptr<CPPR
 template<typename Writer>
 int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& replayFile, const bool parseBody) 
 {
+	/*replayFile->Parse();
+	return 0;*/
 	auto serializer = CPPRP::JSON::Serializer<Writer>();
 	std::vector<CPPRP::ActorStateData> createdActorsThisTick;
 	std::vector<CPPRP::ActorStateData> deletedActorsThisTick;
@@ -201,7 +203,7 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 
 			writer.String("Created");
 			writer.StartArray();
-			for (auto created : createdActorsThisTick)
+			for (auto& created : createdActorsThisTick)
 			{
 				writer.StartObject();
 				writer.String("Id");
@@ -237,7 +239,7 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 
 			writer.String("Deleted");
 			writer.StartArray();
-			for (auto deleted : deletedActorsThisTick)
+			for (auto& deleted : deletedActorsThisTick)
 			{
 				writer.Uint(deleted.actorId);
 			}
@@ -246,7 +248,7 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 
 			writer.String("Updated");
 			writer.StartArray();
-			for (auto updated : updatedActorsThisTick)
+			for (auto& updated : updatedActorsThisTick)
 			{
 				writer.StartObject();
 				writer.String("Id");
@@ -254,7 +256,7 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 				writer.String("UpdatedProperties");
 				writer.StartArray();
 
-				for (auto updatedProp : updated.props)
+				for (auto& updatedProp : updated.props)
 				{
 					writer.StartObject();
 						
@@ -328,6 +330,29 @@ int ParseBodyAndSerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::Rep
 	return SerializeReplay(writer, replayFile, parseBody);
 }
 
+class Timer
+{
+private:
+	std::chrono::time_point<std::chrono::steady_clock> start;
+public:
+	Timer()
+	{
+		start = std::chrono::steady_clock::now();
+	}
+
+	~Timer()
+	{
+		auto end = std::chrono::steady_clock::now();
+		std::cout << "Elapsed time in microseconds : "
+			<< std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+			<< " µs\n";
+
+		std::cout << "Elapsed time in milliseconds : "
+			<< std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
+			<< " ms\n";
+	}
+};
+
 int main(int argc, char* argv[])
 {
 	OptionsParser op(argc, argv);
@@ -351,6 +376,21 @@ int main(int argc, char* argv[])
 	if (!replayFile->Load())
 	{
 		std::cerr << "Cannot open file, it exists but cannot open? " << inputFile << "\n";
+		return 1;
+	}
+
+	//Timer t;
+
+	int crc = op.GetIntValue({ "crc", "verify" }, 0);
+	if (crc < 0 || crc > CPPRP::CrcCheck::CRC_Both)
+	{
+		std::cout << "Invalid value given for crc check (0 = no check, 1 = verify header, 2 = verify body, 3 = verify both)\n";
+		return 1;
+	}
+
+	if (crc != 0 && !replayFile->VerifyCRC((CPPRP::CrcCheck)crc))
+	{
+		std::cout << "CRC check failed! Replay file " << inputFile << " is probably corrupt or has been tampered with!";
 		return 1;
 	}
 
