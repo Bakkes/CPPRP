@@ -319,6 +319,16 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 	return 0;
 }
 
+template<typename Writer>
+int ParseBodyAndSerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& replayFile, const bool parseBody, int precision)
+{
+	if(precision > 0)
+	{
+		writer.SetMaxDecimalPlaces(precision);
+	}
+	return SerializeReplay(writer, replayFile, parseBody);
+}
+
 int main(int argc, char* argv[])
 {
 	OptionsParser op(argc, argv);
@@ -357,16 +367,25 @@ int main(int argc, char* argv[])
 	replayFile->PreprocessTables();
 
 
+	const bool writePretty = op.GetBoolValue({"pretty", "prettify"}, false);
+
 	rapidjson::StringBuffer s;
 
-	rapidjson::Writer<rapidjson::StringBuffer> abc(s);
 	const int precision = op.GetIntValue({"p", "precision"}, 0);
-	if(precision > 0)
-	{
-		abc.SetMaxDecimalPlaces(precision);
-	}
 	const bool parseBody = !op.GetBoolValue({ "ho", "header" }, false);
-	bool result = SerializeReplay(abc, replayFile, parseBody);//
+	bool result = 0;
+	if(writePretty)
+	{
+		auto writer = rapidjson::PrettyWriter<rapidjson::StringBuffer>(s);
+		ParseBodyAndSerializeReplay(writer, replayFile, parseBody, precision);
+	}
+	else
+	{
+		auto writer = rapidjson::Writer<rapidjson::StringBuffer>(s);
+		ParseBodyAndSerializeReplay(writer, replayFile, parseBody, precision);
+	}
+	
+	
 	if(result != 0) //we got an error
 	{
 		return result;
