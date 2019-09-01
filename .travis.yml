@@ -10,7 +10,7 @@ addons:
     - g++-9
     - clang-8
 install:
-- "[ $CXX = g++ ] && export CXX=g++-6 || true"
-- "[ $CXX = clang++ ] && export CXX=clang++-3.8 || true"
+- "[ $CXX = g++ ] && export CXX=g++-9 || true"
+- "[ $CXX = clang++ ] && export CXX=clang++-8 || true"
 script:
   - make RELEASE=1
