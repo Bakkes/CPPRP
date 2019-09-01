@@ -26,10 +26,10 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-xenial-8']
-          packages: ['clang++-6', 'clang-tidy-6']
+          packages: ['clang++-6.0', 'clang-tidy-6.0']
       env:
-        - CXX=clang++-6
-        - CLANG_TIDY=clang-tidy-6
+        - CXX=clang++-6.0
+        - CLANG_TIDY=clang-tidy-6.0
       script:
         - make RELEASE=1
 
