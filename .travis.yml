@@ -19,7 +19,8 @@ matrix:
   include:
 
     
-        - compiler: clang
+        - language: cpp
+          compiler: clang
           os: windows
           addons:
             apt:
