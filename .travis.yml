@@ -1,17 +1,32 @@
 language: generic
-dist: bionic
+os: linux
+dist: xenial
 
 matrix:
   include:
-    - os: linux
+    - compiler: clang
       addons:
         apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-9
-      env: CC='g++-9' CXX='g++-9'
+          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-xenial-8']
+          packages: ['clang-8', 'clang-tidy-8']
+      env:
+        - CXX=clang++-8
+        - CLANG_TIDY=clang-tidy-8
+      script:
+        - make
+
+    - compiler: gcc
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-9']
+      env:
+        - CXX=g++-9
+      script:
+        - make
+
+script:
+  - $CXX --version
+  - make -kj3
 notifications:
-  email:
-    on_success: never
-  on_failure: never
+  email: false
