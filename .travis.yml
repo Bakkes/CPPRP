@@ -20,7 +20,7 @@ matrix:
         - CXX=clang++-8
         - CLANG_TIDY=clang-tidy-8
       script:
-        - make
+        - make RELEASE=1
 
     - compiler: gcc
       addons:
@@ -30,10 +30,6 @@ matrix:
       env:
         - CXX=g++-9
       script:
-        - make
-
-script:
-  - $CXX --version
-  - make
+        - make RELEASE=1
 notifications:
   email: false
