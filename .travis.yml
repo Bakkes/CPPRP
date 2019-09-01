@@ -66,4 +66,4 @@ deploy:
   skip_cleanup: true
   draft: true
   on: 
-    branch: travis
+    branch: master
