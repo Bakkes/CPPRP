@@ -25,7 +25,7 @@ matrix:
           addons:
             apt:
               sources: ['']
-              packages: ['llvm']
+              packages: ['llvm', 'make']
           env:
             - CXX=clang++
           script:
