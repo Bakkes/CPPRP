@@ -17,35 +17,62 @@ before_install:
 
 matrix:
   include:
-
-    
-        - language: cpp
-          compiler: clang
-          os: windows
+        - compiler: clang
+          os: linux
+          dist: xenial
           addons:
             apt:
-              sources: ['']
-              packages: ['llvm', 'make']
+              sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-xenial-8']
+              packages: ['g++-9', 'clang++-8', 'clang-tidy-8']
           env:
-            - CXX=clang++
+            - NAME=clang8
+            - CXX=clang++-8
+            - CLANG_TIDY=clang-tidy-8
+          script:
+            - make RELEASE=1
+        - compiler: clang
+          os: linux
+          dist: xenial
+          addons:
+            apt:
+              sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-xenial-8']
+              packages: ['g++-9', 'clang++-6.0', 'clang-tidy-6.0']
+          env:
+            - NAME=clang6
+            - CXX=clang++-6.0
+            - CLANG_TIDY=clang-tidy-6.0
+          script:
+            - make RELEASE=1
+        - compiler: gcc
+          os: linux
+          dist: xenial
+          addons:
+            apt:
+              sources: ['ubuntu-toolchain-r-test']
+              packages: ['g++-9']
+          env:
+            - NAME=gcc9
+            - CXX=g++-9
           script:
             - make RELEASE=1
     
 notifications:
   email: false
   
-#before_deploy:
+before_deploy:
       # Set up git user name and tag this commit
       #- git config --local user.name "YOUR GIT USER NAME"
       #- git config --local user.email "YOUR GIT USER EMAIL"
       #- export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
       #- git tag $TRAVIS_TAG
+      mv "./build/test" "cpprp-$NAME-$TRAVIS_TAG"
 deploy:
   provider: releases
   api_key: 
     secure: "YhzOqWZGmLgDhmIzV+CK+mxlKsjyP93OOTzX67KoR3imkt8bV3nNF9y3nWEcu4NCZB+VqB9C7k255dD3euLbz86c/OtNt5pR8nbPjdP6YeC5qXOGZmf5uIKW8aBTWGz2diaRHabNDsj29ejsR2MBF65QeCN8Me/gcHKCRbY4JBBh0NhWACJQX5/kBxUVw3Nh1IOEUPD6l6ra14ZhsnYKYgw06tFjP4uHaz0vne65ayuiALnjP7LWaHuyldojdb2AJbXw7uUxyIP69LThD2VEbOmfYjqbelK5XEdY3k2ZjV4/E6C31aXf/gOrp8ar9g+cO6iABeNuBzv5GLrDDvrOnURjAHsHGHeBS9U7ZmwgktbeWvKWudNrsuO+9lHbMd5dDOofxqm2JRgVKh8xSm0ARgvhvvO3nOTKgPfzZ4xQDUqMonKtKadMznoV1Yq5bf2giEWSihkd+GMK+VlBsMM/jbEWqripFgrR0qaMxmnko69ennbz2NOnw8sztBX35CpqMuZr+pyRFx7z/xcEFRiEVP1MSxxc+1MEQoqiOQoDvbW2JINJT8JAoXpBrWHSIkna1NECqurZDVuCWZ02DdmT/iP3FAiWGbXscY4+xiHb3k3kV4EU+4b3uiJKHlzxFb7SD02kxsL3b1kvoSNZIdElu8qWpseLYzGgxnd2lJ/w8cI="
-  file: "./build/test"
+  file: "cpprp-$NAME-$TRAVIS_TAG"
   skip_cleanup: true
   draft: true
   on: 
-    branch: master
+    tags: true
+    #branch: master
