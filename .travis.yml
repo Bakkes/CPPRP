@@ -1,10 +1,9 @@
 language: generic
 os: 
   - linux
-  dist: 
-    - xenial
-    - trusty
-    - bionic
+  dist: xenial
+  - osx
+  - windows
     #- osx
     #- windows
 
