@@ -1,6 +1,13 @@
 language: generic
-os: linux
-dist: xenial
+os: 
+  - linux
+  dist: 
+    - xenial
+    - trusty
+    - bionic
+  #- osx
+  #- windows
+
 
 git:
   submodules: false
