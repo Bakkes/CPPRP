@@ -1,17 +1,17 @@
-language: cpp
+language: generic
 dist: bionic
-compiler:
-  - gcc
-  - clang
-addons:
-  apt:
-    sources:
-    - ppa:ubuntu-toolchain-r/test
-    packages:
-    - g++-9
-    - clang-8
-install:
-- "[ $CXX = g++ ] && export CXX=g++-9 || true"
-- "[ $CXX = clang++ ] && export CXX=clang++-8 || true"
-script:
-  - make RELEASE=1
+
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-9
+      env: CC='g++-9' CXX='g++-9'
+notifications:
+  email:
+    on_success: never
+  on_failure: never
