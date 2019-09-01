@@ -79,4 +79,4 @@ deploy:
 branches:
   only:
     - master
-    - /^v\d+\.\d+\.\d+.*$/ #https://travis-ci.community/t/pushing-tag-does-not-trigger-deployment-to-github-releases/3098
+    - /^\d+\.\d+\.\d+.*$/ #https://travis-ci.community/t/pushing-tag-does-not-trigger-deployment-to-github-releases/3098
