@@ -1,9 +1,9 @@
 language: generic
-os: 
-  - linux
-  dist: xenial
-  - osx
-  - windows
+#os: 
+#  - linux
+#  dist: xenial
+#  - osx
+#  - windows
     #- osx
     #- windows
 
@@ -17,6 +17,10 @@ before_install:
 
 matrix:
   include:
+    - os: linux
+      dist: xenial
+    - os: osx
+    - os: windows
     - compiler: clang
       addons:
         apt:
