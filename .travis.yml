@@ -29,7 +29,7 @@ matrix:
           env:
             - CXX=clang++
           script:
-            - nmake RELEASE=1
+            - make RELEASE=1
     
 notifications:
   email: false
