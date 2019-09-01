@@ -22,6 +22,17 @@ matrix:
       script:
         - make RELEASE=1
 
+    - compiler: clang
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-xenial-8']
+          packages: ['clang-7', 'clang-tidy-7']
+      env:
+        - CXX=clang++-7
+        - CLANG_TIDY=clang-tidy-7
+      script:
+        - make RELEASE=1
+
     - compiler: gcc
       addons:
         apt:
