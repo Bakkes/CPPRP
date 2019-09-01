@@ -75,4 +75,8 @@ deploy:
   draft: true
   on: 
     tags: true
-    #branch: master
+    branch: master
+branches:
+  only:
+    - master
+    - /^v\d+\.\d+\.\d+.*$/ #https://travis-ci.community/t/pushing-tag-does-not-trigger-deployment-to-github-releases/3098
