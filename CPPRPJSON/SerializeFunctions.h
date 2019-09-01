@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <functional>
 #include <memory>
-#define RAPIDJSON_SIMD 1
+//#define RAPIDJSON_SIMD 1
 #define RAPIDJSON_HAS_STDSTRING 1
 #include "rapidjson/writer.h"
 #include "rapidjson/prettywriter.h"

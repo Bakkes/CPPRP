@@ -14,19 +14,19 @@ namespace CPPRP
 	static std::unordered_map<std::string, parsePropertyFunc> parsePropertyFuncs;
 
 	template<typename T1>
-	constexpr inline static std::shared_ptr<Engine::Actor> createObject()
+	inline static std::shared_ptr<Engine::Actor> createObject()
 	{
 		return std::make_shared<T1>();
 	}
 
 	template<typename T1>
-	constexpr inline static void RegisterClass(std::string className)
+	inline static void RegisterClass(std::string className)
 	{
 		createObjectFuncs[className] = &createObject<T1>;
 	}
 
 	template<typename T>
-	constexpr inline static void RegisterField(const std::string& str, T callback)
+	inline static void RegisterField(const std::string& str, T callback)
 	{
 		parsePropertyFuncs[str] = callback;
 	}

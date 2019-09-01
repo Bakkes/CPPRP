@@ -79,7 +79,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\Bakkes\Documents\repos\CPPRP\libs\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Bakkes\Documents\repos\CPPRP\libs\rapidjson\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);CPPRP_PRETTYSUPPORT;RAPIDJSON_HAS_STDSTRING=1;NDEBUG ;</PreprocessorDefinitions>
     </ClCompile>
     <Link>

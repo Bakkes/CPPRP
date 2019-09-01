@@ -28,12 +28,12 @@ else
 endif
 BUILDFLAGS := -DDEBUG=$(DEBUG) -DRELEASE=$(RELEASE)
 CXX = g++-9
-CXXFLAGS ?= -fPIC -std=c++17 $(INC_FLAGS) -w -static-libstdc++ -march=haswell  -Wfatal-errors -DCPPRP_PRETTYSUPPORT#-DPARSE_UNSAFE ##-DPARSE_UNSAFE #-Wall -Wextra -Werror -fopenmp -march=haswell 
+CXXFLAGS ?= -fPIC -std=c++17 $(INC_FLAGS) -w -static-libstdc++ -Wfatal-errors -DCPPRP_PRETTYSUPPORT#-DPARSE_UNSAFE 
 LDFLAGS ?= ${LIB_FLAGS}
 ifeq ($(RELEASE),0)
 	CXXFLAGS += -O0 -ggdb
 else
-	CXXFLAGS += -O3 -s#-g #-s
+	CXXFLAGS += -O3 -s -g -DNDEBUG #-s
 endif
 all: preprocess $(BUILD_DIR)/${TARGET_BIN}
 $(BUILD_DIR)/${TARGET_BIN}: $(OBJS) 
