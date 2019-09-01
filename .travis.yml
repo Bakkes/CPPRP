@@ -15,7 +15,7 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-xenial-8']
-          packages: ['clang-8', 'clang-tidy-8']
+          packages: ['clang++-8', 'clang-tidy-8']
       env:
         - CXX=clang++-8
         - CLANG_TIDY=clang-tidy-8
@@ -26,10 +26,10 @@ matrix:
       addons:
         apt:
           sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-xenial-8']
-          packages: ['clang-7', 'clang-tidy-7']
+          packages: ['clang++-6', 'clang-tidy-6']
       env:
-        - CXX=clang++-7
-        - CLANG_TIDY=clang-tidy-7
+        - CXX=clang++-6
+        - CLANG_TIDY=clang-tidy-6
       script:
         - make RELEASE=1
 
