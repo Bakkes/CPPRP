@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <fstream>
 #include "OptionsParser.h"
+#include "rapidjson/filewritestream.h"
 #undef max
 
 
@@ -260,9 +261,9 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 				{
 					writer.StartObject();
 						
-					std::string objectName = replayFile->replayFile->objects[updatedProp];
-					auto a = updated.asd.actorObject;
-					serializer.writerFuncs[objectName](writer, a);
+					//std::string objectName = replayFile->replayFile->objects[updatedProp];
+					std::shared_ptr<CPPRP::Engine::Actor> a = updated.asd.actorObject;
+					serializer.writerFuncs[updatedProp](writer, a);
 					writer.EndObject();
 				}
 
@@ -280,6 +281,20 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 	{
 		if (parseBody)
 		{
+			replayFile->PreprocessTables();
+			const size_t objectsSize = replayFile->replayFile->objects.size();
+			serializer.writerFuncs.resize(objectsSize);
+			for (size_t i = 0; i < objectsSize; i++)
+			{
+				const std::string& name = replayFile->replayFile->objects.at(i);
+				auto found = serializer.writerFuncMap.find(name);
+				if (found != serializer.writerFuncMap.end())
+				{
+					serializer.writerFuncs[i] = found->second;
+				}
+			}
+
+
 			replayFile->Parse();
 		}
 	}
@@ -379,7 +394,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	//Timer t;
+	Timer t;
 
 	int crc = op.GetIntValue({ "crc", "verify" }, 0);
 	if (crc < 0 || crc > CPPRP::CrcCheck::CRC_Both)
@@ -403,13 +418,12 @@ int main(int argc, char* argv[])
 		std::cerr << "DeserializeHeader threw exception: " << gpe.errorMsg << "\n";
 		return 1;
 	}
-	replayFile->PreprocessTables();
 
-
-	
-
-	rapidjson::StringBuffer s;
-
+	rapidjson::StringBuffer s(0, 20000000); //Allocate 20mb
+	/*FILE* fp = NULL;
+	fopen_s(&fp, "test.json", "wb");
+	char writeBuffer[65536];
+	rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));*/
 	const int precision = op.GetIntValue({"p", "precision"}, 0);
 	const bool parseBody = !op.GetBoolValue({ "ho", "header" }, false);
 	bool result = 0;

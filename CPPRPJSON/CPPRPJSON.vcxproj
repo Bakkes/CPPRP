@@ -80,6 +80,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Users\Bakkes\Documents\repos\CPPRP\libs\</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);CPPRP_PRETTYSUPPORT;RAPIDJSON_HAS_STDSTRING=1;NDEBUG ;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -95,6 +96,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Users\Bakkes\Documents\repos\CPPRP\libs\</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);CPPRP_PRETTYSUPPORT;RAPIDJSON_HAS_STDSTRING=1;</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>../Debug/;</AdditionalLibraryDirectories>
@@ -127,6 +129,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="GeneratedSerializeFunctions.h" />
     <ClInclude Include="OptionsParser.h" />
     <ClInclude Include="SerializeFunctions.h" />
   </ItemGroup>
