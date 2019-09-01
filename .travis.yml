@@ -29,8 +29,7 @@ matrix:
             - CLANG_TIDY=clang-tidy-8
           script:
             - make RELEASE=1
-        - 
-          compiler: clang
+        - compiler: clang
           os: linux
           dist: xenial
           addons:
@@ -42,30 +41,28 @@ matrix:
             - CLANG_TIDY=clang-tidy-6.0
           script:
             - make RELEASE=1
-        - 
-          compiler: gcc
+        - compiler: gcc
           os: linux
           dist: xenial
           addons:
             apt:
               sources: ['ubuntu-toolchain-r-test']
               packages: ['g++-9']
-            env:
-              - CXX=g++-9
-            script:
-              - make RELEASE=1
+          env:
+            - CXX=g++-9
+          script:
+            - make RELEASE=1
     
-        - 
-          compiler: gcc
+        - compiler: gcc
           os: osx
           addons:
             apt:
               sources: ['']
               packages: ['g++-9']
-            env:
-              - CXX=g++-9
-            script:
-              - make RELEASE=1
+          env:
+            - CXX=g++-9
+          script:
+            - make RELEASE=1
     
 notifications:
   email: false
