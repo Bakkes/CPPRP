@@ -1,11 +1,12 @@
 language: generic
-os: linux
-dist: 
-  - xenial
-  - trusty
-  - bionic
-  #- osx
-  #- windows
+os: 
+  - linux
+  dist: 
+    - xenial
+    - trusty
+    - bionic
+    #- osx
+    #- windows
 
 
 git:
