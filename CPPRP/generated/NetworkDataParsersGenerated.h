@@ -1,7 +1,5 @@
-#pragma once
-
 template<>
-inline const LogoData Consume(CPPBitReader<BitReaderType>& reader)
+inline const LogoData Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	LogoData item;
 	item.unknown = reader.read<bool>();
@@ -11,7 +9,7 @@ inline const LogoData Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const ActiveActor Consume(CPPBitReader<BitReaderType>& reader)
+inline const ActiveActor Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ActiveActor item;
 	item.active = reader.read<bool>();
@@ -21,7 +19,7 @@ inline const ActiveActor Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const ObjectTarget Consume(CPPBitReader<BitReaderType>& reader)
+inline const ObjectTarget Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ObjectTarget item;
 	item.unknown = reader.read<bool>();
@@ -31,7 +29,7 @@ inline const ObjectTarget Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const CameraSettings Consume(CPPBitReader<BitReaderType>& reader)
+inline const CameraSettings Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	CameraSettings item;
 	item.FOV = reader.read<float>();
@@ -40,11 +38,10 @@ inline const CameraSettings Consume(CPPBitReader<BitReaderType>& reader)
 	item.distance = reader.read<float>();
 	item.stiffness = reader.read<float>();
 	item.swivelspeed = reader.read<float>();
-	if (reader.owner->header.engineVersion >= 868
-		&& reader.owner->header.licenseeVersion >= 20) {
+	if(reader.owner->header.engineVersion >= 868 
+		&& reader.owner->header.licenseeVersion >= 20) { 
 		item.transitionspeed = reader.read<float>();
-	}
-	else {
+	} else {
 		item.transitionspeed = 0;
 	}
 	return item;
@@ -52,7 +49,7 @@ inline const CameraSettings Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const ReplicatedPickupData Consume(CPPBitReader<BitReaderType>& reader)
+inline const ReplicatedPickupData Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedPickupData item;
 	item.unknown1 = reader.read<bool>();
@@ -63,7 +60,7 @@ inline const ReplicatedPickupData Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const TeamPaint Consume(CPPBitReader<BitReaderType>& reader)
+inline const TeamPaint Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	TeamPaint item;
 	item.team_number = reader.read<uint8_t>();
@@ -76,7 +73,7 @@ inline const TeamPaint Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const ReplicatedDemolish Consume(CPPBitReader<BitReaderType>& reader)
+inline const ReplicatedDemolish Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedDemolish item;
 	item.attacker_flag = reader.read<bool>();
@@ -90,7 +87,7 @@ inline const ReplicatedDemolish Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const ReplicatedMusicStringer Consume(CPPBitReader<BitReaderType>& reader)
+inline const ReplicatedMusicStringer Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedMusicStringer item;
 	item.unknown1 = reader.read<bool>();
@@ -101,7 +98,7 @@ inline const ReplicatedMusicStringer Consume(CPPBitReader<BitReaderType>& reader
 
 
 template<>
-inline const ReplicatedStateIndex Consume(CPPBitReader<BitReaderType>& reader)
+inline const ReplicatedStateIndex Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedStateIndex item;
 	item.value = reader.readBitsMax<uint32_t>(140);
@@ -110,7 +107,7 @@ inline const ReplicatedStateIndex Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const PrivateMatchSettings Consume(CPPBitReader<BitReaderType>& reader)
+inline const PrivateMatchSettings Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	PrivateMatchSettings item;
 	item.mutators = reader.read<std::string>();
@@ -124,7 +121,7 @@ inline const PrivateMatchSettings Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const Attributes Consume(CPPBitReader<BitReaderType>& reader)
+inline const Attributes Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	Attributes item;
 	item.product_attributes = ConsumeVector<std::shared_ptr<ProductAttribute>>(reader);
@@ -133,7 +130,7 @@ inline const Attributes Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const ActorBase Consume(CPPBitReader<BitReaderType>& reader)
+inline const ActorBase Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ActorBase item;
 	item.value = reader.read<uint32_t>();
@@ -144,7 +141,7 @@ inline const ActorBase Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const OnlineLoadout Consume(CPPBitReader<BitReaderType>& reader)
+inline const OnlineLoadout Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	OnlineLoadout item;
 	item.attributes_list = ConsumeVector<Attributes>(reader);
@@ -153,7 +150,7 @@ inline const OnlineLoadout Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const ClientLoadoutsOnline Consume(CPPBitReader<BitReaderType>& reader)
+inline const ClientLoadoutsOnline Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ClientLoadoutsOnline item;
 	item.online_one = Consume<OnlineLoadout>(reader);
@@ -165,7 +162,7 @@ inline const ClientLoadoutsOnline Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const ClientLoadouts Consume(CPPBitReader<BitReaderType>& reader)
+inline const ClientLoadouts Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ClientLoadouts item;
 	item.loadout_one = Consume<ClientLoadout>(reader);
@@ -175,7 +172,7 @@ inline const ClientLoadouts Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const ClubColors Consume(CPPBitReader<BitReaderType>& reader)
+inline const ClubColors Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ClubColors item;
 	item.team_color_set = reader.read<bool>();
@@ -187,7 +184,7 @@ inline const ClubColors Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const WeldedInfo Consume(CPPBitReader<BitReaderType>& reader)
+inline const WeldedInfo Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	WeldedInfo item;
 	item.active = reader.read<bool>();
@@ -200,7 +197,7 @@ inline const WeldedInfo Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const DamageState Consume(CPPBitReader<BitReaderType>& reader)
+inline const DamageState Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	DamageState item;
 	item.damage_state = reader.read<uint8_t>();
@@ -214,7 +211,7 @@ inline const DamageState Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const AppliedDamage Consume(CPPBitReader<BitReaderType>& reader)
+inline const AppliedDamage Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	AppliedDamage item;
 	item.id = reader.read<uint8_t>();
@@ -226,7 +223,7 @@ inline const AppliedDamage Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const ReplicatedExplosionData Consume(CPPBitReader<BitReaderType>& reader)
+inline const ReplicatedExplosionData Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedExplosionData item;
 	item.unknown1 = reader.read<bool>();
@@ -237,7 +234,7 @@ inline const ReplicatedExplosionData Consume(CPPBitReader<BitReaderType>& reader
 
 
 template<>
-inline const ReplicatedExplosionDataExtended Consume(CPPBitReader<BitReaderType>& reader)
+inline const ReplicatedExplosionDataExtended Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedExplosionDataExtended item;
 	item.unknown1 = reader.read<bool>();
@@ -250,7 +247,7 @@ inline const ReplicatedExplosionDataExtended Consume(CPPBitReader<BitReaderType>
 
 
 template<>
-inline const ReplicatedTitle Consume(CPPBitReader<BitReaderType>& reader)
+inline const ReplicatedTitle Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedTitle item;
 	item.unknown1 = reader.read<bool>();
@@ -266,7 +263,7 @@ inline const ReplicatedTitle Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const HistoryKey Consume(CPPBitReader<BitReaderType>& reader)
+inline const HistoryKey Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	HistoryKey item;
 	item.data = reader.read<uint16_t>(14);
@@ -275,7 +272,7 @@ inline const HistoryKey Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const ReplicatedStatEvent Consume(CPPBitReader<BitReaderType>& reader)
+inline const ReplicatedStatEvent Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedStatEvent item;
 	item.unknown1 = reader.read<bool>();
@@ -285,7 +282,7 @@ inline const ReplicatedStatEvent Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const RepStatTitle Consume(CPPBitReader<BitReaderType>& reader)
+inline const RepStatTitle Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	RepStatTitle item;
 	item.unknown1 = reader.read<bool>();
@@ -297,10 +294,11 @@ inline const RepStatTitle Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const SkillTier Consume(CPPBitReader<BitReaderType>& reader)
+inline const SkillTier Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	SkillTier item;
 	item.tier = reader.readBitsMax<uint32_t>(500);
 	return item;
 }
+
 

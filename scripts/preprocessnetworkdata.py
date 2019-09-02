@@ -188,7 +188,7 @@ if __name__== "__main__":
     active = False
     for line in s:
         line = line.strip()
-        if line.startswith("//"):
+        if line.startswith("//") or line.startswith("virtual ~"):
             continue
         if line.startswith("struct") or line.startswith("__ParserAttribute__"):
             active = True

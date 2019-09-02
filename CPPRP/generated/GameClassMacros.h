@@ -1,3 +1,4 @@
+
 #define xstr(a) str(a)
 #define str(a) #a		
 
@@ -9,7 +10,6 @@
 #define GAMEFIELD(...)
 #endif
 
-//GAMECLASS(Engine, Object);
 GAMECLASS(Engine, Actor);
 GAMEFIELD(Engine, Actor, DrawScale, float);
 GAMEFIELD(Engine, Actor, bCollideActors, bool);
@@ -270,3 +270,4 @@ GAMEFIELD(TAGame, GameEvent_SoccarPrivate_TA, MatchSettings, struct PrivateMatch
 GAMECLASS(TAGame, GameEvent_SoccarSplitscreen_TA);
 GAMECLASS(TAGame, GameEvent_Tutorial_TA);
 GAMECLASS(TAGame, HauntedBallTrapTrigger_TA);
+
