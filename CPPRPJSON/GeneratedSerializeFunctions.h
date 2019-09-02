@@ -1,4 +1,4 @@
-template<typename Writer>
+		template<typename Writer>
 		inline const void Serialize(Writer& writer, const ReplicatedRBState& item)
 		{
 			writer.StartObject();

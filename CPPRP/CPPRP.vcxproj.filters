@@ -57,7 +57,7 @@
     <ClInclude Include="data\ArcheTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="generated\GameClassParser.h">
+    <ClInclude Include="generated\GameClassMacros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

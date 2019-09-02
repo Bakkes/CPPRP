@@ -254,5 +254,5 @@ namespace CPPRP
 
 		return item;
 	}
-}
 #include "./generated/NetworkDataParsersGenerated.h"
+}
