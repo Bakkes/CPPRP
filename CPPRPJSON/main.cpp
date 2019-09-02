@@ -320,7 +320,7 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 	}
 	catch(const std::exception &e) //e
 	{
-		std::cerr << "GeneralException: " << e.what() <<  "on file " << replayFile->path.filename() << "\n";
+		std::cerr << "GeneralException: " << e.what() <<  " on file " << replayFile->path.filename() << "\n";
 		return 1;
 	}
 	catch (...)

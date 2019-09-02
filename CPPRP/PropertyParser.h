@@ -28,10 +28,24 @@ namespace CPPRP
 	template<typename T>
 	inline static void RegisterField(const std::string& str, T callback)
 	{
+		
 		parsePropertyFuncs[str] = callback;
 	}
 
-#include "./generated/GameClassParser.h"
+	template<typename T>
+	inline static T Initializor()
+	{	
+#define GAMECLASS(namesp, classn) RegisterClass<namesp::classn>(xstr(namesp) "." xstr(classn));
+#define fulln(namesp, classn, propname) xstr(namesp) "." xstr(classn) ":" xstr(propname)
+#define GAMEFIELD(namesp, classn, propname, nameoftype) \
+	RegisterField(fulln(namesp, classn, propname), [](std::shared_ptr<Engine::Actor>& struc, CPPBitReader<BitReaderType>& br) { std::static_pointer_cast<CPPRP::namesp::classn>(struc)->propname = Consume<nameoftype>(br); })
 
+		#include "./generated/GameClassMacros.h"
+
+#undef GAMECLASS
+#undef fulln
+#undef GAMEFIELD
+		return 0;
+	}
 	static int T = Initializor<int>();
 }

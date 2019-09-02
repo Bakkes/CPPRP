@@ -28,7 +28,7 @@ else
 endif
 BUILDFLAGS := -DDEBUG=$(DEBUG) -DRELEASE=$(RELEASE)
 CXX = g++-9
-CXXFLAGS ?= -fPIC -std=c++17 $(INC_FLAGS) -w -static-libstdc++ -Wfatal-errors -DCPPRP_PRETTYSUPPORT#-DPARSE_UNSAFE 
+CXXFLAGS ?= -fPIC -std=c++17 $(INC_FLAGS) -w -static-libstdc++ -Wfatal-errors -DCPPRP_PRETTYSUPPORT -lstdc++fs #-DPARSE_UNSAFE 
 LDFLAGS ?= ${LIB_FLAGS}
 ifeq ($(RELEASE),0)
 	CXXFLAGS += -O0 -ggdb
@@ -46,4 +46,7 @@ $(BUILD_DIR)/%.cpp.o: %.cpp
 clean:
 	rm -rf $(BUILD_DIR)
 preprocess:
-	#python3.6 ./scripts/preprocessor2.py ./CPPRP/GameClasses.h
+	python3.6 ./scripts/preprocessgameclass.py ./CPPRP/data/GameClasses.h json > ./CPPRP/generated/GameClassMacros.h
+	python3.6 ./scripts/preprocessgameclass.py ./CPPRP/data/GameClasses.h classext > ./CPPRP/generated/ClassExtensions.h
+	python3.6 ./scripts/preprocessnetworkdata.py "./CPPRP/data/NetworkData.h" consume > ./CPPRP/generated/NetworkDataParsersGenerated.h
+	python3.6 ./scripts/preprocessnetworkdata.py "./CPPRP/data/NetworkData.h" json > ./CPPRPJSON/GeneratedSerializeFunctions.h
