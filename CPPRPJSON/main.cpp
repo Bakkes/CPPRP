@@ -394,7 +394,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	Timer t;
+	//Timer t;
 
 	int crc = op.GetIntValue({ "crc", "verify" }, 0);
 	if (crc < 0 || crc > CPPRP::CrcCheck::CRC_Both)
