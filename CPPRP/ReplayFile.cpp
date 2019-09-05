@@ -234,10 +234,14 @@ namespace CPPRP
 		constexpr uint32_t CRC_SEED = 0xEFCBF201;
 		if (verifyWhat & CRC_Header)
 		{
-			const uint32_t headerCalculatedCRC = CalculateCRC(data,
+			/*const uint32_t headerCalculatedCRC = CalculateCRC(data,
 				static_cast<size_t>(bitReader.GetAbsoluteBytePosition()), 
+				static_cast<size_t>(headerSize), CRC_SEED);*/
+			const uint32_t headerCalculatedCRC2 = CalculateCRC_SB8(*reinterpret_cast<std::vector<uint8_t>*>(&data),
+				static_cast<size_t>(bitReader.GetAbsoluteBytePosition()),
 				static_cast<size_t>(headerSize), CRC_SEED);
-			const bool result = headerCalculatedCRC == headerReadCrc;
+			//std::cout << "headerCalculatedCRC==headerCalculatedCRC2" << (headerCalculatedCRC == headerCalculatedCRC2 ? "true" : "false") << "\n";
+			const bool result = headerCalculatedCRC2 == headerReadCrc;
 			//If only verify header, or if already failed here
 			if (!(verifyWhat & CRC_Body) || !result)
 			{
@@ -260,10 +264,17 @@ namespace CPPRP
 			return false;
 		}
 
-		const uint32_t bodyCalculatedCRC = CalculateCRC(data, 
+		/*const uint32_t bodyCalculatedCRC = CalculateCRC(data, 
 			static_cast<size_t>(bitReader.GetAbsoluteBytePosition()), 
+			static_cast<size_t>(bodySize), CRC_SEED);*/
+
+		//cast is ugly but works, fix later
+		const uint32_t bodyCalculatedCRC2 = CalculateCRC_SB8(*reinterpret_cast<std::vector<uint8_t>*>(&data),
+			static_cast<size_t>(bitReader.GetAbsoluteBytePosition()),
 			static_cast<size_t>(bodySize), CRC_SEED);
-		return bodyReadCrc == bodyCalculatedCRC;
+		//std::cout << "headerCalculatedCRC==headerCalculatedCRC2" << (bodyCalculatedCRC == bodyCalculatedCRC2 ? "true" : "false") << "\n";
+
+		return bodyReadCrc == bodyCalculatedCRC2;
 	}
 
 	void ReplayFile::PreprocessTables()

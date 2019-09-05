@@ -4,6 +4,18 @@
 #include <vector>
 #include "CPPBitReader.h"
 
+/* 
+ParserAttributes:
+	Consume true/false -> 
+		If on struct -> if false, don't generate parser. Must implement your own in NetworkDataParser.h
+		If on member -> needs to be true for non standard types that don't have a read<T> method in CPPBitReader
+	NumBits x -> declare if x != sizeof(type) * 8, for example when an uint8_t is used to store but only 3 bits need to be read from stream
+	EngineVersion x -> Only parse replay if engine version >= x
+	LicenseeVersion x -> Only parse replay if licensee version >= x
+	MaxBits x -> instead of reading set number of bits, will call CPPBitReader::get_bits_max(x);
+std::vector<T> members always assume it can read a uint8_t member containing the size of vector, then fills it with reading T
+std::shared_ptr<T> Parser needs to be specifically implemented to return a shared_ptr.
+*/
 #define __ParserAttribute__(...)
 
 namespace CPPRP
@@ -12,16 +24,9 @@ namespace CPPRP
 	__ParserAttribute__(Consume, false)
 	struct ReplicatedRBState
 	{
-		__ParserAttribute__(CallToString, true)
 		Quat rotation;
-
-		__ParserAttribute__(CallToString, true)
 		Vector3 position;
-
-		__ParserAttribute__(CallToString, true)
 		Vector3 linear_velocity;
-
-		__ParserAttribute__(CallToString, true)
 		Vector3 angular_velocity;
 		bool sleeping;
 	};
@@ -48,21 +53,15 @@ namespace CPPRP
 	struct Reservation
 	{
 		__ParserAttribute__(NumBits, 3)
-		__ParserAttribute__(CallToString, true)
 		uint8_t number;
-
-		__ParserAttribute__(CallToString, true)
 		std::shared_ptr<UniqueId> player_id;
 		std::string player_name;
-
-		__ParserAttribute__(CallToString, true)
 		uint8_t unknown2;
 	};
 
 	__ParserAttribute__(Consume, false)
 	struct ClientLoadout
 	{
-		__ParserAttribute__(CallToString, true)
 		uint8_t version;
 		uint32_t body;
 		uint32_t skin;
@@ -71,7 +70,6 @@ namespace CPPRP
 		uint32_t antenna;
 		uint32_t hat;
 		uint32_t unknown2;
-
 		uint32_t unknown3;
 		uint32_t engine_audio;
 		uint32_t trail;
@@ -106,13 +104,8 @@ namespace CPPRP
 
 	struct TeamPaint
 	{
-		__ParserAttribute__(CallToString, true)
 		uint8_t team_number;
-
-		__ParserAttribute__(CallToString, true)
 		uint8_t team_color_id;
-
-		__ParserAttribute__(CallToString, true)
 		uint8_t custom_color_id;
 		uint32_t team_finish_id;
 		uint32_t custom_finish_id;
@@ -124,9 +117,7 @@ namespace CPPRP
 		int32_t attacker_actor_id;
 		bool victim_flag;
 		int32_t victim_actor_id;
-		__ParserAttribute__(CallToString, true)
 		Vector3 attacker_velocity;
-		__ParserAttribute__(CallToString, true)
 		Vector3 victim_velocity;
 	};
 
@@ -175,7 +166,6 @@ namespace CPPRP
 	struct Attributes
 	{
 		//uint8_t attributes_count; //Is automatically read when consuming vector
-		__ParserAttribute__(CallToString, true)
 		__ParserAttribute__(CallConsume, true)
 		std::vector<std::shared_ptr<ProductAttribute>> product_attributes;
 	};
@@ -191,7 +181,6 @@ namespace CPPRP
 	__ParserAttribute__(Consume, false)
 	struct PartyLeader
 	{
-		__ParserAttribute__(CallToString, true)
 		std::shared_ptr<UniqueId> id;
 	};
 
@@ -251,11 +240,9 @@ namespace CPPRP
 
 	struct ClientLoadoutsOnline
 	{
-		__ParserAttribute__(CallToString, true)
 		__ParserAttribute__(CallConsume, true)
 		OnlineLoadout online_one;
 
-		__ParserAttribute__(CallToString, true)
 		__ParserAttribute__(CallConsume, true)
 		OnlineLoadout online_two;
 
@@ -265,11 +252,9 @@ namespace CPPRP
 
 	struct ClientLoadouts
 	{
-		__ParserAttribute__(CallToString, true)
 		__ParserAttribute__(CallConsume, true)
 		ClientLoadout loadout_one;
 
-		__ParserAttribute__(CallToString, true)
 		__ParserAttribute__(CallConsume, true)
 		ClientLoadout loadout_two;
 	};
@@ -286,10 +271,8 @@ namespace CPPRP
 	{
 		bool active;
 		int32_t actor_id;
-		__ParserAttribute__(CallToString, true)
 		Vector3 offset;
 		float mass;
-		__ParserAttribute__(CallToString, true)
 		Rotator rotation;
 	};
 
@@ -306,8 +289,6 @@ namespace CPPRP
 		uint8_t damage_state;
 		bool unknown2;
 		int32_t causer_actor_id;
-
-		__ParserAttribute__(CallToString, true)
 		Vector3 damage_location;
 		bool direct_damage;
 		bool immediate;
@@ -316,7 +297,6 @@ namespace CPPRP
 	struct AppliedDamage
 	{
 		uint8_t id;
-		__ParserAttribute__(CallToString, true)
 		Vector3 position;
 		int32_t damage_index;
 		int32_t total_damage;
@@ -326,7 +306,6 @@ namespace CPPRP
 	{
 		bool unknown1;
 		uint32_t actor_id;
-		__ParserAttribute__(CallToString, true)
 		Vector3 position;
 	};
 
@@ -334,7 +313,6 @@ namespace CPPRP
 	{
 		bool unknown1;
 		uint32_t actor_id;
-		__ParserAttribute__(CallToString, true)
 		Vector3 position;
 		bool unknown3;
 		uint32_t unknown4;
@@ -368,8 +346,6 @@ namespace CPPRP
 	{
 		bool unknown1;
 		std::string name;
-
-		__ParserAttribute__(CallToString, true)
 		__ParserAttribute__(CallConsume, true)
 		ObjectTarget object_target;
 		uint32_t value;

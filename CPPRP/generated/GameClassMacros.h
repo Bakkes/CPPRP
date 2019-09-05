@@ -270,4 +270,7 @@ GAMEFIELD(TAGame, GameEvent_SoccarPrivate_TA, MatchSettings, struct PrivateMatch
 GAMECLASS(TAGame, GameEvent_SoccarSplitscreen_TA);
 GAMECLASS(TAGame, GameEvent_Tutorial_TA);
 GAMECLASS(TAGame, HauntedBallTrapTrigger_TA);
+GAMECLASS(TAGame, Cannon_TA);
+GAMEFIELD(TAGame, Cannon_TA, Pitch, float);
+GAMEFIELD(TAGame, Cannon_TA, FireCount, uint8_t);
 
