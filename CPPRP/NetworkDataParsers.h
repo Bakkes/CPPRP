@@ -235,7 +235,7 @@ namespace CPPRP
 		item.player_id = reader.read<std::shared_ptr<UniqueId>>();
 		if (item.player_id->platform == Platform_Unknown && (reader.licenseeVersion < 18 || reader.netVersion != 0))
 		{
-
+			
 		}
 		else
 		{

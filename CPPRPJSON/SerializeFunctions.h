@@ -69,10 +69,58 @@ namespace CPPRP
 			writer.Int((int)item);
 		}
 
-		template<typename Writer>
+		template<typename Writer, int DEC=0>
 		static inline const void Serialize(Writer& writer, const float& item)
 		{
-			writer.Double(item);
+			if constexpr (DEC == 2)
+			{
+				char buf[20];
+				char tmp[20];
+				bool isNeg = item < 0.f;
+				int value = static_cast<int>((item * 100.f) + (isNeg ? -.5f : 0.5f));
+				char* tmpPos = tmp;
+				
+				if(isNeg)
+				{
+					value *= -1;
+				}
+
+
+				*tmpPos++ = 48 + (value % 10);
+				value /= 10;
+				*tmpPos++ = 48 + (value % 10);
+				value /= 10;
+				*tmpPos++ = '.';
+				*tmpPos++ = 48 + (value % 10);
+				value /= 10;
+
+				do {
+					*tmpPos++ = 48 + (value % 10); //"0123456789"[ value % 10 ];
+					value /= 10;
+				} while (value);
+
+				if(isNeg)
+				{
+					*tmpPos++ = '-';
+				}
+
+				char *bufPos = buf;
+				while(tmpPos != tmp)
+				{
+					*bufPos++ = *--tmpPos;
+				}
+
+				//*bufPos++ = '.';
+				//*bufPos++ = 48 + (value / 10);
+				//*bufPos++ = 48 + (value % 10);
+				//*bufPos = '\0';
+
+				writer.RawValue(buf, (bufPos - buf), rapidjson::kNumberType);
+			} 
+			else
+			{
+				writer.Double(item);
+			}
 		}
 
 		template<typename Writer>
@@ -155,11 +203,22 @@ namespace CPPRP
 			writer.RawValue(data, 42, rapidjson::kObjectType);*/
 			writer.StartObject();
 			writer.Key("X");
-			Serialize<Writer>(writer, item.x);
+			//writer.StartArray();
+			Serialize<Writer, 2>(writer, item.x);
+			//writer.Double(item.x);
+			//writer.EndArray();
 			writer.Key("Y");
-			Serialize<Writer>(writer, item.y);
+			//writer.StartArray();
+			Serialize<Writer, 2>(writer, item.y);
+			//writer.Double(item.y);
+			//writer.EndArray();
+			//Serialize<Writer, 2>(writer, item.y);
 			writer.Key("Z");
-			Serialize<Writer>(writer, item.z);
+			//writer.StartArray();
+			Serialize<Writer, 2>(writer, item.z);
+			//writer.Double(item.z);
+			//writer.EndArray();
+			//Serialize<Writer, 2>(writer, item.z);
 			writer.EndObject();
 		}
 

@@ -103,7 +103,8 @@ namespace CPPRP
 		if (!fullReplayBitReader->canRead())
 		{
 			//Replay is corrupt
-			throw GeneralParseException("ReplayFile corrupt. header + netstream_size > filesize", *fullReplayBitReader);
+			const std::string exceptionText = "ReplayFile corrupt. header + netstream_size > filesize";
+			throw GeneralParseException(exceptionText, *fullReplayBitReader);
 		}
 
 		const int32_t debugStringSize = fullReplayBitReader->read<int32_t>();
@@ -540,9 +541,19 @@ namespace CPPRP
 								if(funcPtr == nullptr)
 								{
 									const std::string& objName = replayFile->objects[propertyIndex];
-									std::cout << "Property " << objName << " is undefined\n";
+									//std::cout << "Property " << objName << " is undefined\n";
 
-									throw GeneralParseException("Property " + objName + " is undefined", networkReader);
+									std::string exceptionText = "Property " + objName + " is undefined";
+									if(IncludeParseLog)
+									{
+										exceptionText += "Parse log: ";
+										for(int32_t i = std::max((size_t)0, parseLog.size() - 10); i < parseLog.size(); i++)
+										{
+											exceptionText += "\n\t" + parseLog.at(i);
+										}
+										
+									}
+									throw GeneralParseException(exceptionText, networkReader);
 
 								}
 								#endif
