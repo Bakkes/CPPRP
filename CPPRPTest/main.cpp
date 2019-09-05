@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 			{
 				if (entry.path().filename().u8string().find(".replay") == std::string::npos)
 					continue;
-				if (replayFilesToLoad.size() >= 600)
+				if (replayFilesToLoad.size() >= 123459696)
 					break;
 				replayFilesToLoad.push(entry.path());
 			}
@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
 	if constexpr (true)
 	{
 		auto start = std::chrono::steady_clock::now();
-		constexpr size_t bothReplayThreadCount = 1;
+		constexpr size_t bothReplayThreadCount = 10;
 
 		if constexpr(bothReplayThreadCount == 1)
 		{
