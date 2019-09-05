@@ -503,7 +503,11 @@ namespace CPPRP
 
 		};
 
-		
+		struct Cannon_TA : public Engine::Actor
+		{
+			float Pitch;
+			uint8_t FireCount;
+		};
 	};
 
 
