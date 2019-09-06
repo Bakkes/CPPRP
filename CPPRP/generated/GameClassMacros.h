@@ -93,7 +93,7 @@ GAMEFIELD(ProjectX, Pawn_X, bRootMotionFromInterpCurve, bool);
 GAMEFIELD(ProjectX, Pawn_X, bFastAttachedMove, bool);
 GAMEFIELD(ProjectX, Pawn_X, RemoteViewPitch, uint8_t);
 GAMEFIELD(ProjectX, Pawn_X, GroundSpeed, float);
-GAMEFIELD(ProjectX, Pawn_X, AIrSpeed, float);
+GAMEFIELD(ProjectX, Pawn_X, AirSpeed, float);
 GAMEFIELD(ProjectX, Pawn_X, AccelRate, float);
 GAMEFIELD(ProjectX, Pawn_X, JumpZ, float);
 GAMEFIELD(ProjectX, Pawn_X, AirControl, float);

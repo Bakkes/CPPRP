@@ -156,7 +156,7 @@ namespace CPPRP
 			uint8_t RemoteViewPitch;
 
 			float GroundSpeed;
-			float AIrSpeed;
+			float AirSpeed;
 			float AccelRate;
 			float JumpZ;
 			float AirControl;
