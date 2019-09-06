@@ -94,11 +94,14 @@ namespace CPPRP
 				*tmpPos++ = 48 + (value % 10);
 				value /= 10;
 
-				do {
+				while (value)
+				{
+					//printf("value: %i\n", value);
 					*tmpPos++ = 48 + (value % 10); //"0123456789"[ value % 10 ];
 					value /= 10;
-				} while (value);
-
+					
+				} 
+				//printf("----\n");
 				if(isNeg)
 				{
 					*tmpPos++ = '-';
@@ -201,33 +204,24 @@ namespace CPPRP
 
 			data[41] = '}';
 			writer.RawValue(data, 42, rapidjson::kObjectType);*/
-			//writer.StartObject();
-			//writer.Key("X");
-			//writer.StartArray();
-			//Serialize<Writer, 2>(writer, item.x);
-			////writer.Double(item.x);
-			////writer.EndArray();
-			//writer.Key("Y");
-			////writer.StartArray();
-			//Serialize<Writer, 2>(writer, item.y);
-			////writer.Double(item.y);
-			////writer.EndArray();
-			////Serialize<Writer, 2>(writer, item.y);
-			//writer.Key("Z");
-			////writer.StartArray();
-			//Serialize<Writer, 2>(writer, item.z);
-			////writer.Double(item.z);
-			////writer.EndArray();
-			////Serialize<Writer, 2>(writer, item.z);
-			//writer.EndObject();
-
 			writer.StartObject();
 			writer.Key("X");
-			Serialize<Writer>(writer, item.x);
+			//writer.StartArray();
+			Serialize<Writer, 2>(writer, item.x);
+			//writer.Double(item.x);
+			//writer.EndArray();
 			writer.Key("Y");
-			Serialize<Writer>(writer, item.y);
+			//writer.StartArray();
+			Serialize<Writer, 2>(writer, item.y);
+			//writer.Double(item.y);
+			//writer.EndArray();
+			//Serialize<Writer, 2>(writer, item.y);
 			writer.Key("Z");
-			Serialize<Writer>(writer, item.z);
+			//writer.StartArray();
+			Serialize<Writer, 2>(writer, item.z);
+			//writer.Double(item.z);
+			//writer.EndArray();
+			//Serialize<Writer, 2>(writer, item.z);
 			writer.EndObject();
 		}
 
