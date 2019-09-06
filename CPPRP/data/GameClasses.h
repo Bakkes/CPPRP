@@ -28,6 +28,17 @@ namespace CPPRP
 			bool bTearOff;
 			struct Vector3I Location;
 			struct Rotator Rotation;
+
+			//Fields that aren't used (yet) but could probably be replicated
+			uint8_t Physics;
+			uint8_t RemoteRole;
+			uint8_t Role;
+			uint8_t ReplicatedCollisionType;
+			ActiveActor Owner;
+			bool bHardAttach;
+			ActiveActor Instigator;
+			Vector3I RelativeLocation;
+			Rotator RelativeRotation;
 		};
 
 		struct Info : public Actor
@@ -47,6 +58,14 @@ namespace CPPRP
 			bool bStopCountDown;
 			bool bMatchIsOver;
 			bool bMatchHasBegun;
+
+			//Unused?
+			int RemainingTime;
+			int ElapsedTime;
+			int RemainingMinute;
+			int GoalScore;
+			int TimeLimit;
+			ActiveActor winner;
 		};
 
 		struct Pawn : public Actor
@@ -72,19 +91,35 @@ namespace CPPRP
 			bool bAdmin;
 			bool bIsInactive;
 			bool bOnlySpectator;
-			unsigned char Ping;
+			uint8_t Ping;
 			class std::shared_ptr<struct UniqueId> UniqueId;
+
+			//Unused
+			uint32_t Deaths;
+			uint8_t TTSSpeaker;
+			bool bOutOfLives;
+			bool bFromPreviousLevel;
+			//PRIRemoteUserData RemoteUserData
+
 		};
 
 		struct TeamInfo : public ReplicationInfo
 		{
 			uint32_t Score;
+
+			//Unused
+			//std::string TeamName;
+			//int TeamIndex;
 		};
 
 		struct WorldInfo : public Info
 		{
 			float WorldGravityZ;
 			float TimeDilation;
+			bool bHighPriorityLoading;
+			ActiveActor Pauser; //Is of type PlayerReplicationInfo
+
+			//MusicTrackStruct ReplicatedMusicTrack; 
 		};
 
 	};
@@ -98,7 +133,9 @@ namespace CPPRP
 			bool bGameStarted;
 			uint32_t ReplicatedGamePlaylist;
 			uint64_t GameServerID;
-			struct Reservation Reservations;
+			struct Reservation Reservations; //is actually array of size 0x8, first 3 bits read is index of array i guess
+
+
 		};
 
 		struct NetModeReplicator_X : public Engine::ReplicationInfo
@@ -108,7 +145,25 @@ namespace CPPRP
 
 		struct Pawn_X : public Engine::Pawn
 		{
+			//Controller Controller;
+			bool bIsWalking;
+			bool bIsCrouched;
+			bool bSimulateGravity;
+			bool bCanSwatTurn;
+			bool bUsedByMatinee;
+			bool bRootMotionFromInterpCurve;
+			bool bFastAttachedMove;
+			uint8_t RemoteViewPitch;
 
+			float GroundSpeed;
+			float AIrSpeed;
+			float AccelRate;
+			float JumpZ;
+			float AirControl;
+			ActiveActor PlayerReplicationInfo; //Engine::PlayerReplicationInfo
+			float RootMotionInterpRate;
+			float RootMotionInterpCurrentTime;
+			Vector3I RootMotionInterpCurveLastValue;
 		};
 
 		struct PRI_X : public Engine::PlayerReplicationInfo
@@ -153,10 +208,10 @@ namespace CPPRP
 			bool bVoteToForfeitDisabled;
 			bool bUsingFreecam;
 			struct OnlineLoadout ClientLoadoutOnline;
-			unsigned char CameraYaw;
-			unsigned char CameraPitch;
-			unsigned char PawnType;
-			unsigned char ReplicatedWorstNetQualityBeyondLatency;
+			uint8_t CameraYaw;
+			uint8_t CameraPitch;
+			uint8_t PawnType;
+			uint8_t ReplicatedWorstNetQualityBeyondLatency;
 			float SteeringSensitivity;
 			struct PartyLeader PartyLeader;
 			int TimeTillItem;
@@ -166,6 +221,10 @@ namespace CPPRP
 			struct CameraSettings CameraSettings;
 			struct ReplicatedTitle SecondaryTitle;
 			struct HistoryKey PlayerHistoryKey;
+
+			//Unused
+			ActiveActor ReplacingBotPRI;
+			//PlayerReplicatedEventInfo_TA               PREI
 		};
 
 		struct RBActor_TA : public ProjectX::Pawn_X
@@ -175,12 +234,16 @@ namespace CPPRP
 			bool bFrozen;
 			struct WeldedInfo WeldedInfo;
 			bool bIgnoreSyncing;
+
+			float MaxLinearSpeed;
+			float MaxAngularSpeed;
+
 		};
 
 		struct CarComponent_TA : public Engine::ReplicationInfo
 		{
 			struct ActiveActor Vehicle;
-			unsigned char ReplicatedActive;
+			uint8_t ReplicatedActive;
 			float ReplicatedActivityTime;
 		};
 
@@ -200,9 +263,13 @@ namespace CPPRP
 			bool bUnlimitedBoost;
 			uint32_t UnlimitedBoostRefCount;
 			bool bNoBoost;
-			unsigned char ReplicatedBoostAmount;
+			uint8_t ReplicatedBoostAmount;
 			float RechargeRate;
 			float BoostModifier;
+
+			//unused
+			float StartBoostAmount;
+			float CurrentBoostAmount;
 		};
 
 		struct CarComponent_Dodge_TA : public CarComponent_TA
@@ -229,6 +296,11 @@ namespace CPPRP
 			struct ReplicatedExplosionData ReplicatedExplosionData;
 			float ReplicatedBallMaxLinearSpeedScale;
 			struct ReplicatedExplosionDataExtended ReplicatedExplosionDataExtended;
+			Vector3I MagnusCoefficient;
+
+			//Unused
+			bool bEndOfGameHidden;
+			//ObjectTarget ReplicatedBallMesh; //ObjectTarget or active actor, idk
 		};
 
 		struct Team_TA : public Engine::TeamInfo
@@ -362,6 +434,9 @@ namespace CPPRP
 			bool bReplicatedHandbrake;
 			bool bDriving;
 			unsigned char ReplicatedSteer;
+
+			//Unused
+			bool bPodiumMode;
 		};
 
 		struct Car_TA : public Vehicle_TA
@@ -383,13 +458,17 @@ namespace CPPRP
 		struct CameraSettingsActor_TA : public Engine::ReplicationInfo
 		{
 			struct ActiveActor PRI;
-			unsigned char CameraPitch;
+			
 			bool bMouseCameraToggleEnabled;
 			bool bUsingSecondaryCamera;
 			bool bUsingBehindView;
 			struct CameraSettings ProfileSettings;
 			bool bUsingSwivel;
-			unsigned char CameraYaw;
+			bool bUsingFreecam;
+			bool bHoldMouseCamera;
+			bool bResetCamera;
+			uint8_t CameraPitch;
+			uint8_t CameraYaw;
 		};
 		
 		struct GRI_TA : public ProjectX::GRI_X
@@ -434,12 +513,14 @@ namespace CPPRP
 			uint32_t ReplicatedGameStateTimeRemaining;
 			uint32_t ReplicatedStateName;
 			struct ObjectTarget MatchTypeClass;
-			uint32_t BotSkill;
+			uint32_t BotSkill; //Should actually be a float
 			bool bHasLeaveMatchPenalty;
 			bool bCanVoteToForfeit;
 			bool bAllowReadyUp;
 			struct GameMode GameMode;
-			struct ReplicatedStateIndex ReplicatedStateIndex;
+			struct ReplicatedStateIndex ReplicatedStateIndex; //Might actually just be an uint8_t??
+			struct ActiveActor GameOwner; //PRI_TA
+			//struct CustomMatchSettings MatchSettings;
 		};
 
 		struct GameEvent_Team_TA : public GameEvent_TA
