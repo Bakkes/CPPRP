@@ -201,24 +201,33 @@ namespace CPPRP
 
 			data[41] = '}';
 			writer.RawValue(data, 42, rapidjson::kObjectType);*/
+			//writer.StartObject();
+			//writer.Key("X");
+			//writer.StartArray();
+			//Serialize<Writer, 2>(writer, item.x);
+			////writer.Double(item.x);
+			////writer.EndArray();
+			//writer.Key("Y");
+			////writer.StartArray();
+			//Serialize<Writer, 2>(writer, item.y);
+			////writer.Double(item.y);
+			////writer.EndArray();
+			////Serialize<Writer, 2>(writer, item.y);
+			//writer.Key("Z");
+			////writer.StartArray();
+			//Serialize<Writer, 2>(writer, item.z);
+			////writer.Double(item.z);
+			////writer.EndArray();
+			////Serialize<Writer, 2>(writer, item.z);
+			//writer.EndObject();
+
 			writer.StartObject();
 			writer.Key("X");
-			//writer.StartArray();
-			Serialize<Writer, 2>(writer, item.x);
-			//writer.Double(item.x);
-			//writer.EndArray();
+			Serialize<Writer>(writer, item.x);
 			writer.Key("Y");
-			//writer.StartArray();
-			Serialize<Writer, 2>(writer, item.y);
-			//writer.Double(item.y);
-			//writer.EndArray();
-			//Serialize<Writer, 2>(writer, item.y);
+			Serialize<Writer>(writer, item.y);
 			writer.Key("Z");
-			//writer.StartArray();
-			Serialize<Writer, 2>(writer, item.z);
-			//writer.Double(item.z);
-			//writer.EndArray();
-			//Serialize<Writer, 2>(writer, item.z);
+			Serialize<Writer>(writer, item.z);
 			writer.EndObject();
 		}
 
