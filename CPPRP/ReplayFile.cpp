@@ -558,7 +558,7 @@ namespace CPPRP
 									if(IncludeParseLog)
 									{
 										exceptionText += "Parse log: ";
-										for(int32_t i = std::max((size_t)0, parseLog.size() - 10); i < parseLog.size(); i++)
+										for(int32_t i = std::max(0, (int32_t)parseLog.size() - 10); (size_t)i < parseLog.size(); i++)
 										{
 											exceptionText += "\n\t" + parseLog.at(i);
 										}
