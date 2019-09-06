@@ -443,7 +443,18 @@ namespace CPPRP
 					|| (f.time > 0 && f.time < 1E-10)
 					|| (f.delta > 0 && f.delta < 1E-10))
 				{
-					throw GeneralParseException("Frame time incorrect (parser at wrong position)", networkReader);
+					std::string exceptionText = "Frame time incorrect (parser at wrong position)";
+					if (IncludeParseLog)
+					{
+						exceptionText += "Parse log: ";
+						for (int32_t i = std::max(0, (int32_t)parseLog.size() - 10); (size_t)i < parseLog.size(); i++)
+						{
+							exceptionText += "\n\t" + parseLog.at(i);
+						}
+
+					}
+
+					throw GeneralParseException(exceptionText, networkReader);
 				}
 				#endif
 
@@ -621,7 +632,8 @@ namespace CPPRP
 			|| name.compare("TAGame.InMapScoreboard_TA") == 0
 			|| name.compare("TAGame.BreakOutActor_Platform_TA") == 0
 			|| name.compare("Engine.WorldInfo") == 0
-			|| name.compare("TAGame.HauntedBallTrapTrigger_TA") == 0);
+			|| name.compare("TAGame.HauntedBallTrapTrigger_TA") == 0
+			|| name.compare("Engine.KActor") == 0);
 	}
 
 	const bool ReplayFile::HasRotation(const std::string & name) const
@@ -800,6 +812,10 @@ return (*found).second;
 		else if (name.find("Archetypes.Teams.TeamWhite") != std::string::npos)
 		{
 			fffffind("TAGame.Team_Soccar_TA");
+		}
+		else if (name.find("PersistentLevel.KActor") != std::string::npos)
+		{
+			fffffind("Engine.KActor")
 		}
 		auto found = classnetMap.find(name);
 		if (found == classnetMap.end())

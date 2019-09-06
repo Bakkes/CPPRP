@@ -122,6 +122,13 @@ namespace CPPRP
 			//MusicTrackStruct ReplicatedMusicTrack; 
 		};
 
+		//Currently only used in workshop map replays
+		struct KActor : public Actor
+		{
+			bool bWakeOnLevelStart;
+			ReplicatedRBState RBState;
+			Vector3 ReplicatedDrawScale3D;
+		};
 	};
 
 	namespace ProjectX
