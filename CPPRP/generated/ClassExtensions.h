@@ -64,6 +64,8 @@ namespace CPPRP {
 		, {"TAGame.GameEvent_SoccarPrivate_TA","TAGame.GameEvent_Soccar_TA"}
 		, {"TAGame.GameEvent_SoccarSplitscreen_TA","TAGame.GameEvent_SoccarPrivate_TA"}
 		, {"TAGame.GameEvent_Tutorial_TA","TAGame.GameEvent_Soccar_TA"}
+		, {"TAGame.GameEvent_GameEditor_TA","TAGame.GameEvent_Soccar_TA"}
+		, {"TAGame.GameEvent_TrainingEditor_TA","TAGame.GameEvent_GameEditor_TA"}
 		, {"TAGame.HauntedBallTrapTrigger_TA","Engine.Actor"}
 		, {"TAGame.Cannon_TA","Engine.Actor"}
 	};

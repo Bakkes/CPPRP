@@ -579,6 +579,16 @@ namespace CPPRP
 
 		};
 
+		struct GameEvent_GameEditor_TA : public GameEvent_Soccar_TA
+		{
+
+		};
+
+		struct GameEvent_TrainingEditor_TA : public GameEvent_GameEditor_TA
+		{
+
+		};
+
 		struct HauntedBallTrapTrigger_TA : public Engine::Actor
 		{
 

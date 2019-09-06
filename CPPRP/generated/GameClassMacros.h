@@ -319,6 +319,8 @@ GAMECLASS(TAGame, GameEvent_SoccarPrivate_TA);
 GAMEFIELD(TAGame, GameEvent_SoccarPrivate_TA, MatchSettings, struct PrivateMatchSettings);
 GAMECLASS(TAGame, GameEvent_SoccarSplitscreen_TA);
 GAMECLASS(TAGame, GameEvent_Tutorial_TA);
+GAMECLASS(TAGame, GameEvent_GameEditor_TA);
+GAMECLASS(TAGame, GameEvent_TrainingEditor_TA);
 GAMECLASS(TAGame, HauntedBallTrapTrigger_TA);
 GAMECLASS(TAGame, Cannon_TA);
 GAMEFIELD(TAGame, Cannon_TA, Pitch, float);
