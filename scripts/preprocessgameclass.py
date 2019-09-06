@@ -31,10 +31,13 @@ def parseStruct(text):
     if ":" in structText:
         struct.parent = spl[4]
     for line in text[1:]:
+        if "//" in line:
+            line = line[:line.rfind("//")]
         line = line.strip()
         linesplit = line.split(' ')
         if line.startswith("FIELD") or len(line) < 2 or len(linesplit) < 2 or line.startswith("//") or line.startswith("virtual ~"):
             continue
+        
         typename = line[0:line.rfind(" ")]
         fieldname = line[line.rfind(" ") + 1:-1]
         struct.fields.append((typename, fieldname))
