@@ -342,7 +342,7 @@ namespace CPPRP
 
 			Serializer()
 			{
-#define fulln(namesp, classn, propname) xstr(namesp)"."xstr(classn)":"xstr(propname)
+#define fulln(namesp, classn, propname) xstr(namesp) "." xstr(classn) ":" xstr(propname)
 #define GAMEFIELD(namesp, classn, propname, nameoftype) \
 	RegisterSerializer(fulln(namesp, classn, propname), [](Writer& writer, std::shared_ptr<Engine::Actor>& struc) { writer.Key(fulln(namesp, classn, propname)); Serialize<Writer>(writer, std::static_pointer_cast<CPPRP::namesp::classn>(struc)->propname); })
 
