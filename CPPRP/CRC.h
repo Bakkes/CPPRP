@@ -148,7 +148,7 @@ namespace CPPRP
 		const uint8_t* __restrict currentData = (uint8_t*)(data.data() + startPosition);
 
 		// Align 8 bytes
-		uint32_t preProcessBytes = ((reinterpret_cast<std::uintptr_t>(currentData) + 7) & ~(7)) - reinterpret_cast<std::uintptr_t>(currentData);
+		uint32_t preProcessBytes = ((reinterpret_cast<std::uintptr_t>(currentData) + 3) & ~(3)) - reinterpret_cast<std::uintptr_t>(currentData);
 
 
 		if (length > preProcessBytes)
@@ -167,7 +167,7 @@ namespace CPPRP
 			constexpr size_t prefetchAhead = 256;
 			while (length >= bytesAtOnce)
 			{
-				PREFETCH(((const char*)processBy8) + prefetchAhead); //prefetch, haven't tested if this makes a big difference yet
+				PREFETCH(((const char*)processBy8) + prefetchAhead);
 				for (size_t unroll = 0; unroll < unrollSize; unroll++) //let compiler unroll this
 				{
 					uint32_t one = *processBy8++ ^ crc;
