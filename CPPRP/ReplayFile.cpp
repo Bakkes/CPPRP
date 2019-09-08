@@ -237,7 +237,7 @@ namespace CPPRP
 			/*const uint32_t headerCalculatedCRC = CalculateCRC(data,
 				static_cast<size_t>(bitReader.GetAbsoluteBytePosition()), 
 				static_cast<size_t>(headerSize), CRC_SEED);*/
-			const uint32_t headerCalculatedCRC2 = CalculateCRC_SB8(*reinterpret_cast<std::vector<uint8_t>*>(&data),
+			const uint32_t headerCalculatedCRC2 = CalculateCRC_SB16(*reinterpret_cast<std::vector<uint8_t>*>(&data),
 				static_cast<size_t>(bitReader.GetAbsoluteBytePosition()),
 				static_cast<size_t>(headerSize), CRC_SEED);
 			//std::cout << "headerCalculatedCRC==headerCalculatedCRC2" << (headerCalculatedCRC == headerCalculatedCRC2 ? "true" : "false") << "\n";
@@ -269,7 +269,7 @@ namespace CPPRP
 			static_cast<size_t>(bodySize), CRC_SEED);*/
 
 		//cast is ugly but works, fix later
-		const uint32_t bodyCalculatedCRC2 = CalculateCRC_SB8(*reinterpret_cast<std::vector<uint8_t>*>(&data),
+		const uint32_t bodyCalculatedCRC2 = CalculateCRC_SB16(*reinterpret_cast<std::vector<uint8_t>*>(&data),
 			static_cast<size_t>(bitReader.GetAbsoluteBytePosition()),
 			static_cast<size_t>(bodySize), CRC_SEED);
 		//std::cout << "headerCalculatedCRC==headerCalculatedCRC2" << (bodyCalculatedCRC == bodyCalculatedCRC2 ? "true" : "false") << "\n";
