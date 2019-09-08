@@ -207,6 +207,13 @@ namespace CPPRP
 		std::string value;
 	};
 
+	struct DebugString
+	{
+		uint32_t frame;
+		std::string key;
+		std::string value;
+	};
+
 	struct ReplayFileData
 	{
 		//All header props
@@ -222,6 +229,7 @@ namespace CPPRP
 		uint32_t netstream_size;
 		const char* netstream_data;
 
+		std::vector<DebugString> debugstrings;
 		std::vector<ReplayTick> replayticks;
 		std::vector<std::string> replicated_packages;
 		std::vector<std::string> objects;

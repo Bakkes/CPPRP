@@ -406,7 +406,7 @@ int main(int argc, char* argv[])
 		//std::cout << "File size: " << replayFile->data.size() << " bytes\n";
 	}
 	{
-		Timer crcTimer("CRC");
+		//Timer crcTimer("CRC");
 		int crc = op.GetIntValue({ "crc", "verify" }, 0);
 		if (crc < 0 || crc > CPPRP::CrcCheck::CRC_Both)
 		{

@@ -37,6 +37,62 @@ namespace CPPRP
 		return (bool)file.read(data.data(), size);
 	}
 
+	template<typename T>
+	T ReadHeaderStruct(std::shared_ptr<CPPBitReader<BitReaderType>>& bitReader)
+	{
+		return bitReader->read<T>();
+	}
+
+	template<>
+	KeyFrame ReadHeaderStruct(std::shared_ptr<CPPBitReader<BitReaderType>>& bitReader)
+	{
+		return KeyFrame {
+			bitReader->read<float>(),		//Time
+			bitReader->read<uint32_t>(),	//Frame
+			bitReader->read<uint32_t>()	//File position
+		};
+	}
+
+	template<>
+	DebugString ReadHeaderStruct(std::shared_ptr<CPPBitReader<BitReaderType>>& bitReader)
+	{
+		return DebugString {
+			bitReader->read<uint32_t>(),	//Time
+			bitReader->read<std::string>(),	//Frame
+			bitReader->read<std::string>()	//File position
+		};
+	}
+
+	template<>
+	ReplayTick ReadHeaderStruct(std::shared_ptr<CPPBitReader<BitReaderType>>& bitReader)
+	{
+		return ReplayTick {
+			bitReader->read<std::string>(),	//Type
+			bitReader->read<uint32_t>()		//Frame	
+		};
+	}
+	template<>
+	ClassIndex ReadHeaderStruct(std::shared_ptr<CPPBitReader<BitReaderType>>& bitReader)
+	{
+		return ClassIndex{
+			bitReader->read<std::string>(),	//Class_name
+			bitReader->read<uint32_t>()		//Index
+		};
+	}
+	
+
+	template<typename T>
+	void ReadVector(std::shared_ptr<CPPBitReader<BitReaderType>>& bitReader, std::vector<T>& inVec)
+	{
+		const uint32_t vectorCount = bitReader->read<uint32_t>();
+		if (vectorCount * sizeof(T) > bitReader->size) throw 0; //TODO: throw proper exception
+		inVec.resize(vectorCount);
+		for (uint32_t i = 0; i < vectorCount; ++i)
+		{
+			inVec[i] = ReadHeaderStruct<T>(bitReader);
+		}
+	}
+
 	void ReplayFile::DeserializeHeader()
 	{
 		const size_t dataSizeBits = data.size() * 8;
@@ -77,22 +133,8 @@ namespace CPPRP
 		replayFile->body_size = fullReplayBitReader->read<uint32_t>();
 		replayFile->crc2 = fullReplayBitReader->read<uint32_t>();
 
-		const uint32_t levelCount = fullReplayBitReader->read<uint32_t>();
-		for (uint32_t i = 0; i < levelCount; ++i)
-		{
-			replayFile->levels.push_back(fullReplayBitReader->read<std::string>());
-		}
-
-		const uint32_t keyframeCount = fullReplayBitReader->read<uint32_t>();
-		for (uint32_t i = 0; i < keyframeCount; ++i)
-		{
-			replayFile->keyframes.push_back(
-				{
-					fullReplayBitReader->read<float>(),		//Time
-					fullReplayBitReader->read<uint32_t>(),	//Frame
-					fullReplayBitReader->read<uint32_t>()	//File position
-				});
-		}
+		ReadVector(fullReplayBitReader, replayFile->levels);
+		ReadVector(fullReplayBitReader, replayFile->keyframes);
 
 		const uint32_t netstreamCount = static_cast<uint32_t>(fullReplayBitReader->read<int32_t>());
 		replayFile->netstream_data = data.data() + fullReplayBitReader->GetAbsoluteBytePosition(); //We know this is always aligned, so valid
@@ -107,62 +149,13 @@ namespace CPPRP
 			throw GeneralParseException(exceptionText, *fullReplayBitReader);
 		}
 
-		const int32_t debugStringSize = fullReplayBitReader->read<int32_t>();
-		for (int32_t i = 0; i < debugStringSize; ++i)
-		{
-			uint32_t frame = fullReplayBitReader->read<uint32_t>();
-			std::string key = fullReplayBitReader->read<std::string>();
-			std::string value = fullReplayBitReader->read<std::string>();
-			///printf("%s = %s", key.c_str(), value.c_str());
-		}
-
-		const uint32_t replayTickCount = fullReplayBitReader->read<uint32_t>();
-		for (uint32_t i = 0; i < replayTickCount; ++i)
-		{
-			replayFile->replayticks.push_back(
-				{
-					fullReplayBitReader->read<std::string>(),	//Type
-					fullReplayBitReader->read<uint32_t>()		//Frame
-				});
-		}
-
-
-		const uint32_t replicatedPackagesCount = fullReplayBitReader->read<uint32_t>();
-		for (uint32_t i = 0; i < replicatedPackagesCount; ++i)
-		{
-			replayFile->replicated_packages.push_back(
-				{
-					fullReplayBitReader->read<std::string>()
-				});
-		}
-
-		const uint32_t objectsCount = fullReplayBitReader->read<uint32_t>();
-		for (uint32_t i = 0; i < objectsCount; ++i)
-		{
-			replayFile->objects.push_back(
-				{
-					fullReplayBitReader->read<std::string>()
-				});
-		}
-
-		const uint32_t namesCount = fullReplayBitReader->read<uint32_t>();
-		for (uint32_t i = 0; i < namesCount; ++i)
-		{
-			replayFile->names.push_back(
-				{
-					fullReplayBitReader->read<std::string>()
-				});
-		}
-
-		const uint32_t classIndexCount = fullReplayBitReader->read<uint32_t>();
-		for (uint32_t i = 0; i < classIndexCount; ++i)
-		{
-			replayFile->class_indices.push_back(
-				{
-					fullReplayBitReader->read<std::string>(),	//Class_name
-					fullReplayBitReader->read<uint32_t>()		//Index
-				});
-		}
+		ReadVector(fullReplayBitReader, replayFile->debugstrings);
+		ReadVector(fullReplayBitReader, replayFile->replayticks);
+		ReadVector(fullReplayBitReader, replayFile->replicated_packages);
+		ReadVector(fullReplayBitReader, replayFile->objects);
+		ReadVector(fullReplayBitReader, replayFile->names);
+		ReadVector(fullReplayBitReader, replayFile->class_indices);
+		
 
 		const uint32_t classNetsCount = fullReplayBitReader->read<uint32_t>();
 		replayFile->classnets.resize(classNetsCount);
