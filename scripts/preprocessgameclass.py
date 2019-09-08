@@ -121,8 +121,8 @@ if __name__== "__main__":
     if printJson:
         json = io.StringIO()
         json.write("""
-#define xstr(a) str(a)
-#define str(a) #a		
+#define xstr(a) DEFINESTR(a)
+#define DEFINESTR(a) #a		
 
 #ifndef GAMECLASS
 #define GAMECLASS(...)
