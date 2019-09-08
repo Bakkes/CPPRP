@@ -348,7 +348,7 @@ namespace CPPRP
 		case Platform_Unknown:
 		{
 			uniqueId = std::make_shared<UnkownId>();
-			if (licenseeVersion >= 18 && netVersion == 0)
+			if (licenseeVersion > 18 && netVersion == 0)
 			{
 				std::static_pointer_cast<UnkownId>(uniqueId)->unknown = 0;
 			}

@@ -1,6 +1,6 @@
 
-#define xstr(a) str(a)
-#define str(a) #a		
+#define xstr(a) M_TOSTRING(a)
+#define M_TOSTRING(a) #a	
 
 #ifndef GAMECLASS
 #define GAMECLASS(...)

@@ -43,10 +43,11 @@ namespace CPPRP
 	class ReplayFile
 	{
 	private:
-		std::vector<char> data;
+		
 		std::shared_ptr<CPPBitReader<BitReaderType>> fullReplayBitReader;
 		std::map<std::string, std::shared_ptr<ClassNet>> classnetMap;
 	public:
+		std::vector<char> data;
 		std::filesystem::path path;
 		std::vector<Frame> frames;
 		std::unordered_map<int, ActorStateData> actorStates;
@@ -73,6 +74,7 @@ namespace CPPRP
 		void Parse(const uint32_t startPos = 0, int32_t endPos = -1, const uint32_t frameCount = 0);
 	
 		void PreprocessTables();
+		std::string GetParseLog(size_t amount);
 	protected:
 		void MergeDuplicates();
 		void FixParents();
@@ -84,6 +86,7 @@ namespace CPPRP
 		const uint16_t GetMaxPropertyId(const std::shared_ptr<ClassNet>& cn);
 		const uint16_t FindMaxPropertyId(const std::shared_ptr<ClassNet>& cn, uint16_t maxProp) const;
 
+		
 	public:
 		const bool HasProperty(const std::string& key) const;
 		const bool HasInitialPosition(const std::string& name) const;

@@ -52,8 +52,8 @@ namespace CPPRP
 	{
 		std::stringstream ss;
 		auto absPos = (bitReader.t_position * sizeof(T) * 8) + bitReader.bit_position;
-		ss << "T_POS=" << bitReader.t_position << ", BIT_POS=" << bitReader.bit_position << ", ABS=" << absPos << "/" << bitReader.size;
-		ss << ". Version(" << bitReader.engineVersion << ", " << bitReader.licenseeVersion << ", " << bitReader.netVersion << ")";
+		ss << "T_POS=" << std::to_string(bitReader.t_position) << ", BIT_POS=" << std::to_string(bitReader.bit_position) << ", ABS=" << absPos << "/" << bitReader.size;
+		ss << ". Version(" << std::to_string(bitReader.engineVersion) << ", " << std::to_string(bitReader.licenseeVersion) << ", " << std::to_string(bitReader.netVersion) << ")";
 		errorMsg = ss.str();
 	}
 

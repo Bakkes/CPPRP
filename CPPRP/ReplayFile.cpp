@@ -377,6 +377,17 @@ namespace CPPRP
 
 	}
 
+	std::string ReplayFile::GetParseLog(size_t size)
+	{
+		std::stringstream ss;
+		ss << "Parse log: ";
+		for (size_t i = std::max(std::size_t(0), parseLog.size() - size); i < parseLog.size(); i++)
+		{
+			ss <<"\n\t" + parseLog.at(i);
+		}
+		return ss.str();
+	}
+
 	void ReplayFile::Parse(const uint32_t startPos, int32_t endPos, const uint32_t frameCount)
 	{
 		/*
@@ -444,16 +455,6 @@ namespace CPPRP
 					|| (f.delta > 0 && f.delta < 1E-10))
 				{
 					std::string exceptionText = "Frame time incorrect (parser at wrong position)";
-					if (IncludeParseLog)
-					{
-						exceptionText += "Parse log: ";
-						for (int32_t i = std::max(0, (int32_t)parseLog.size() - 10); (size_t)i < parseLog.size(); i++)
-						{
-							exceptionText += "\n\t" + parseLog.at(i);
-						}
-
-					}
-
 					throw GeneralParseException(exceptionText, networkReader);
 				}
 				#endif
@@ -566,15 +567,6 @@ namespace CPPRP
 									//std::cout << "Property " << objName << " is undefined\n";
 
 									std::string exceptionText = "Property " + objName + " is undefined";
-									if(IncludeParseLog)
-									{
-										exceptionText += "Parse log: ";
-										for(int32_t i = std::max(0, (int32_t)parseLog.size() - 10); (size_t)i < parseLog.size(); i++)
-										{
-											exceptionText += "\n\t" + parseLog.at(i);
-										}
-										
-									}
 									throw GeneralParseException(exceptionText, networkReader);
 
 								}
@@ -627,13 +619,13 @@ namespace CPPRP
 	const bool ReplayFile::HasInitialPosition(const std::string & name) const
 	{
 		return !(name.compare("TAGame.CrowdActor_TA") == 0
-			|| name.compare("TAGame.CrowdManager_TA") == 0
 			|| name.compare("TAGame.VehiclePickup_Boost_TA") == 0
 			|| name.compare("TAGame.InMapScoreboard_TA") == 0
 			|| name.compare("TAGame.BreakOutActor_Platform_TA") == 0
 			|| name.compare("Engine.WorldInfo") == 0
 			|| name.compare("TAGame.HauntedBallTrapTrigger_TA") == 0
-			|| name.compare("Engine.KActor") == 0);
+			|| name.compare("Engine.KActor") == 0
+			|| name.compare("TAGame.CrowdManager_TA") == 0);
 	}
 
 	const bool ReplayFile::HasRotation(const std::string & name) const
