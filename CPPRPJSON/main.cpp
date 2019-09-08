@@ -402,8 +402,9 @@ int main(int argc, char* argv[])
 		std::cerr << "Cannot open file, it exists but cannot open? " << inputFile << "\n";
 		return 1;
 	}
-
-	
+	{
+		//std::cout << "File size: " << replayFile->data.size() << " bytes\n";
+	}
 	{
 		//Timer crcTimer("CRC");
 		int crc = op.GetIntValue({ "crc", "verify" }, 0);
@@ -419,6 +420,7 @@ int main(int argc, char* argv[])
 			return 1;
 		}
 	}
+	
 	//Timer t("Time including header deserialization");
 	try
 	{
