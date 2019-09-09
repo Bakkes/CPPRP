@@ -22,8 +22,8 @@ namespace CPPRP
 
 	static inline float uncompress_quat(uint32_t val)
 	{
-		const int MaxValue = (1 << QUAT_NUM_BITS) - 1;
-		float positiveRangedValue = val / (float)MaxValue;
+		constexpr float MaxValue = (float)(1 << QUAT_NUM_BITS) - 1;
+		float positiveRangedValue = val / MaxValue;
 		float rangedValue = (positiveRangedValue - 0.50f) * 2.0f;
 		return rangedValue * MAX_QUAT_VALUE;
 	}
@@ -138,11 +138,9 @@ namespace CPPRP
 		}
 
 		template<typename X>
-		const X get_bits_max(const X maxValue)
+		const X get_bits_max(const X maxValue, const uint8_t max_bits)
 		{
 			X result = 0;
-			
-			const uint8_t max_bits = msbDeBruijn32(maxValue);
 
 			result = read<X>(max_bits);
 
@@ -158,6 +156,12 @@ namespace CPPRP
 				}
 			}
 			return result;
+		}
+
+		template<typename X>
+		const X get_bits_max(const X maxValue)
+		{
+			return get_bits_max(maxValue, msbDeBruijn32(maxValue));
 		}
 	public:
 		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_);
@@ -205,8 +209,8 @@ namespace CPPRP
 	inline const float CPPBitReader<BitReaderType>::read<float>()
 	{
 		assert(sizeof(float) == sizeof(uint32_t));
-		uint32_t value = read<uint32_t>();
-		return reinterpret_cast<float&>(value);
+		const uint32_t value = read<uint32_t>();
+		return reinterpret_cast<const float&>(value);
 	}
 
 
@@ -215,16 +219,28 @@ namespace CPPRP
 	inline const Vector3I CPPBitReader<BitReaderType>::read<Vector3I>()
 	{
 		//PREFETCH((char*)(this->data));
-		const uint32_t maxbits = netVersion >= 7 ? 22 : 20;
-		const uint32_t num_bits = readBitsMax<uint32_t>(maxbits);
+		const uint32_t max_value = netVersion >= 7 ? 22 : 20;
+		const uint32_t num_bits = get_bits_max<uint32_t>(max_value, 4); //Saves a debruijn call since its 4 for both 22 and 20
 
 		const int32_t bias = 1 << (int)(num_bits + 1);
-		const int32_t max = (int)num_bits + 2;
+		const int64_t max = (int)num_bits + 2;
+		if(max >= 22) 
+		{
+			//happens in 3 out of 10000 replays, so we still need it i guess
+			const int32_t dx = read<int32_t>(max);
+			const int32_t dy = read<int32_t>(max);
+			const int32_t dz = read<int32_t>(max);
+			return { (dx - bias), (dy - bias), (dz - bias) };
+		}
 
-		//printf("Test %i\n", num_bits);
-		const int32_t dx = read<int32_t>(max);
-		const int32_t dy = read<int32_t>(max);
-		const int32_t dz = read<int32_t>(max);
+		// printf("Test %i\n", max);
+		const uint64_t test = read<uint64_t>(max*3);
+		const uint64_t rightShift = (64UL - max);
+
+		const int32_t dx = (test << rightShift) >> rightShift;//read<int32_t>(max);
+		const int32_t dy = (test << (64UL - max * 2UL)) >> rightShift;//read<int32_t>(max);
+		const int32_t dz = (test << (64UL - max * 3UL)) >> rightShift; //read<int32_t>(max);
+
 		return { (dx - bias), (dy - bias), (dz - bias) };
 	}
 
@@ -263,7 +279,7 @@ namespace CPPRP
 	template<>
 	inline const Quat CPPBitReader<BitReaderType>::read<Quat>()
 	{
-		uint8_t largest = read<uint8_t>(2);
+		const uint8_t largest = read<uint8_t>(2);
 		const float a = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
 		const float b = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
 		const float c = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
@@ -295,7 +311,7 @@ namespace CPPRP
 	{
 		std::shared_ptr<UniqueId> uniqueId;
 		
-		uint8_t platform = read<uint8_t>();
+		const uint8_t platform = read<uint8_t>();
 		switch (platform)
 		{
 		case Platform_Steam:
