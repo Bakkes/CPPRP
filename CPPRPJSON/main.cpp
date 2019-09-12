@@ -410,13 +410,13 @@ int main(int argc, char* argv[])
 		int crc = op.GetIntValue({ "crc", "verify" }, 0);
 		if (crc < 0 || crc > CPPRP::CrcCheck::CRC_Both)
 		{
-			std::cout << "Invalid value given for crc check (0 = no check, 1 = verify header, 2 = verify body, 3 = verify both)\n";
+			std::cerr << "Invalid value given for crc check (0 = no check, 1 = verify header, 2 = verify body, 3 = verify both)\n";
 			return 1;
 		}
 
 		if (crc != 0 && !replayFile->VerifyCRC((CPPRP::CrcCheck)crc))
 		{
-			std::cout << "CRC check failed! Replay file " << inputFile << " is probably corrupt or has been tampered with!";
+			std::cerr << "CRC check failed! Replay file " << inputFile << " is probably corrupt or has been tampered with!";
 			return 1;
 		}
 	}
