@@ -33,10 +33,11 @@ namespace CPPRP
 
 	struct LogoData
 	{
-		bool unknown;
+		bool swap_colors;
 		uint32_t logo_id;
 	};
 
+	
 	struct ActiveActor
 	{
 		bool active;
@@ -56,9 +57,16 @@ namespace CPPRP
 		uint8_t number;
 		std::shared_ptr<UniqueId> player_id;
 		std::string player_name;
-		uint8_t unknown2;
+		uint8_t status;
 	};
 
+	//	ReservationStatus_None = 0,
+	//	ReservationStatus_Reserved = 1,
+	//	ReservationStatus_Joining = 2,
+	//	ReservationStatus_InGame = 3,
+	//	ReservationStatus_MAX = 4
+
+	//Maybe its not version, but size instead? then fill array of size version
 	__ParserAttribute__(Consume, false)
 	struct ClientLoadout
 	{
@@ -97,8 +105,8 @@ namespace CPPRP
 
 	struct ReplicatedPickupData
 	{
-		bool unknown1;
-		int32_t actor_id;
+		bool unknown1; //some kind of flag?
+		int32_t actor_id; //instigator
 		bool picked_up;
 	};
 
@@ -355,6 +363,17 @@ namespace CPPRP
 	{
 		__ParserAttribute__(MaxBits, 500)
 		uint32_t tier;
+	};
+
+	//Probably not relevant for most, is only used for KActors in workshop replays
+	//__ParserAttribute__(Consume, false)
+	struct RigidBodyState 
+	{
+		Vector3 position;
+		Vector3 lin_vel;
+		Quat quaternion;            
+		Vector3 ang_vel;              
+		uint32_t flags;         
 	};
 }
 #include "GameClasses.h"

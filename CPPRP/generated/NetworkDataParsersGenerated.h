@@ -2,7 +2,7 @@ template<>
 inline const LogoData Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	LogoData item;
-	item.unknown = reader.read<bool>();
+	item.swap_colors = reader.read<bool>();
 	item.logo_id = reader.read<uint32_t>();
 	return item;
 }
@@ -298,6 +298,19 @@ inline const SkillTier Consume(CPPBitReader<BitReaderType>& reader)
 {
 	SkillTier item;
 	item.tier = reader.readBitsMax<uint32_t>(500);
+	return item;
+}
+
+
+template<>
+inline const RigidBodyState Consume(CPPBitReader<BitReaderType>& reader) 
+{
+	RigidBodyState item;
+	item.position = reader.read<Vector3>();
+	item.lin_vel = reader.read<Vector3>();
+	item.quaternion = reader.read<Quat>();
+	item.ang_vel = reader.read<Vector3>();
+	item.flags = reader.read<uint32_t>();
 	return item;
 }
 

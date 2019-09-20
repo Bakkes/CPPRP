@@ -5,10 +5,10 @@ namespace CPPRP
 {
 	static const std::vector<std::pair<std::string, std::vector<std::string>>> archetypeMap =
 	{
-		{{"TAGame.Car_TA"}, {"Archetypes.Car.Car_Default"}},
+		{{"TAGame.Car_TA"}, {"Archetypes.Car.Car_Default", "TAGame.Default__Car_TA"}},
 		{{"TAGame.Car_TA"}, {"Mutators.Mutators.Mutators.FreePlay:CarArchetype"}},
 		{{"TAGame.Ball_TA"}, { "Archetypes.Ball.Ball_Training"}},
-		{{"TAGame.Ball_TA"},  {"Archetypes.Ball.Ball_GameEditor", "Archetypes.Ball.Ball_Default", "Archetypes.Ball.Ball_Basketball", "Archetypes.Ball.Ball_BasketBall", "Archetypes.Ball.Ball_BasketBall_Mutator", "Archetypes.Ball.Ball_Puck", "Archetypes.Ball.CubeBall", "Archetypes.Ball.Ball_Beachball"}},
+		{{"TAGame.Ball_TA"},  {"Archetypes.Ball.Ball_GameEditor", "Archetypes.Ball.Ball_Default", "Archetypes.Ball.Ball_Basketball", "Archetypes.Ball.Ball_BasketBall", "Archetypes.Ball.Ball_BasketBall_Mutator", "Archetypes.Ball.Ball_Puck", "Archetypes.Ball.CubeBall", "Archetypes.Ball.Ball_Beachball", "Archetypes.Ball.Ball_Anniversary"}},
 		{{"TAGame.Ball_Breakout_TA"}, {"Archetypes.Ball.Ball_Breakout"}},
 		{{"TAGame.Ball_TA"},{"Archetypes.Ball.Ball_Trajectory"}},
 		{{"TAGame.CarComponent_Boost_TA"}, {"Archetypes.CarComponents.CarComponent_Boost"}},
@@ -48,6 +48,7 @@ namespace CPPRP
 		{{"TAGame.SpecialPickup_HauntedBallBeam_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_HauntedBallBeam"}},
 		{{"TAGame.SpecialPickup_Rugby_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Rugby"}},
 		{{"TAGame.Cannon_TA"},  {"Archetypes.Tutorial.Cannon"}},
+		{{"TAGame.GameEditor_Pawn_TA"}, {"Archetypes.GameEditor.GameEditor_Pawn_Default"} },
 		{{"ProjectX.NetModeReplicator_X"}, {"ProjectX.Default__NetModeReplicator_X"}}
 	};
 }

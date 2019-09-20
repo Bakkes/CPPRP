@@ -39,6 +39,7 @@ namespace CPPRP
 			ActiveActor Instigator;
 			Vector3I RelativeLocation;
 			Rotator RelativeRotation;
+			bool bRootMotionFromInterpCurve;
 		};
 
 		struct Info : public Actor
@@ -122,11 +123,32 @@ namespace CPPRP
 			//MusicTrackStruct ReplicatedMusicTrack; 
 		};
 
+
+		struct ADynamicSMActor : public Actor
+		{
+
+			//class UStaticMesh* ReplicatedMesh;                                   		// 0x01F0 (0x0004) [0x0000000000002020]              ( CPF_Net | CPF_Transient )
+			//class UMaterialInterface* ReplicatedMaterial0;                              		// 0x01F4 (0x0004) [0x0000000000000020]              ( CPF_Net )
+			//class UMaterialInterface* ReplicatedMaterial1;                              		// 0x01F8 (0x0004) [0x0000000000000020]              ( CPF_Net )
+			//class UMaterialInterface* ReplicatedMaterial2;                              		// 0x01FC (0x0004) [0x0000000000000020]              ( CPF_Net )
+			//class UMaterialInterface* ReplicatedMaterial3;                              		// 0x0200 (0x0004) [0x0000000000000020]              ( CPF_Net )
+
+			ObjectTarget ReplicatedMesh;                                   		// 0x01F0 (0x0004) [0x0000000000002020]              ( CPF_Net | CPF_Transient )
+			ObjectTarget ReplicatedMaterial0;                              		// 0x01F4 (0x0004) [0x0000000000000020]              ( CPF_Net )
+			ObjectTarget ReplicatedMaterial1;                              		// 0x01F8 (0x0004) [0x0000000000000020]              ( CPF_Net )
+			ObjectTarget ReplicatedMaterial2;                              		// 0x01FC (0x0004) [0x0000000000000020]              ( CPF_Net )
+			ObjectTarget ReplicatedMaterial3;                              		// 0x0200 (0x0004) [0x0000000000000020]              ( CPF_Net )
+			bool bForceStaticDecals;                           		// 0x0204 (0x0004) [0x0000000000000020] [0x00000001] ( CPF_Net )
+			Vector3 ReplicatedMeshTranslation;                        		// 0x0208 (0x000C) [0x0000000000000020]              ( CPF_Net )
+			Rotator ReplicatedMeshRotation;                           		// 0x0214 (0x000C) [0x0000000000000020]              ( CPF_Net )
+			Vector3 ReplicatedMeshScale3D;                            		// 0x0220 (0x000C) [0x0000000000000020]              ( CPF_Net )
+		};
+
 		//Currently only used in workshop map replays
-		struct KActor : public Actor
+		struct KActor : public ADynamicSMActor
 		{
 			bool bWakeOnLevelStart;
-			ReplicatedRBState RBState;
+			RigidBodyState RBState;
 			Vector3 ReplicatedDrawScale3D;
 		};
 	};
@@ -233,6 +255,7 @@ namespace CPPRP
 			ActiveActor ReplacingBotPRI;
 			//PlayerReplicatedEventInfo_TA               PREI
 		};
+
 
 		struct RBActor_TA : public ProjectX::Pawn_X
 		{
@@ -520,7 +543,7 @@ namespace CPPRP
 			uint32_t ReplicatedGameStateTimeRemaining;
 			uint32_t ReplicatedStateName;
 			struct ObjectTarget MatchTypeClass;
-			uint32_t BotSkill; //Should actually be a float
+			float BotSkill; 
 			bool bHasLeaveMatchPenalty;
 			bool bCanVoteToForfeit;
 			bool bAllowReadyUp;
@@ -587,6 +610,11 @@ namespace CPPRP
 		};
 
 		struct GameEvent_GameEditor_TA : public GameEvent_Soccar_TA
+		{
+
+		};
+
+		struct GameEditor_Pawn_TA : public ProjectX::Pawn_X
 		{
 
 		};

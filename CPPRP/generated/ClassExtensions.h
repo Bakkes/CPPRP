@@ -12,7 +12,8 @@ namespace CPPRP {
 		, {"Engine.PlayerReplicationInfo","Engine.ReplicationInfo"}
 		, {"Engine.TeamInfo","Engine.ReplicationInfo"}
 		, {"Engine.WorldInfo","Engine.Info"}
-		, {"Engine.KActor","Engine.Actor"}
+		, {"Engine.ADynamicSMActor","Engine.Actor"}
+		, {"Engine.KActor","Engine.ADynamicSMActor"}
 		, {"ProjectX.GRI_X","Engine.GameReplicationInfo"}
 		, {"ProjectX.NetModeReplicator_X","Engine.ReplicationInfo"}
 		, {"ProjectX.Pawn_X","Engine.Pawn"}
@@ -66,6 +67,7 @@ namespace CPPRP {
 		, {"TAGame.GameEvent_SoccarSplitscreen_TA","TAGame.GameEvent_SoccarPrivate_TA"}
 		, {"TAGame.GameEvent_Tutorial_TA","TAGame.GameEvent_Soccar_TA"}
 		, {"TAGame.GameEvent_GameEditor_TA","TAGame.GameEvent_Soccar_TA"}
+		, {"TAGame.GameEditor_Pawn_TA","ProjectX.Pawn_X"}
 		, {"TAGame.GameEvent_TrainingEditor_TA","TAGame.GameEvent_GameEditor_TA"}
 		, {"TAGame.HauntedBallTrapTrigger_TA","Engine.Actor"}
 		, {"TAGame.Cannon_TA","Engine.Actor"}

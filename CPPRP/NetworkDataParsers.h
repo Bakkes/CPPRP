@@ -244,12 +244,12 @@ namespace CPPRP
 
 		if (reader.engineVersion >= 868 && reader.licenseeVersion >= 12)
 		{
-			item.unknown2 = reader.read<uint8_t>();
+			item.status = reader.read<uint8_t>();
 
 		}
 		else
 		{
-			item.unknown2 = reader.read<uint8_t>(2);
+			item.status = reader.read<uint8_t>(2);
 		}
 
 		return item;
