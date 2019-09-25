@@ -68,7 +68,7 @@ namespace CPPRP
 
 	private:
 		template<typename X>
-		const X get_bits(uint16_t n)
+		inline const X get_bits(uint16_t n)
 		{
 			#ifndef PARSE_UNSAFE
 			if (GetAbsoluteBitPosition() + n > size)
@@ -138,7 +138,7 @@ namespace CPPRP
 		}
 
 		template<typename X>
-		const X get_bits_max(const X maxValue, const uint8_t max_bits)
+		inline const X get_bits_max(const X maxValue, const uint8_t max_bits)
 		{
 			X result = 0;
 
@@ -159,7 +159,7 @@ namespace CPPRP
 		}
 
 		template<typename X>
-		const X get_bits_max(const X maxValue)
+		inline const X get_bits_max(const X maxValue)
 		{
 			return get_bits_max(maxValue, msbDeBruijn32(maxValue));
 		}
@@ -222,25 +222,24 @@ namespace CPPRP
 		const uint32_t max_value = netVersion >= 7 ? 22 : 20;
 		const uint32_t num_bits = get_bits_max<uint32_t>(max_value, 4); //Saves a debruijn call since its 4 for both 22 and 20
 
-		const int32_t bias = 1 << (int)(num_bits + 1);
-		const int64_t max = (int)num_bits + 2;
-		if(max >= 22) 
+		const int32_t bias = 1 << (int32_t)(num_bits + 1);
+		const int64_t max = (int64_t)num_bits + 2;
+		if (max < 22) //if it fits in 64 bits, read it all at once (3*21 < 64)
 		{
-			//happens in 3 out of 10000 replays, so we still need it i guess
-			const int32_t dx = read<int32_t>(max);
-			const int32_t dy = read<int32_t>(max);
-			const int32_t dz = read<int32_t>(max);
+			const uint64_t test = read<uint64_t>(max * 3);
+			const uint64_t rightShift = (64UL - max);
+
+			const int32_t dx = (test << rightShift) >> rightShift;
+			const int32_t dy = (test << (64UL - max * 2UL)) >> rightShift;
+			const int32_t dz = (test << (64UL - max * 3UL)) >> rightShift;
+
 			return { (dx - bias), (dy - bias), (dz - bias) };
 		}
 
-		// printf("Test %i\n", max);
-		const uint64_t test = read<uint64_t>(max*3);
-		const uint64_t rightShift = (64UL - max);
-
-		const int32_t dx = (test << rightShift) >> rightShift;//read<int32_t>(max);
-		const int32_t dy = (test << (64UL - max * 2UL)) >> rightShift;//read<int32_t>(max);
-		const int32_t dz = (test << (64UL - max * 3UL)) >> rightShift; //read<int32_t>(max);
-
+		//happens in 3 out of 10000 replays, so we still need it i guess
+		const int32_t dx = read<int32_t>(max);
+		const int32_t dy = read<int32_t>(max);
+		const int32_t dz = read<int32_t>(max);
 		return { (dx - bias), (dy - bias), (dz - bias) };
 	}
 
@@ -276,40 +275,33 @@ namespace CPPRP
 		}
 		return ret;
 	}
-#include <immintrin.h>
+
+
+#ifdef USESIMD
+
+	#include <immintrin.h>
 	template<>
 	template<>
 	inline const Quat CPPBitReader<BitReaderType>::read<Quat>()
 	{
-		//uint8_t largest = read<uint8_t>(2);
-		//const float a = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
-		//const float b = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
-		//const float c = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
-		//const float extra = std::sqrt(1.f - (a*a) - (b*b) - (c * c));
-
 		constexpr uint16_t BitsReadForQuat = 2 + (3 * QUAT_NUM_BITS);
 		const uint64_t readQuat = read<uint64_t>(BitsReadForQuat);
 		const uint8_t largest = readQuat & 0b11; //Read 2 lsb
 		
 		constexpr uint64_t QuatMask = (1 << QUAT_NUM_BITS) - 1; //(2^QUAT_NUM_BITS) - 1
-		//constexpr float MaxValue = (1 << QUAT_NUM_BITS) - 1;
 		
-
 		const __m128 first = _mm_set_ps(0, (readQuat & (QuatMask << 2ULL)) >> 2ULL, (readQuat & (QuatMask << 20ULL)) >> 20ULL, (readQuat & (QuatMask << 38ULL)) >> 38ULL);
 		const __m128 second = _mm_set_ps(QuatMask, QuatMask, QuatMask, QuatMask);
 		const __m128 minus = _mm_set_ps(0.5f, 0.5f, 0.5f, 0.5f);
 
 		constexpr float TwoTimesMaxQuat = 2.f * MAX_QUAT_VALUE;
 		const __m128 timestwo = _mm_set_ps(TwoTimesMaxQuat, TwoTimesMaxQuat, TwoTimesMaxQuat, TwoTimesMaxQuat);
-		//const __m128 maxQuatVal = _mm_set_ps(MAX_QUAT_VALUE, MAX_QUAT_VALUE, MAX_QUAT_VALUE, MAX_QUAT_VALUE);
 		const __m128 divd = _mm_div_ps(first, second);
 
 		const __m128 mind = _mm_sub_ps(divd, minus);
 		const __m128 result = _mm_mul_ps(mind, timestwo);
-		//const __m128 result = _mm_mul_ps(timsed, maxQuatVal);
 		const float* res = (float*)&result;
 		const float extra = std::sqrt(1.f - (res[0] * res[0]) - (res[1] * res[1]) - (res[2] * res[2]));
-		/*int* values = (int*)& result;*/
 
 		Quat q = { 0 };
 		switch (largest)
@@ -330,6 +322,37 @@ namespace CPPRP
 		};
 		return q;
 	}
+#else
+	template<>
+	template<>
+	inline const Quat CPPBitReader<BitReaderType>::read<Quat>()
+	{
+		const uint8_t largest = read<uint8_t>(2);
+		const float a = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
+		const float b = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
+		const float c = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
+		const float extra = std::sqrt(1.f - (a * a) - (b * b) - (c * c));
+
+		Quat q = { 0 };
+		switch (largest)
+		{
+		case 0:
+			q = { extra, a, b, c };
+			break;
+		case 1:
+			q = { a, extra, b, c };
+			break;
+		case 2:
+			q = { a, b, extra, c };
+			break;
+		case 3:
+		default:
+			q = { a, b, c, extra };
+			break;
+		};
+		return q;
+	}
+#endif
 
 	template<>
 	template<>
