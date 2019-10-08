@@ -373,15 +373,38 @@ namespace CPPRP
 			std::static_pointer_cast<XBoxID>(uniqueId)->xboxID = read<uint64_t>(sizeof(uint64_t) * 8);
 			break;
 		case Platform_PS4:
+
+			//uniqueId = std::make_shared<PS4ID>();
+			//if (netVersion >= 1)
+			//{
+			//	std::static_pointer_cast<PS4ID>(uniqueId)->psId = read<uint64_t>(40 * 8);
+			//}
+			//else
+			//{
+			//	std::static_pointer_cast<PS4ID>(uniqueId)->psId = read<uint64_t>(32 * 8);
+			//}
+			//break;
 			uniqueId = std::make_shared<PS4ID>();
+			
+			#define PSY4_MAX_NAME_LENGTH 16
+			char playerNameTemp[PSY4_MAX_NAME_LENGTH];
+			for (uint32_t i = 0; i < PSY4_MAX_NAME_LENGTH; ++i)
+			{
+				playerNameTemp[i] = read<char>();
+				//if (playerNameTemp[i] == '\0')
+				//{
+				//	//skip(PSY4_MAX_NAME_LENGTH - i);
+				//	break;
+				//}
+			}
+
+			std::static_pointer_cast<PS4ID>(uniqueId)->playerName = std::string(playerNameTemp);
+			std::static_pointer_cast<PS4ID>(uniqueId)->unknown1 = read<uint64_t>();
 			if (netVersion >= 1)
 			{
-				std::static_pointer_cast<PS4ID>(uniqueId)->psId = read<uint64_t>(40 * 8);
+				std::static_pointer_cast<PS4ID>(uniqueId)->unknown2 = read<uint64_t>();
 			}
-			else
-			{
-				std::static_pointer_cast<PS4ID>(uniqueId)->psId = read<uint64_t>(32 * 8);
-			}
+			std::static_pointer_cast<PS4ID>(uniqueId)->psId = read<uint64_t>();
 			break;
 		case Platform_Switch:
 		{
