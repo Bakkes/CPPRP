@@ -307,6 +307,15 @@ namespace CPPRP
 			else if (std::shared_ptr<CPPRP::PS4ID> ps4Id = std::dynamic_pointer_cast<CPPRP::PS4ID>(item); ps4Id)
 			{
 				Serialize<Writer>(writer, ps4Id->psId);
+
+				writer.Key("PlayerName");
+				Serialize<Writer>(writer, ps4Id->playerName);
+
+				writer.Key("Unknown1");
+				Serialize<Writer>(writer, ps4Id->unknown1);
+
+				writer.Key("Unknown2");
+				Serialize<Writer>(writer, ps4Id->unknown2);
 			}
 			else if (std::shared_ptr<CPPRP::PsyNetID> psynetId = std::dynamic_pointer_cast<CPPRP::PsyNetID>(item); psynetId)
 			{
