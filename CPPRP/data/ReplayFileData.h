@@ -112,6 +112,9 @@ namespace CPPRP
 
 	struct PS4ID : public UniqueId
 	{
+		std::string playerName{ "" };
+		uint64_t unknown1{ 0 };
+		uint64_t unknown2{ 0 };
 		uint64_t psId{ 0 };
 	};
 

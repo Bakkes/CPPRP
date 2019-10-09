@@ -11,10 +11,20 @@
 
 namespace CPPRP
 {
+	
+	
+
 	constexpr bool IncludeParseLog = false;
+	constexpr uint32_t ParseLogSize = 100;
+
 	ReplayFile::ReplayFile(std::filesystem::path path_) : path(path_)
 	{
+		
+	}
 
+	ReplayFile::ReplayFile(std::vector<char>& fileData)
+	{
+		this->data = fileData;
 	}
 
 
@@ -374,7 +384,7 @@ namespace CPPRP
 	{
 		std::stringstream ss;
 		ss << "Parse log: ";
-		for (size_t i = std::max(std::size_t(0), parseLog.size() - size); i < parseLog.size(); i++)
+		for (size_t i = size > parseLog.size() ? parseLog.size() - size : size; i < parseLog.size(); i++)
 		{
 			ss <<"\n\t" + parseLog.at(i);
 		}
@@ -447,7 +457,7 @@ namespace CPPRP
 					|| (f.time > 0 && f.time < 1E-10)
 					|| (f.delta > 0 && f.delta < 1E-10))
 				{
-					std::string exceptionText = "Frame time incorrect (parser at wrong position)";
+					std::string exceptionText = "Frame time incorrect (parser at wrong position)\n" + GetParseLog(ParseLogSize);
 					throw GeneralParseException(exceptionText, networkReader);
 				}
 				#endif
@@ -552,14 +562,18 @@ namespace CPPRP
 								}
 								updatedProperties.push_back(propertyIndex);
 								const auto& funcPtr = parseFunctions[propertyIndex];
-								
+								/*if (b)
+								{
+									printf("Calling parser for %s (%i, %i, %s)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.nameId >= namesSize ? "unknown" : replayFile->names[actorState.nameId].c_str());
+								}*/
+
 								#ifndef PARSE_UNSAFE
 								if(funcPtr == nullptr)
 								{
 									const std::string& objName = replayFile->objects[propertyIndex];
 									//std::cout << "Property " << objName << " is undefined\n";
 
-									std::string exceptionText = "Property " + objName + " is undefined";
+									std::string exceptionText = "Property " + objName + " is undefined\n" + GetParseLog(ParseLogSize);
 									throw GeneralParseException(exceptionText, networkReader);
 
 								}

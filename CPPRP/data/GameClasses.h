@@ -74,6 +74,24 @@ namespace CPPRP
 			struct ActiveActor PlayerReplicationInfo;
 			uint32_t HealthMax;
 			bool bIsCrouched;
+
+			//Controller Controller;
+			bool bIsWalking;
+			bool bSimulateGravity;
+			bool bCanSwatTurn;
+			bool bUsedByMatinee;
+			bool bRootMotionFromInterpCurve;
+			bool bFastAttachedMove;
+			uint8_t RemoteViewPitch;
+
+			float GroundSpeed;
+			float AirSpeed;
+			float AccelRate;
+			float JumpZ;
+			float AirControl;
+			float RootMotionInterpRate;
+			float RootMotionInterpCurrentTime;
+			Vector3I RootMotionInterpCurveLastValue;
 		};
 
 
@@ -174,25 +192,7 @@ namespace CPPRP
 
 		struct Pawn_X : public Engine::Pawn
 		{
-			//Controller Controller;
-			bool bIsWalking;
-			bool bIsCrouched;
-			bool bSimulateGravity;
-			bool bCanSwatTurn;
-			bool bUsedByMatinee;
-			bool bRootMotionFromInterpCurve;
-			bool bFastAttachedMove;
-			uint8_t RemoteViewPitch;
-
-			float GroundSpeed;
-			float AirSpeed;
-			float AccelRate;
-			float JumpZ;
-			float AirControl;
-			ActiveActor PlayerReplicationInfo; //Engine::PlayerReplicationInfo
-			float RootMotionInterpRate;
-			float RootMotionInterpCurrentTime;
-			Vector3I RootMotionInterpCurveLastValue;
+			
 		};
 
 		struct PRI_X : public Engine::PlayerReplicationInfo

@@ -66,6 +66,7 @@ namespace CPPRP
 		std::unordered_map<std::string, uint32_t> objectToId;
 	public:
 		ReplayFile(std::filesystem::path path_);
+		ReplayFile(std::vector<char>& fileData);
 		~ReplayFile();
 
 		const bool Load();
