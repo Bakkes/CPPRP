@@ -238,10 +238,10 @@ inline const ReplicatedExplosionDataExtended Consume(CPPBitReader<BitReaderType>
 {
 	ReplicatedExplosionDataExtended item;
 	item.unknown1 = reader.read<bool>();
-	item.actor_id = reader.read<uint32_t>();
+	item.actor_id = reader.read<int32_t>();
 	item.position = reader.read<Vector3>();
 	item.unknown3 = reader.read<bool>();
-	item.unknown4 = reader.read<uint32_t>();
+	item.secondary_actor_id = reader.read<int32_t>();
 	return item;
 }
 

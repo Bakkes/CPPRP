@@ -320,10 +320,10 @@ namespace CPPRP
 	struct ReplicatedExplosionDataExtended
 	{
 		bool unknown1;
-		uint32_t actor_id;
+		int32_t actor_id;
 		Vector3 position;
 		bool unknown3;
-		uint32_t unknown4;
+		int32_t secondary_actor_id;
 	};
 
 	struct ReplicatedTitle
