@@ -20,8 +20,8 @@ template<typename Writer>
 inline const void Serialize(Writer& writer, const LogoData& item)
 {
 	writer.StartObject();
-	writer.Key("unknown");
-	Serialize(writer, item.unknown);
+	writer.Key("swap_colors");
+	Serialize(writer, item.swap_colors);
 	writer.Key("logo_id");
 	Serialize(writer, item.logo_id);
 	writer.EndObject();
@@ -62,8 +62,8 @@ inline const void Serialize(Writer& writer, const Reservation& item)
 	Serialize(writer, item.player_id);
 	writer.Key("player_name");
 	Serialize(writer, item.player_name);
-	writer.Key("unknown2");
-	Serialize(writer, item.unknown2);
+	writer.Key("status");
+	Serialize(writer, item.status);
 	writer.EndObject();
 }
 
@@ -134,6 +134,20 @@ inline const void Serialize(Writer& writer, const CameraSettings& item)
 
 template<typename Writer>
 inline const void Serialize(Writer& writer, const ReplicatedPickupData& item)
+{
+	writer.StartObject();
+	writer.Key("unknown1");
+	Serialize(writer, item.unknown1);
+	writer.Key("actor_id");
+	Serialize(writer, item.actor_id);
+	writer.Key("picked_up");
+	Serialize(writer, item.picked_up);
+	writer.EndObject();
+}
+
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const ReplicatedPickupData2& item)
 {
 	writer.StartObject();
 	writer.Key("unknown1");
@@ -496,8 +510,8 @@ inline const void Serialize(Writer& writer, const ReplicatedExplosionDataExtende
 	Serialize(writer, item.position);
 	writer.Key("unknown3");
 	Serialize(writer, item.unknown3);
-	writer.Key("unknown4");
-	Serialize(writer, item.unknown4);
+	writer.Key("secondary_actor_id");
+	Serialize(writer, item.secondary_actor_id);
 	writer.EndObject();
 }
 
@@ -570,6 +584,24 @@ inline const void Serialize(Writer& writer, const SkillTier& item)
 	writer.StartObject();
 	writer.Key("tier");
 	Serialize(writer, item.tier);
+	writer.EndObject();
+}
+
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const RigidBodyState& item)
+{
+	writer.StartObject();
+	writer.Key("position");
+	Serialize(writer, item.position);
+	writer.Key("lin_vel");
+	Serialize(writer, item.lin_vel);
+	writer.Key("quaternion");
+	Serialize(writer, item.quaternion);
+	writer.Key("ang_vel");
+	Serialize(writer, item.ang_vel);
+	writer.Key("flags");
+	Serialize(writer, item.flags);
 	writer.EndObject();
 }
 

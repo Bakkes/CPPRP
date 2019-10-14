@@ -60,6 +60,17 @@ inline const ReplicatedPickupData Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
+inline const ReplicatedPickupData2 Consume(CPPBitReader<BitReaderType>& reader) 
+{
+	ReplicatedPickupData2 item;
+	item.unknown1 = reader.read<bool>();
+	item.actor_id = reader.read<int32_t>();
+	item.picked_up = reader.read<uint8_t>();
+	return item;
+}
+
+
+template<>
 inline const TeamPaint Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	TeamPaint item;

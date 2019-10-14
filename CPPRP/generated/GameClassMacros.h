@@ -283,6 +283,7 @@ GAMEFIELD(TAGame, Ball_Breakout_TA, LastTeamTouch, unsigned char);
 GAMECLASS(TAGame, VehiclePickup_TA);
 GAMEFIELD(TAGame, VehiclePickup_TA, bNoPickup, bool);
 GAMEFIELD(TAGame, VehiclePickup_TA, ReplicatedPickupData, struct ReplicatedPickupData);
+GAMEFIELD(TAGame, VehiclePickup_TA, NewReplicatedPickupData, struct ReplicatedPickupData2);
 GAMECLASS(TAGame, VehiclePickup_Boost_TA);
 GAMECLASS(TAGame, Ball_Haunted_TA);
 GAMEFIELD(TAGame, Ball_Haunted_TA, DeactivatedGoalIndex, unsigned char);

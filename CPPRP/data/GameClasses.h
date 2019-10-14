@@ -519,6 +519,7 @@ namespace CPPRP
 		{
 			bool bNoPickup;
 			struct ReplicatedPickupData ReplicatedPickupData;
+			struct ReplicatedPickupData2 NewReplicatedPickupData;
 		};
 
 		struct VehiclePickup_Boost_TA : public VehiclePickup_TA

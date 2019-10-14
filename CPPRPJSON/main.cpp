@@ -213,10 +213,10 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 				std::string name = replayFile->replayFile->names.at(created.nameId);
 				std::string className = replayFile->replayFile->objects.at(created.classNameId);
 				writer.String("Name");
-				writer.String(name.c_str());
+				writer.String(name);
 
 				writer.String("ClassName");
-				writer.String(className.c_str());
+				writer.String(className);
 				bool hasInitialPosition = replayFile->HasInitialPosition(className);
 				writer.String("HasInitialPosition");
 				writer.Bool(hasInitialPosition);

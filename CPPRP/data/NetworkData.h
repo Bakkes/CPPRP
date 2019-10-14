@@ -110,6 +110,13 @@ namespace CPPRP
 		bool picked_up;
 	};
 
+	struct ReplicatedPickupData2
+	{
+		bool unknown1;
+		int32_t actor_id; //instigator
+		uint8_t picked_up;
+	};
+
 	struct TeamPaint
 	{
 		uint8_t team_number;
