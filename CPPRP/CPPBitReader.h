@@ -223,15 +223,15 @@ namespace CPPRP
 		const uint32_t num_bits = get_bits_max<uint32_t>(max_value, 4); //Saves a debruijn call since its 4 for both 22 and 20
 
 		const int32_t bias = 1 << (int32_t)(num_bits + 1);
-		const int64_t max = (int64_t)num_bits + 2;
+		const int16_t max = (int16_t)num_bits + 2;
 		if (max < 22) //if it fits in 64 bits, read it all at once (3*21 < 64)
 		{
 			const uint64_t test = read<uint64_t>(max * 3);
-			const uint64_t rightShift = (64UL - max);
+			const uint64_t rightShift = static_cast<uint64_t>(64 - max);
 
-			const int32_t dx = (test << rightShift) >> rightShift;
-			const int32_t dy = (test << (64UL - max * 2UL)) >> rightShift;
-			const int32_t dz = (test << (64UL - max * 3UL)) >> rightShift;
+			const int32_t dx = static_cast<int32_t>((test << rightShift) >> rightShift);
+			const int32_t dy = static_cast<int32_t>((test << (64UL - max * 2UL)) >> rightShift);
+			const int32_t dz = static_cast<int32_t>((test << (64UL - max * 3UL)) >> rightShift);
 
 			return { (dx - bias), (dy - bias), (dz - bias) };
 		}

@@ -35,6 +35,7 @@ namespace CPPRP
 	};
 
 	typedef std::function<void(const Frame, const std::unordered_map<int, ActorStateData>&)> tickable;
+	typedef std::function<void(const Frame)> onNewFrame;
 	typedef std::function<void(const ActorStateData&)> actorCreated;
 	typedef std::function<void(const ActorStateData&, const std::vector<uint32_t>&)> actorUpdated;
 	typedef std::function<void(const ActorStateData&)> actorDeleted;
@@ -59,6 +60,7 @@ namespace CPPRP
 
 	public:
 		std::vector<tickable> tickables;
+		std::vector<onNewFrame> newFrameCallbacks;
 		std::vector<actorCreated> createdCallbacks;
 		std::vector<actorUpdated> updatedCallbacks;
 		std::vector<actorDeleted> actorDeleteCallbacks;

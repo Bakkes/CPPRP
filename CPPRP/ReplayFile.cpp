@@ -462,6 +462,11 @@ namespace CPPRP
 				}
 				#endif
 
+				for (const auto& newFrame : newFrameCallbacks)
+				{
+					newFrame(f);
+				}
+
 				//While there are actors in buffer (this frame)
 				while (networkReader.read<bool>())
 				{
