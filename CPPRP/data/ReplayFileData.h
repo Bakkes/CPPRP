@@ -102,6 +102,11 @@ namespace CPPRP
 		uint64_t xboxID{ 0 };
 	};
 
+	struct QQID : public UniqueId
+	{
+		uint64_t qqID{ 0 };
+	};
+
 	struct SwitchID : public UniqueId
 	{
 		uint64_t a{ 0 };

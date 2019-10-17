@@ -372,6 +372,10 @@ namespace CPPRP
 			uniqueId = std::make_shared<XBoxID>();
 			std::static_pointer_cast<XBoxID>(uniqueId)->xboxID = read<uint64_t>(sizeof(uint64_t) * 8);
 			break;
+		case Platform_QQ:
+			uniqueId = std::make_shared<QQID>();
+			std::static_pointer_cast<QQID>(uniqueId)->qqID = read<uint64_t>(sizeof(uint64_t) * 8);
+			break;
 		case Platform_PS4:
 
 			//uniqueId = std::make_shared<PS4ID>();

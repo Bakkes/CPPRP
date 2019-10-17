@@ -326,6 +326,10 @@ namespace CPPRP
 				Serialize<Writer>(writer, psynetId->d);
 				writer.EndArray();
 			}
+			else if (std::shared_ptr<CPPRP::QQID> qqId = std::dynamic_pointer_cast<CPPRP::QQID>(item); qqId)
+			{
+				Serialize<Writer>(writer, qqId->qqID);
+			}
 			else
 			{
 				Serialize<Writer>(writer, 1337);
