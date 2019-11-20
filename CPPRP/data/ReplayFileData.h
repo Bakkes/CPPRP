@@ -16,7 +16,9 @@ namespace CPPRP
 {
 	struct Vector3
 	{
-		float x{ 0 }, y{ 0 }, z{ 0 };
+		float x{ 0 };
+		float y{ 0 };
+		float z{ 0 };
 
 		std::string ToString() const
 		{
@@ -26,7 +28,9 @@ namespace CPPRP
 
 	struct Vector3I
 	{
-		int x{ 0 }, y{ 0 }, z{ 0 };
+		int x{ 0 };
+		int y{ 0 };
+		int z{ 0 };
 
 		explicit operator Vector3() const
 		{
@@ -46,7 +50,9 @@ namespace CPPRP
 
 	struct Rotator
 	{
-		int pitch{ 0 }, yaw{ 0 }, roll{ 0 };
+		int pitch{ 0 };
+		int yaw{ 0 };
+		int roll{ 0 };
 
 		std::string ToString() const
 		{
@@ -56,7 +62,10 @@ namespace CPPRP
 
 	struct Quat
 	{
-		float  x{ 0 }, y{ 0 }, z{ 0 }, w{ 0 };
+		float x{ 0 };
+		float y{ 0 };
+		float z{ 0 };
+		float w{ 0 };
 
 		std::string ToString() const
 		{
