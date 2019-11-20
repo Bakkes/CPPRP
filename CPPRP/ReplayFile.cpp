@@ -315,7 +315,19 @@ namespace CPPRP
 		{
 			const uint32_t index = replayFile->classnets.at(i)->index;
 			const std::string objectName = replayFile->objects.at(index);
-			classnetMap[objectName] = replayFile->classnets.at(i);
+			if (classnetMap.find(objectName) != classnetMap.end())
+			{
+				auto newClassnet = replayFile->classnets.at(i);
+				auto originalClassnet = classnetMap[objectName];
+				//Kind of a cheap hack, just insert map with higher ID properties to start of array so we don't have to find and replace existing ones
+				//This way the property index cacher will find these newer properties before the old ones thus making the old ones obsolete
+				originalClassnet->prop_indexes.insert(originalClassnet->prop_indexes.begin(), newClassnet->prop_indexes.begin(), newClassnet->prop_indexes.end());
+				
+			}
+			else
+			{
+				classnetMap[objectName] = replayFile->classnets.at(i);
+			}
 		}
 
 		this->MergeDuplicates();
