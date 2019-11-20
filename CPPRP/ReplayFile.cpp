@@ -289,24 +289,6 @@ namespace CPPRP
 			//printf("[%i] %s", i, replayFile->objects.at(i).c_str());
 		}
 	}
-
-	void ReplayFile::MergeDuplicates()
-	{
-		std::unordered_map<std::string, int> counts;
-		for (auto it : classnetMap)
-		{
-			if (it.second)
-			{
-				counts[replayFile->objects[it.second->index]]++;
-			}
-
-		}
-		if (counts.size() != classnetMap.size())
-		{
-			throw GeneralParseException("Found duplicate class!", *fullReplayBitReader);
-		}
-	}
-
 	
 
 	void ReplayFile::FixParents()
@@ -329,8 +311,6 @@ namespace CPPRP
 				classnetMap[objectName] = replayFile->classnets.at(i);
 			}
 		}
-
-		this->MergeDuplicates();
 
 		for (auto& archetypeMapping : archetypeMap)
 		{
