@@ -251,6 +251,8 @@ namespace CPPRP
 			struct ReplicatedTitle SecondaryTitle;
 			struct HistoryKey PlayerHistoryKey;
 
+			bool bIsDistracted;
+
 			//Unused
 			ActiveActor ReplacingBotPRI;
 			//PlayerReplicatedEventInfo_TA               PREI
@@ -583,6 +585,7 @@ namespace CPPRP
 			unsigned char ReplicatedScoredOnTeam;
 			bool bMatchEnded;
 			unsigned char ReplicatedServerPerformanceState;
+			uint32_t MaxScore;
 		};
 
 		struct GameEvent_Breakout_TA : public GameEvent_Soccar_TA
