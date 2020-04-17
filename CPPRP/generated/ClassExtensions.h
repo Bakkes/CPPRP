@@ -55,6 +55,7 @@ namespace CPPRP {
 		, {"TAGame.CameraSettingsActor_TA","Engine.ReplicationInfo"}
 		, {"TAGame.GRI_TA","ProjectX.GRI_X"}
 		, {"TAGame.Ball_Breakout_TA","TAGame.Ball_TA"}
+		, {"TAGame.Ball_God_TA","TAGame.Ball_TA"}
 		, {"TAGame.VehiclePickup_TA","Engine.ReplicationInfo"}
 		, {"TAGame.VehiclePickup_Boost_TA","TAGame.VehiclePickup_TA"}
 		, {"TAGame.Ball_Haunted_TA","TAGame.Ball_TA"}
@@ -62,6 +63,7 @@ namespace CPPRP {
 		, {"TAGame.GameEvent_Team_TA","TAGame.GameEvent_TA"}
 		, {"TAGame.GameEvent_Soccar_TA","TAGame.GameEvent_Team_TA"}
 		, {"TAGame.GameEvent_Breakout_TA","TAGame.GameEvent_Soccar_TA"}
+		, {"TAGame.GameEvent_GodBall_TA","TAGame.GameEvent_Soccar_TA"}
 		, {"TAGame.GameEvent_Season_TA","TAGame.GameEvent_Soccar_TA"}
 		, {"TAGame.GameEvent_SoccarPrivate_TA","TAGame.GameEvent_Soccar_TA"}
 		, {"TAGame.GameEvent_SoccarSplitscreen_TA","TAGame.GameEvent_SoccarPrivate_TA"}

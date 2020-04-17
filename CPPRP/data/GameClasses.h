@@ -515,7 +515,10 @@ namespace CPPRP
 			unsigned char LastTeamTouch;
 		};
 
-
+		struct Ball_God_TA : public Ball_TA
+		{
+			float TargetSpeed;
+		};
 
 		struct VehiclePickup_TA : public Engine::ReplicationInfo
 		{
@@ -589,6 +592,11 @@ namespace CPPRP
 		};
 
 		struct GameEvent_Breakout_TA : public GameEvent_Soccar_TA
+		{
+
+		};
+
+		struct GameEvent_GodBall_TA : public GameEvent_Soccar_TA
 		{
 
 		};

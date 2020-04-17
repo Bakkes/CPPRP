@@ -638,7 +638,8 @@ namespace CPPRP
 			|| name.compare("TAGame.Car_TA") == 0
 			|| name.compare("TAGame.Car_Season_TA") == 0
 			|| name.compare("TAGame.Ball_Breakout_TA") == 0
-			|| name.compare("TAGame.Ball_Haunted_TA") == 0;
+			|| name.compare("TAGame.Ball_Haunted_TA") == 0
+			|| name.compare("TAGame.Ball_God_TA") == 0;
 	}
 
 	const std::pair<const uint32_t, const KeyFrame> ReplayFile::GetNearestKeyframe(uint32_t frame) const

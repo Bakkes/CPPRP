@@ -122,11 +122,12 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\Users\Bakkes\Documents\repos\CPPRP\libs\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Bakkes\Desktop\CPPRP;C:\Users\Bakkes\Desktop\CPPRP\libs\rapidjson\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>C:\Users\Bakkes\Desktop\CPPRP\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
