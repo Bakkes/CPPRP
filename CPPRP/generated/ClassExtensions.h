@@ -12,8 +12,8 @@ namespace CPPRP {
 		, {"Engine.PlayerReplicationInfo","Engine.ReplicationInfo"}
 		, {"Engine.TeamInfo","Engine.ReplicationInfo"}
 		, {"Engine.WorldInfo","Engine.Info"}
-		, {"Engine.ADynamicSMActor","Engine.Actor"}
-		, {"Engine.KActor","Engine.ADynamicSMActor"}
+		, {"Engine.DynamicSMActor","Engine.Actor"}
+		, {"Engine.KActor","Engine.DynamicSMActor"}
 		, {"ProjectX.GRI_X","Engine.GameReplicationInfo"}
 		, {"ProjectX.NetModeReplicator_X","Engine.ReplicationInfo"}
 		, {"ProjectX.Pawn_X","Engine.Pawn"}

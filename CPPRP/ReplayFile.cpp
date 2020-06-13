@@ -376,7 +376,7 @@ namespace CPPRP
 	{
 		std::stringstream ss;
 		ss << "Parse log: ";
-		for (size_t i = size > parseLog.size() ? parseLog.size() - size : size; i < parseLog.size(); i++)
+		for (size_t i = size > parseLog.size() ?  0 : parseLog.size() - size; i < parseLog.size(); i++)
 		{
 			ss <<"\n\t" + parseLog.at(i);
 		}

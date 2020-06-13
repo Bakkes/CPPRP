@@ -142,7 +142,7 @@ namespace CPPRP
 		};
 
 
-		struct ADynamicSMActor : public Actor
+		struct DynamicSMActor : public Actor
 		{
 
 			//class UStaticMesh* ReplicatedMesh;                                   		// 0x01F0 (0x0004) [0x0000000000002020]              ( CPF_Net | CPF_Transient )
@@ -163,7 +163,7 @@ namespace CPPRP
 		};
 
 		//Currently only used in workshop map replays
-		struct KActor : public ADynamicSMActor
+		struct KActor : public DynamicSMActor
 		{
 			bool bWakeOnLevelStart;
 			RigidBodyState RBState;
