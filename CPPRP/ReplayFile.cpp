@@ -425,6 +425,8 @@ namespace CPPRP
 
 			const uint32_t engineVersion = replayFile->header.engineVersion;
 			const uint32_t licenseeVersion = replayFile->header.licenseeVersion;
+			const bool parseNameId = engineVersion > 868 || (engineVersion == 868 && licenseeVersion >= 20) || (engineVersion == 868 && licenseeVersion >= 14 && !isLan) || ((engineVersion == 868 && licenseeVersion == 17 && isLan));
+			
 
 			frames.resize(numFrames);
 			uint32_t currentFrame = 0;
@@ -469,7 +471,7 @@ namespace CPPRP
 						if (networkReader.read<bool>())
 						{
 							uint32_t name_id;
-							if (engineVersion > 868 || (engineVersion == 868 && licenseeVersion >= 20) || (engineVersion == 868 && licenseeVersion >= 14 && !isLan))
+							if (parseNameId)
 							{
 								const uint32_t nameId = networkReader.read<uint32_t>();
 								name_id = nameId;
