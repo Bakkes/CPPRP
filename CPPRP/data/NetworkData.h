@@ -136,6 +136,19 @@ namespace CPPRP
 		Vector3 victim_velocity;
 	};
 
+	struct ReplicatedDemolish2
+	{
+		bool custom_demo_flag;
+		int32_t custom_demo_id;
+		bool attacker_flag;
+		int32_t attacker_actor_id;
+		bool victim_flag;
+		int32_t victim_actor_id;
+		Vector3 attacker_velocity;
+		Vector3 victim_velocity;
+		
+	};
+
 	struct ReplicatedMusicStringer
 	{
 		bool unknown1;

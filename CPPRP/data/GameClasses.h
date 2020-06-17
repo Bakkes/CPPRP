@@ -479,6 +479,7 @@ namespace CPPRP
 			float AddedBallForceMultiplier;
 			struct TeamPaint TeamPaint;
 			struct ReplicatedDemolish ReplicatedDemolish;
+			struct ReplicatedDemolish2 ReplicatedDemolish_CustomFX;
 			struct ClubColors ClubColors;
 		};
 
