@@ -9,12 +9,13 @@
 #include <mutex>
 #include <functional>
 #include "CPPBitReader.h"
+
 #include "./data/NetworkData.h"
 #include "./exceptions/ParseException.h"
 #include "./exceptions/ReplayException.h"
-
+#include "NetworkDataParsers.h"
 #include "./data/ReplayFileData.h"
-
+#include "PropertyParser.h"
 
 namespace CPPRP
 {
@@ -34,8 +35,7 @@ namespace CPPRP
 		uint32_t classNameId{ 0 };
 	};
 
-	typedef std::function<std::unique_ptr<Engine::Actor>()> createObjectFunc;
-	typedef std::function<void(Engine::Actor*, CPPBitReader<BitReaderType>& br)> parsePropertyFunc;
+
 
 	typedef std::function<void(const Frame, const std::unordered_map<int, ActorStateData>&)> tickable;
 	typedef std::function<void(const Frame)> onNewFrame;
@@ -44,7 +44,7 @@ namespace CPPRP
 	typedef std::function<void(const ActorStateData&)> actorDeleted;
 	typedef std::function<void(uint32_t, const ActorStateData&)> propertyUpdated;
 
-	class ReplayFile : std::enable_shared_from_this<ReplayFile>
+	class ReplayFile
 	{
 	private:
 		

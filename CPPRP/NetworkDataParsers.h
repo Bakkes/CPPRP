@@ -1,11 +1,9 @@
 #pragma once
-#include "ReplayFile.h"
-#include "CPPBitReader.h"
 #include "./data/NetworkData.h"
 #include <vector>
 #include <sstream>
 #include "./exceptions/ParseException.h"
-
+#include "CPPBitReader.h"
 /*
 File responsible for parsing network data, which are the fields in the game classes
 Basically means it should parse all structs defined in data/NetworkData.h.
@@ -50,14 +48,14 @@ namespace CPPRP
 		std::shared_ptr<ProductAttribute> prodAttr;
 		bool unknown1 = reader.read<bool>();
 		uint32_t class_index = reader.read<uint32_t>();
-		if (class_index > reader.owner->replayFile->objects.size())
+		/*if (class_index > reader.owner->replayFile->objects.size())
 		{
 			throw AttributeParseException<BitReaderType>("ProductAttribute", reader);
-		}
-		std::string className = reader.owner->replayFile->objects[class_index];
-		size_t index = std::distance(reader.owner->attributeIDs.begin(),
-			std::find(reader.owner->attributeIDs.begin(), reader.owner->attributeIDs.end(), class_index));
-		printf("[%i|%i] %s", index, class_index, className.c_str());
+		}*/
+		//std::string className = reader.owner->replayFile->objects[class_index];
+		size_t index = std::distance(reader.attributeIDs.begin(),
+			std::find(reader.attributeIDs.begin(), reader.attributeIDs.end(), class_index));
+		//printf("[%i|%i] %s", index, class_index, className.c_str());
 		//reader.owner->attributeIDs.find()
 		switch((AttributeTypes)index)
 		{
@@ -129,7 +127,7 @@ namespace CPPRP
 			default:
 			case AttributeTypes::MAX:
 			{
-				throw AttributeParseException<BitReaderType>("Unable to parse attribute with name: " + reader.owner->replayFile->objects[class_index], reader);
+				throw AttributeParseException<BitReaderType>("Unable to parse attribute with ID: " + std::to_string(class_index), reader);
 			}
 			break;
 		}

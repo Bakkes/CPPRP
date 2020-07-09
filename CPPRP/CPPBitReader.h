@@ -5,6 +5,7 @@
 #include <assert.h>
 //#include "ParseException.h"
 #include "./data/ReplayFileData.h"
+//#include "ReplayFile.h"
 #include "./exceptions/ReplayException.h"
 #include <cmath>
 #include <memory>
@@ -45,7 +46,61 @@ namespace CPPRP
 
 		return static_cast<uint32_t>(MultiplyDeBruijnBitPosition[(const uint32_t)(v * 0x07C4ACDDU) >> 27]);
 	}
-	class ReplayFile;
+	typedef struct
+	{
+		const uint8_t* data;
+		uint64_t cachedVal;
+		uint32_t validBits;
+		size_t len;
+		size_t bytes_read;
+
+	} bitreader_t;
+
+	static inline void bitreader_load_cache(bitreader_t* b)
+	{
+		uint64_t val = *(uint64_t*)&b->data[b->bytes_read];
+
+		b->bytes_read += 8;
+		b->cachedVal = (val);// (val >> 32) | (val << 32);
+		b->validBits = 64;
+	}
+
+	static inline void bitreader_init(bitreader_t* b, const uint8_t* data, size_t len)
+	{
+		b->data = data;
+		b->len = len;
+		b->bytes_read = 0;
+		bitreader_load_cache(b);
+	}
+
+	static inline uint64_t bitreader_read_bits(bitreader_t* b, uint8_t bits)
+	{
+		uint32_t validBits = b->validBits;
+		uint64_t result = 0;
+
+
+		uint8_t overflow = 0;
+		if (bits >= validBits)
+		{
+			overflow = validBits;
+			bits -= validBits;
+			//result |= bt >> bit_position;
+			//bit_position = (64 - validBits)
+			result = (b->cachedVal >> (64 - validBits));// &((1ull << (64 - validBits)) - 1)) << (bits);
+			bitreader_load_cache(b);
+			validBits = 64;
+		}
+		validBits -= bits;
+
+
+		//result |= ((bt >> (bit_position))& ((1ULL << n) - 1)) << bit_pos;
+		//(((b->cachedVal) >> 8) & (((1ULL << bits) - 1)))
+		result |= (((b->cachedVal) >> (64 - validBits - bits)) & ((1ULL << bits) - 1)) << overflow;// >> (validBits);
+		//result |= ((b->cachedVal >> (64 - validBits))& ((1ull << (64 - validBits)) - 1));
+
+		b->validBits = validBits;
+		return (result);
+	}
 
 	//Attempt at writing a fast bitreader for RL replays
 	template<typename T>
@@ -64,7 +119,7 @@ namespace CPPRP
 		const uint8_t licenseeVersion;
 		const uint8_t netVersion;
 
-		const std::shared_ptr<ReplayFile> owner;
+		std::vector<uint32_t> attributeIDs;
 
 	private:
 		template<typename X>
@@ -77,64 +132,90 @@ namespace CPPRP
 			}
 			#endif
 
-			constexpr uint16_t SIZE_T = sizeof(T) * 8;
-			X result = 0;
-			X bit_pos = 0;
-			T bt = *data;
-			if (bit_position > 0)
+			uint32_t validBits = sizeof(T) - (bit_position % sizeof(T));
+			uint64_t result = 0;
+
+
+			uint8_t overflow = 0;
+			if (bits >= validBits)
 			{
-				if (n > (SIZE_T - bit_position)) //n finishes this byte and needs next byte for sure
-				{
-					bit_pos += SIZE_T - bit_position;
-					n -= SIZE_T - bit_position;
-					result |= bt >> bit_position;
-
-					bit_position = 0;
-					++t_position;
-					bt = *(++data);
-				}
-				else //n doesn't finish this byte
-				{
-					result |= (bt >> (bit_position)) & ((1ULL << n) - 1);
-					bit_position += n;
-
-					if (bit_position == SIZE_T)
-					{
-						++data;
-						//bt = *(++data);
-						++t_position;
-						bit_position = 0;
-					}
-
-					return result;
-				}
+				overflow = validBits;
+				bits -= validBits;
+				//result |= bt >> bit_position;
+				//bit_position = (64 - validBits)
+				result = (b->cachedVal >> (64 - validBits));// &((1ull << (64 - validBits)) - 1)) << (bits);
+				bitreader_load_cache(b);
+				validBits = 64;
 			}
+			validBits -= bits;
 
-			//If we reached this point, we know n > 0
-			while (n > (SIZE_T - 1))
-			{
-				result |= static_cast<X>(bt) << (bit_pos);
-				++t_position;
-				bt = *(++data); //Valgrind says this has invalid reads, probably at end of replay and there's no bytes left?
-				n -= SIZE_T;
-				bit_pos += SIZE_T;
-			}
 
-			if (n > 0)
-			{
-				result |= ((bt >> (bit_position)) & ((1ULL << n) - 1)) << bit_pos;
-				bit_position += n;
+			//result |= ((bt >> (bit_position))& ((1ULL << n) - 1)) << bit_pos;
+			//(((b->cachedVal) >> 8) & (((1ULL << bits) - 1)))
+			result |= (((b->cachedVal) >> (64 - validBits - bits)) & ((1ULL << bits) - 1)) << overflow;// >> (validBits);
+			//result |= ((b->cachedVal >> (64 - validBits))& ((1ull << (64 - validBits)) - 1));
 
-				if (bit_position == SIZE_T)
-				{
-					++data;
-					//bt = *(++data);
-					++t_position;
-					bit_position = 0;
-				}
-			}
+			b->validBits = validBits;
+			return (result);
 
-			return result;
+			//constexpr uint16_t SIZE_T = sizeof(T) * 8;
+			//X result = 0;
+			//X bit_pos = 0;
+			//T bt = *data;
+			//if (bit_position > 0)
+			//{
+			//	if (n > (SIZE_T - bit_position)) //n finishes this byte and needs next byte for sure
+			//	{
+			//		bit_pos += SIZE_T - bit_position;
+			//		n -= SIZE_T - bit_position;
+			//		result |= bt >> bit_position;
+
+			//		bit_position = 0;
+			//		++t_position;
+			//		bt = *(++data);
+			//	}
+			//	else //n doesn't finish this byte
+			//	{
+			//		result |= (bt >> (bit_position)) & ((1ULL << n) - 1);
+			//		bit_position += n;
+
+			//		if (bit_position == SIZE_T)
+			//		{
+			//			++data;
+			//			//bt = *(++data);
+			//			++t_position;
+			//			bit_position = 0;
+			//		}
+
+			//		return result;
+			//	}
+			//}
+
+			////If we reached this point, we know n > 0
+			//while (n > (SIZE_T - 1))
+			//{
+			//	result |= static_cast<X>(bt) << (bit_pos);
+			//	++t_position;
+			//	bt = *(++data); //Valgrind says this has invalid reads, probably at end of replay and there's no bytes left?
+			//	n -= SIZE_T;
+			//	bit_pos += SIZE_T;
+			//}
+
+			//if (n > 0)
+			//{
+			//	result |= ((bt >> (bit_position)) & ((1ULL << n) - 1)) << bit_pos;
+			//	bit_position += n;
+
+			//	if (bit_position == SIZE_T)
+			//	{
+			//		++data;
+			//		//bt = *(++data);
+			//		++t_position;
+			//		bit_position = 0;
+			//	}
+			//}
+
+			//return result;
 		}
 
 		template<typename X>
@@ -164,8 +245,8 @@ namespace CPPRP
 			return get_bits_max(maxValue, msbDeBruijn32(maxValue));
 		}
 	public:
-		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFile> owner_);
-		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFile> owner_, 
+		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_);
+		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_,
 			const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV);
 		CPPBitReader(const CPPBitReader& other);
 		CPPBitReader();
@@ -518,9 +599,9 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFile> owner_) 
+	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFileData> owner_) 
 	: engineVersion(owner_->header.engineVersion), licenseeVersion(owner_->header.licenseeVersion), 
-	netVersion(owner_->header.netVersion), owner(owner_), size(sizee)
+	netVersion(owner_->header.netVersion), size(sizee)
 	{
 		this->start = data;
 		this->data = data;
@@ -529,9 +610,9 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFile> owner_, 
+	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFileData> owner_, 
 		const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV) : engineVersion(engineV), 
-		licenseeVersion(licenseeV), netVersion(netV), owner(owner_), size(sizee)
+		licenseeVersion(licenseeV), netVersion(netV), size(sizee)
 	{
 		this->start = data;
 		this->data = data;
@@ -541,7 +622,7 @@ namespace CPPRP
 
 	template<typename T>
 	inline CPPBitReader<T>::CPPBitReader(const CPPBitReader& other) 
-	: engineVersion(other.engineVersion), licenseeVersion(other.licenseeVersion), netVersion(other.netVersion), owner(other.owner), size(other.size)
+	: engineVersion(other.engineVersion), licenseeVersion(other.licenseeVersion), netVersion(other.netVersion), size(other.size)
 	{
 		this->start = other.start;
 		this->data = other.data;

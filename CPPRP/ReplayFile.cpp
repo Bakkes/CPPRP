@@ -110,7 +110,7 @@ namespace CPPRP
 	{
 		const size_t dataSizeBits = data.size() * 8;
 		replayFile = std::make_shared<ReplayFileData>();
-		fullReplayBitReader = std::make_shared<CPPBitReader<BitReaderType>>((const BitReaderType*)data.data(), dataSizeBits, shared_from_this());
+		fullReplayBitReader = std::make_shared<CPPBitReader<BitReaderType>>((const BitReaderType*)data.data(), dataSizeBits, replayFile);
 
 		replayFile->header = {
 			fullReplayBitReader->read<uint32_t>(),	//Size
@@ -126,7 +126,7 @@ namespace CPPRP
 
 		//Reconstruct cause we got version info now,  find something better for this
 		size_t bitPos = fullReplayBitReader->GetAbsoluteBitPosition();
-		fullReplayBitReader = std::make_shared<CPPBitReader<BitReaderType>>((const BitReaderType*)data.data(), dataSizeBits, shared_from_this());
+		fullReplayBitReader = std::make_shared<CPPBitReader<BitReaderType>>((const BitReaderType*)data.data(), dataSizeBits, replayFile);
 		fullReplayBitReader->skip(bitPos);
 
 		replayFile->replayType = fullReplayBitReader->read<std::string>(); //Not sure what this is
@@ -228,7 +228,7 @@ namespace CPPRP
 			return false;
 		}
 		CPPBitReader<BitReaderType> bitReader((const BitReaderType*)data.data(), 
-			dataSizeBits, shared_from_this(), 0, 0, 0);
+			dataSizeBits, replayFile, 0, 0, 0);
 		const uint32_t headerSize = bitReader.read<uint32_t>();
 		const uint32_t headerReadCrc = bitReader.read<uint32_t>();
 
@@ -405,7 +405,7 @@ public:
 			}
 		}
 
-		printf("Ab");
+		//printf("Ab");
 		const std::vector<std::string> position_names = {
 			"TAGame.CrowdActor_TA", "TAGame.VehiclePickup_Boost_TA", "TAGame.InMapScoreboard_TA",
 			"TAGame.BreakOutActor_Platform_TA", "Engine.WorldInfo", "TAGame.HauntedBallTrapTrigger_TA",
@@ -434,7 +434,7 @@ public:
 			if(classnetCache[i])
 				GetMaxPropertyId(classnetCache[i].get());
 		}
-printf("Aa");
+//printf("Aa");
 		const std::vector<std::string> attributeNames = 
 		{
 			"TAGame.ProductAttribute_UserColor_TA",
@@ -443,14 +443,14 @@ printf("Aa");
 			"TAGame.ProductAttribute_SpecialEdition_TA",
 			"TAGame.ProductAttribute_TitleID_TA"
 		};
-		printf("A");
+		//printf("A");
 		PreprocessTables();
 		for(size_t i = 0; i < attributeNames.size(); ++i)
 		{
-			printf("B");
+			//printf("B");
 			const uint32_t attributeID = objectToId[attributeNames.at(i)];
 			attributeIDs.push_back(attributeID);
-			printf("[%i] %s", attributeID, attributeNames.at(i).c_str());
+			//printf("[%i] %s", attributeID, attributeNames.at(i).c_str());
 		}
 		//attributeIDs
 
@@ -488,7 +488,7 @@ printf("Aa");
 		}
 
 		
-		CPPBitReader<BitReaderType> networkReader((BitReaderType*)(replayFile->netstream_data), static_cast<size_t>(endPos), shared_from_this());
+		CPPBitReader<BitReaderType> networkReader((BitReaderType*)(replayFile->netstream_data), static_cast<size_t>(endPos), replayFile);
 
 		//FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
 
@@ -514,7 +514,7 @@ printf("Aa");
 			const uint32_t engineVersion = replayFile->header.engineVersion;
 			const uint32_t licenseeVersion = replayFile->header.licenseeVersion;
 			const bool parseNameId = engineVersion > 868 || (engineVersion == 868 && licenseeVersion >= 20) || (engineVersion == 868 && licenseeVersion >= 14 && !isLan) || ((engineVersion == 868 && licenseeVersion == 17 && isLan));
-			
+			networkReader.attributeIDs = attributeIDs;
 
 			frames.resize(numFrames);
 			uint32_t currentFrame = 0;

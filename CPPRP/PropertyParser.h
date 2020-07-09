@@ -1,11 +1,16 @@
 #pragma once
+
 #include <unordered_map>
 #include <functional>
 #include <memory>
 #include "./data/GameClasses.h"
 
+
 namespace CPPRP
 {
+	typedef std::function<std::unique_ptr<Engine::Actor>()> createObjectFunc;
+	typedef std::function<void(Engine::Actor*, CPPBitReader<BitReaderType>& br)> parsePropertyFunc;
+
 	static std::unordered_map<std::string, createObjectFunc> createObjectFuncs;
 	static std::unordered_map<std::string, parsePropertyFunc> parsePropertyFuncs;
 
