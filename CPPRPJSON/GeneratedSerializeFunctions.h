@@ -295,16 +295,6 @@ inline const void Serialize(Writer& writer, const ProductAttribute& item)
 
 
 template<typename Writer>
-inline const void Serialize(Writer& writer, const Attributes& item)
-{
-	writer.StartObject();
-	writer.Key("product_attributes");
-	Serialize(writer, item.product_attributes);
-	writer.EndObject();
-}
-
-
-template<typename Writer>
 inline const void Serialize(Writer& writer, const ActorBase& item)
 {
 	writer.StartObject();
@@ -324,16 +314,6 @@ inline const void Serialize(Writer& writer, const PartyLeader& item)
 	writer.StartObject();
 	writer.Key("id");
 	Serialize(writer, item.id);
-	writer.EndObject();
-}
-
-
-template<typename Writer>
-inline const void Serialize(Writer& writer, const OnlineLoadout& item)
-{
-	writer.StartObject();
-	writer.Key("attributes_list");
-	Serialize(writer, item.attributes_list);
 	writer.EndObject();
 }
 
@@ -406,6 +386,26 @@ template<typename Writer>
 inline const void Serialize(Writer& writer, const ProductAttributeSpecialEdition& item)
 {
 	writer.StartObject();
+	writer.EndObject();
+}
+
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const Attributes& item)
+{
+	writer.StartObject();
+	writer.Key("product_attributes");
+	Serialize(writer, item.product_attributes);
+	writer.EndObject();
+}
+
+
+template<typename Writer>
+inline const void Serialize(Writer& writer, const OnlineLoadout& item)
+{
+	writer.StartObject();
+	writer.Key("attributes_list");
+	Serialize(writer, item.attributes_list);
 	writer.EndObject();
 }
 

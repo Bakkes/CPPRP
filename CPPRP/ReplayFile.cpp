@@ -2,7 +2,7 @@
 #include <fstream>
 #include "./data/GameClasses.h"
 #include "./data/NetworkData.h"
-
+#include <set>
 #include "./data/ArcheTypes.h"
 #include "./generated/ClassExtensions.h"
 #include "./exceptions/ParseException.h"
@@ -643,7 +643,8 @@ public:
 						{
 							
 							ActorStateData& actorState = actorStates[actorId];
-							std::vector<uint32_t> updatedProperties;
+							//std::set<uint32_t> updatedProperties;
+							//updatedProperties.reserve(100);
 							//While there's data for this state to be updated
 							while (networkReader.read<bool>())
 							{
@@ -661,7 +662,7 @@ public:
 								 {
 
 
-									updatedProperties.push_back(propertyIndex);
+									//updatedProperties.insert(propertyIndex);
 									const auto& funcPtr = parseFunctions[propertyIndex];
 									/*if (b)
 									{

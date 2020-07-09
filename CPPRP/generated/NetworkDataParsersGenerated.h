@@ -148,21 +148,21 @@ inline const PrivateMatchSettings Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const Attributes Consume(CPPBitReader<BitReaderType>& reader) 
-{
-	Attributes item;
-	item.product_attributes = ConsumeVector<std::shared_ptr<ProductAttribute>>(reader);
-	return item;
-}
-
-
-template<>
 inline const ActorBase Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ActorBase item;
 	item.value = reader.read<uint32_t>();
 	item.unknown1 = reader.read<bool>();
 	item.unknown2 = reader.read<bool>();
+	return item;
+}
+
+
+template<>
+inline const Attributes Consume(CPPBitReader<BitReaderType>& reader) 
+{
+	Attributes item;
+	item.product_attributes = ConsumeVector<AttributeType>(reader);
 	return item;
 }
 

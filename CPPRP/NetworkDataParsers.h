@@ -4,6 +4,7 @@
 #include <sstream>
 #include "./exceptions/ParseException.h"
 #include "CPPBitReader.h"
+#include <variant>
 /*
 File responsible for parsing network data, which are the fields in the game classes
 Basically means it should parse all structs defined in data/NetworkData.h.
@@ -30,8 +31,9 @@ namespace CPPRP
 		return vec;
 	}
 
+	
 	template<>
-	inline const std::shared_ptr<ProductAttribute> Consume(CPPBitReader<BitReaderType>& reader) {
+	inline const AttributeType Consume(CPPBitReader<BitReaderType>& reader) {
 		
 		//Make sure this matches attributeNames in the preprocess function
 		enum class AttributeTypes : size_t
@@ -44,8 +46,8 @@ namespace CPPRP
 			MAX
 		};
 		
-		
-		std::shared_ptr<ProductAttribute> prodAttr;
+
+		AttributeType att;
 		bool unknown1 = reader.read<bool>();
 		uint32_t class_index = reader.read<uint32_t>();
 		/*if (class_index > reader.owner->replayFile->objects.size())
@@ -63,65 +65,66 @@ namespace CPPRP
 			{
 				if (reader.licenseeVersion >= 23)
 				{
-					std::shared_ptr<ProductAttributeUserColorRGB> ucargb = std::make_shared<ProductAttributeUserColorRGB>();
-
-					ucargb->r = reader.read<uint8_t>();
-					ucargb->g = reader.read<uint8_t>();
-					ucargb->b = reader.read<uint8_t>();
-					ucargb->a = reader.read<uint8_t>();
-					prodAttr = ucargb;
+					auto tmp = ProductAttributeUserColorRGB();
+					{
+						tmp.r = reader.read<uint8_t>();
+						tmp.g = reader.read<uint8_t>();
+						tmp.b = reader.read<uint8_t>();
+						tmp.a = reader.read<uint8_t>();
+						att = tmp;
+					}
 				}
 				else
 				{
-					std::shared_ptr<ProductAttributeUserColorSingle> ucas = std::make_shared<ProductAttributeUserColorSingle>();
+					auto tmp = ProductAttributeUserColorSingle();
 
-					ucas->has_value = reader.read<bool>();
-					if (ucas->has_value)
+					tmp.has_value = reader.read<bool>();
+					if (tmp.has_value)
 					{
-						ucas->value = reader.read<uint32_t>(31);
+						tmp.value = reader.read<uint32_t>(31);
 					}
 					else
 					{
-						ucas->value = 0;
+						tmp.value = 0;
 					}
-					prodAttr = ucas;
+					att = tmp;
 				}
 			}
 			break;
 			case AttributeTypes::Painted:
 			{
-				std::shared_ptr<ProductAttributePainted> pad = std::make_shared<ProductAttributePainted>();
+				auto tmp = ProductAttributePainted();
 
 				if (reader.engineVersion >= 868 && reader.licenseeVersion >= 18)
 				{
-					pad->value = reader.read<uint32_t>(31);
+					tmp.value = reader.read<uint32_t>(31);
 				}
 				else
 				{
-					pad->value = reader.readBitsMax<uint32_t>(14);
+					tmp.value = reader.readBitsMax<uint32_t>(14);
 				}
-				prodAttr = pad;
+				att = tmp;
 			}
 			break;
 			case AttributeTypes::TeamEdition:
 			{
-				std::shared_ptr<ProductAttributeTeamEdition> teamEdition = std::make_shared<ProductAttributeTeamEdition>();
-				teamEdition->value = reader.read<uint32_t>(31);
-				prodAttr = teamEdition;
+				auto tmp = ProductAttributeTeamEdition();
+				tmp.value = reader.read<uint32_t>(31);
+				att = tmp;
 			}
 			break;
 			case AttributeTypes::SpecialEdition:
 			{
-				std::shared_ptr<ProductAttributeSpecialEdition> specialEdition = std::make_shared<ProductAttributeSpecialEdition>();
-				specialEdition->value = reader.read<uint32_t>(31);
-				prodAttr = specialEdition;
+				auto tmp = ProductAttributeSpecialEdition();
+				tmp.value = reader.read<uint32_t>(31);
+				att = tmp;
 			}
 			break;
 			case AttributeTypes::TitleID:
 			{
-				std::shared_ptr<ProductAttributeTitle> title = std::make_shared<ProductAttributeTitle>();
-				title->title = reader.read<std::string>();
-				prodAttr = title;
+				auto tmp = ProductAttributeTitle();
+				tmp.title = reader.read<std::string>();
+				att = tmp;
 			}
 			break;
 			default:
@@ -131,9 +134,16 @@ namespace CPPRP
 			}
 			break;
 		}
-		prodAttr->unknown1 = unknown1;
-		prodAttr->class_index = class_index;
-		return prodAttr;
+		std::visit(
+			[unknown1, class_index](ProductAttribute& base)
+			{
+				base.unknown1 = unknown1;
+				base.class_index = class_index;
+			},
+			att);
+		//std::get<ProductAttribute>(att).unknown1 = unknown1;
+		//std::get<ProductAttribute>(att).class_index = class_index;
+		return att;
 	}
 
 
