@@ -6,17 +6,13 @@
 
 namespace CPPRP
 {
-
-	typedef std::function<std::shared_ptr<Engine::Actor>()> createObjectFunc;
-	typedef std::function<void(std::shared_ptr<Engine::Actor>&, CPPBitReader<BitReaderType>& br)> parsePropertyFunc;
-
 	static std::unordered_map<std::string, createObjectFunc> createObjectFuncs;
 	static std::unordered_map<std::string, parsePropertyFunc> parsePropertyFuncs;
 
 	template<typename T1>
-	inline static std::shared_ptr<Engine::Actor> createObject()
+	inline static std::unique_ptr<Engine::Actor> createObject()
 	{
-		return std::make_shared<T1>();
+		return std::move(std::make_unique<T1>());
 	}
 
 	template<typename T1>
@@ -38,7 +34,7 @@ namespace CPPRP
 #define GAMECLASS(namesp, classn) RegisterClass<namesp::classn>(xstr(namesp) "." xstr(classn));
 #define fulln(namesp, classn, propname) xstr(namesp) "." xstr(classn) ":" xstr(propname)
 #define GAMEFIELD(namesp, classn, propname, nameoftype) \
-	RegisterField(fulln(namesp, classn, propname), [](std::shared_ptr<Engine::Actor>& struc, CPPBitReader<BitReaderType>& br) { std::static_pointer_cast<CPPRP::namesp::classn>(struc)->propname = Consume<nameoftype>(br); })
+	RegisterField(fulln(namesp, classn, propname), [](Engine::Actor* struc, CPPBitReader<BitReaderType>& br) { ((CPPRP::namesp::classn*)(struc))->propname = Consume<nameoftype>(br); })
 
 		#include "./generated/GameClassMacros.h"
 

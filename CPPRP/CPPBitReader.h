@@ -45,7 +45,7 @@ namespace CPPRP
 
 		return static_cast<uint32_t>(MultiplyDeBruijnBitPosition[(const uint32_t)(v * 0x07C4ACDDU) >> 27]);
 	}
-
+	class ReplayFile;
 
 	//Attempt at writing a fast bitreader for RL replays
 	template<typename T>
@@ -64,7 +64,7 @@ namespace CPPRP
 		const uint8_t licenseeVersion;
 		const uint8_t netVersion;
 
-		const std::shared_ptr<ReplayFileData> owner;
+		const std::shared_ptr<ReplayFile> owner;
 
 	private:
 		template<typename X>
@@ -164,8 +164,8 @@ namespace CPPRP
 			return get_bits_max(maxValue, msbDeBruijn32(maxValue));
 		}
 	public:
-		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_);
-		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_, 
+		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFile> owner_);
+		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFile> owner_, 
 			const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV);
 		CPPBitReader(const CPPBitReader& other);
 		CPPBitReader();
@@ -518,7 +518,7 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFileData> owner_) 
+	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFile> owner_) 
 	: engineVersion(owner_->header.engineVersion), licenseeVersion(owner_->header.licenseeVersion), 
 	netVersion(owner_->header.netVersion), owner(owner_), size(sizee)
 	{
@@ -529,7 +529,7 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFileData> owner_, 
+	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFile> owner_, 
 		const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV) : engineVersion(engineV), 
 		licenseeVersion(licenseeV), netVersion(netV), owner(owner_), size(sizee)
 	{

@@ -1,4 +1,5 @@
 #pragma once
+#include "ReplayFile.h"
 #include "CPPBitReader.h"
 #include "./data/NetworkData.h"
 #include <vector>
@@ -33,80 +34,104 @@ namespace CPPRP
 
 	template<>
 	inline const std::shared_ptr<ProductAttribute> Consume(CPPBitReader<BitReaderType>& reader) {
+		
+		//Make sure this matches attributeNames in the preprocess function
+		enum class AttributeTypes : size_t
+		{
+			UserColor = 0,
+			Painted,
+			TeamEdition,
+			SpecialEdition,
+			TitleID,
+			MAX
+		};
+		
+		
 		std::shared_ptr<ProductAttribute> prodAttr;
 		bool unknown1 = reader.read<bool>();
 		uint32_t class_index = reader.read<uint32_t>();
-		if (class_index > reader.owner->objects.size())
+		if (class_index > reader.owner->replayFile->objects.size())
 		{
 			throw AttributeParseException<BitReaderType>("ProductAttribute", reader);
 		}
-		std::string className = reader.owner->objects[class_index];
-
-		if (className.compare("TAGame.ProductAttribute_UserColor_TA") == 0)
+		std::string className = reader.owner->replayFile->objects[class_index];
+		size_t index = std::distance(reader.owner->attributeIDs.begin(),
+			std::find(reader.owner->attributeIDs.begin(), reader.owner->attributeIDs.end(), class_index));
+		printf("[%i|%i] %s", index, class_index, className.c_str());
+		//reader.owner->attributeIDs.find()
+		switch((AttributeTypes)index)
 		{
-			if (reader.licenseeVersion >= 23)
+			case AttributeTypes::UserColor:
 			{
-				std::shared_ptr<ProductAttributeUserColorRGB> ucargb = std::make_shared<ProductAttributeUserColorRGB>();
-
-				ucargb->r = reader.read<uint8_t>();
-				ucargb->g = reader.read<uint8_t>();
-				ucargb->b = reader.read<uint8_t>();
-				ucargb->a = reader.read<uint8_t>();
-				prodAttr = ucargb;
-			}
-			else
-			{
-				std::shared_ptr<ProductAttributeUserColorSingle> ucas = std::make_shared<ProductAttributeUserColorSingle>();
-
-				ucas->has_value = reader.read<bool>();
-				if (ucas->has_value)
+				if (reader.licenseeVersion >= 23)
 				{
-					ucas->value = reader.read<uint32_t>(31);
+					std::shared_ptr<ProductAttributeUserColorRGB> ucargb = std::make_shared<ProductAttributeUserColorRGB>();
+
+					ucargb->r = reader.read<uint8_t>();
+					ucargb->g = reader.read<uint8_t>();
+					ucargb->b = reader.read<uint8_t>();
+					ucargb->a = reader.read<uint8_t>();
+					prodAttr = ucargb;
 				}
 				else
 				{
-					ucas->value = 0;
+					std::shared_ptr<ProductAttributeUserColorSingle> ucas = std::make_shared<ProductAttributeUserColorSingle>();
+
+					ucas->has_value = reader.read<bool>();
+					if (ucas->has_value)
+					{
+						ucas->value = reader.read<uint32_t>(31);
+					}
+					else
+					{
+						ucas->value = 0;
+					}
+					prodAttr = ucas;
 				}
-				prodAttr = ucas;
 			}
-		}
-		else if (className.compare("TAGame.ProductAttribute_Painted_TA") == 0)
-		{
-			std::shared_ptr<ProductAttributePainted> pad = std::make_shared<ProductAttributePainted>();
-
-			if (reader.engineVersion >= 868 && reader.licenseeVersion >= 18)
+			break;
+			case AttributeTypes::Painted:
 			{
-				pad->value = reader.read<uint32_t>(31);
+				std::shared_ptr<ProductAttributePainted> pad = std::make_shared<ProductAttributePainted>();
+
+				if (reader.engineVersion >= 868 && reader.licenseeVersion >= 18)
+				{
+					pad->value = reader.read<uint32_t>(31);
+				}
+				else
+				{
+					pad->value = reader.readBitsMax<uint32_t>(14);
+				}
+				prodAttr = pad;
 			}
-			else
+			break;
+			case AttributeTypes::TeamEdition:
 			{
-				pad->value = reader.readBitsMax<uint32_t>(14);
+				std::shared_ptr<ProductAttributeTeamEdition> teamEdition = std::make_shared<ProductAttributeTeamEdition>();
+				teamEdition->value = reader.read<uint32_t>(31);
+				prodAttr = teamEdition;
 			}
-			prodAttr = pad;
-		}
-		else if (className.compare("TAGame.ProductAttribute_TeamEdition_TA") == 0)
-		{
-			std::shared_ptr<ProductAttributeTeamEdition> teamEdition = std::make_shared<ProductAttributeTeamEdition>();
-			teamEdition->value = reader.read<uint32_t>(31);
-			prodAttr = teamEdition;
-
-		}
-		else if (className.compare("TAGame.ProductAttribute_SpecialEdition_TA") == 0)
-		{
-			std::shared_ptr<ProductAttributeSpecialEdition> specialEdition = std::make_shared<ProductAttributeSpecialEdition>();
-			specialEdition->value = reader.read<uint32_t>(31);
-			prodAttr = specialEdition;
-		}
-		else if (className.compare("TAGame.ProductAttribute_TitleID_TA") == 0)
-		{
-			std::shared_ptr<ProductAttributeTitle> title = std::make_shared<ProductAttributeTitle>();
-			title->title = reader.read<std::string>();
-			prodAttr = title;
-
-		}
-		else
-		{
-			printf("Can not read product attribute %s@@@@\n", className.c_str());
+			break;
+			case AttributeTypes::SpecialEdition:
+			{
+				std::shared_ptr<ProductAttributeSpecialEdition> specialEdition = std::make_shared<ProductAttributeSpecialEdition>();
+				specialEdition->value = reader.read<uint32_t>(31);
+				prodAttr = specialEdition;
+			}
+			break;
+			case AttributeTypes::TitleID:
+			{
+				std::shared_ptr<ProductAttributeTitle> title = std::make_shared<ProductAttributeTitle>();
+				title->title = reader.read<std::string>();
+				prodAttr = title;
+			}
+			break;
+			default:
+			case AttributeTypes::MAX:
+			{
+				throw AttributeParseException<BitReaderType>("Unable to parse attribute with name: " + reader.owner->replayFile->objects[class_index], reader);
+			}
+			break;
 		}
 		prodAttr->unknown1 = unknown1;
 		prodAttr->class_index = class_index;

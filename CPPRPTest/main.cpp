@@ -17,13 +17,14 @@
 #include <filesystem>
 #include <queue>
 #include <unordered_map>
+#include "../CPPRPJSON/OptionsParser.h"
 #undef max
 
 
 
 int main(int argc, char *argv[])
 {
-	if constexpr (true) {
+	if constexpr (false) {
 		auto replayFile = std::make_shared<CPPRP::ReplayFile>("J:/74B3720B43DEF8267DD3EB932BED44B5.replay");
 		replayFile->Load();
 		replayFile->DeserializeHeader();
@@ -35,7 +36,7 @@ int main(int argc, char *argv[])
 			}
 		}
 		std::map<uint32_t, std::unordered_map<uint32_t, CPPRP::Vector3>> locations;
-		replayFile->tickables.push_back([&](const CPPRP::Frame frame, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
+		/*replayFile->tickables.push_back([&](const CPPRP::Frame frame, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
 		{
 			for (auto& actor : actorStats)
 			{
@@ -45,7 +46,7 @@ int main(int argc, char *argv[])
 					locations[frame.frameNumber][actor.first] = car->ReplicatedRBState.position;
 				}
 			}
-		});
+		});*/
 		replayFile->Parse();
 		int fdfsd = 5;
 	}
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
 			{
 				if (entry.path().filename().u8string().find(".replay") == std::string::npos)
 					continue;
-				if (replayFilesToLoad.size() >= 123459696)
+				if (replayFilesToLoad.size() >= 20)
 					break;
 				replayFilesToLoad.push(entry.path());
 			}
@@ -157,7 +158,7 @@ int main(int argc, char *argv[])
 			}
 		}
 	};
-
+	OptionsParser op(argc, argv);
 	auto loadAndParseReplay = [&success, &queueMutex, &replayFilesToLoad]()
 	{
 		while (true)
@@ -225,19 +226,23 @@ int main(int argc, char *argv[])
 		}
 	};
 
-	if constexpr (true)
+	const int bothReplayThreadsCount = op.GetIntValue({"both"}, 1);
+	const int loadThreads = op.GetIntValue({"loads"}, 0);
+	const int parseThreads = op.GetIntValue({"parses"}, 0);
+	if (loadThreads == 0 || parseThreads == 0)
 	{
+		
+		//constexpr size_t bothReplayThreadCount = 50;
+		printf("Loading&parsing using %i thread(s)\n", bothReplayThreadsCount);
 		auto start = std::chrono::steady_clock::now();
-		constexpr size_t bothReplayThreadCount = 10;
-
-		if constexpr(bothReplayThreadCount == 1)
+		if (bothReplayThreadsCount == 1)
 		{
 			loadAndParseReplay();
 		}
 		else
 		{
 			std::vector<std::thread> bothReplayThreads;
-			for (size_t i = 0; i < bothReplayThreadCount; ++i)
+			for (size_t i = 0; i < bothReplayThreadsCount; ++i)
 			{
 				std::thread bothReplayThread = std::thread{
 					loadAndParseReplay
@@ -270,19 +275,20 @@ int main(int argc, char *argv[])
 	} 
 	else
 	{
+		printf("Loading threads: %i. Parsing using %i thread(s)\n", loadThreads, parseThreads);
 		auto start = std::chrono::steady_clock::now();
-		constexpr size_t loadReplayThreadCount = 4;
-		constexpr size_t parseReplayThreadCount = 6;
+		//constexpr size_t loadReplayThreadCount = 4;
+		//constexpr size_t parseReplayThreadCount = 6;
 		std::vector<std::thread> loadReplayThreads;
 		std::vector<std::thread> parseReplayThreads;
-		for (size_t i = 0; i < loadReplayThreadCount; ++i)
+		for (size_t i = 0; i < loadThreads; ++i)
 		{
 			std::thread loadReplayThread = std::thread{
 				loadReplay
 			};
 			loadReplayThreads.emplace_back(std::move(loadReplayThread));
 		}
-		for (size_t i = 0; i < parseReplayThreadCount; i++)
+		for (size_t i = 0; i < parseThreads; i++)
 		{
 			std::thread parseReplayThread = std::thread{
 				parseReplay

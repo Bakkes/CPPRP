@@ -12,9 +12,9 @@
 #include "./data/NetworkData.h"
 #include "./exceptions/ParseException.h"
 #include "./exceptions/ReplayException.h"
-#include "NetworkDataParsers.h"
+
 #include "./data/ReplayFileData.h"
-#include "PropertyParser.h"
+
 
 namespace CPPRP
 {
@@ -27,12 +27,15 @@ namespace CPPRP
 
 	struct ActorStateData
 	{
-		std::shared_ptr<Engine::Actor> actorObject;
+		std::unique_ptr<Engine::Actor> actorObject;
 		std::shared_ptr<ClassNet> classNet;
 		uint32_t actorId{0};
 		uint32_t nameId{ 0 };
 		uint32_t classNameId{ 0 };
 	};
+
+	typedef std::function<std::unique_ptr<Engine::Actor>()> createObjectFunc;
+	typedef std::function<void(Engine::Actor*, CPPBitReader<BitReaderType>& br)> parsePropertyFunc;
 
 	typedef std::function<void(const Frame, const std::unordered_map<int, ActorStateData>&)> tickable;
 	typedef std::function<void(const Frame)> onNewFrame;
@@ -41,7 +44,7 @@ namespace CPPRP
 	typedef std::function<void(const ActorStateData&)> actorDeleted;
 	typedef std::function<void(uint32_t, const ActorStateData&)> propertyUpdated;
 
-	class ReplayFile
+	class ReplayFile : std::enable_shared_from_this<ReplayFile>
 	{
 	private:
 		
@@ -53,7 +56,7 @@ namespace CPPRP
 		std::vector<Frame> frames;
 		std::unordered_map<int, ActorStateData> actorStates;
 		std::shared_ptr<ReplayFileData> replayFile;
-		
+		FileHeader header;
 		std::vector<parsePropertyFunc> parseFunctions;
 		std::vector<createObjectFunc> createFunctions;
 		std::vector<std::string> parseLog;
@@ -65,6 +68,10 @@ namespace CPPRP
 		std::vector<actorUpdated> updatedCallbacks;
 		std::vector<actorDeleted> actorDeleteCallbacks;
 
+		std::vector<uint32_t> positionIDs;
+		std::vector<uint32_t> rotationIDs;
+		std::vector<uint32_t> attributeIDs;
+		std::vector<std::shared_ptr<ClassNet>> classnetCache;
 		std::unordered_map<std::string, uint32_t> objectToId;
 	public:
 		ReplayFile(std::filesystem::path path_);
@@ -86,14 +93,14 @@ namespace CPPRP
 		const bool ParseProperty(const std::shared_ptr<Property>& currentProperty);
 		const std::shared_ptr<ClassNet>& GetClassnetByNameWithLookup(const std::string& name) const;
 		const uint16_t GetPropertyIndexById(const std::shared_ptr<ClassNet>& cn, const int id) const;
-		const uint16_t GetMaxPropertyId(const std::shared_ptr<ClassNet>& cn);
-		const uint16_t FindMaxPropertyId(const std::shared_ptr<ClassNet>& cn, uint16_t maxProp) const;
+		const uint16_t GetMaxPropertyId(ClassNet* cn);
+		const uint16_t FindMaxPropertyId(const ClassNet* cn, uint16_t maxProp) const;
 
 		
 	public:
 		const bool HasProperty(const std::string& key) const;
-		const bool HasInitialPosition(const std::string& name) const;
-		const bool HasRotation(const std::string& name) const;
+		const bool HasInitialPosition(const uint32_t name) const;
+		const bool HasRotation(const uint32_t name) const;
 		template<typename T>
 		const T GetProperty(const std::string& key) const;
 	};

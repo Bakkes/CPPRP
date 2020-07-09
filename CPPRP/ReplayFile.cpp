@@ -2,12 +2,15 @@
 #include <fstream>
 #include "./data/GameClasses.h"
 #include "./data/NetworkData.h"
+
 #include "./data/ArcheTypes.h"
 #include "./generated/ClassExtensions.h"
 #include "./exceptions/ParseException.h"
 #include "./exceptions/ReplayException.h"
 #include "CRC.h"
 #include <functional>
+#include "NetworkDataParsers.h"
+#include "PropertyParser.h"
 
 namespace CPPRP
 {
@@ -107,7 +110,7 @@ namespace CPPRP
 	{
 		const size_t dataSizeBits = data.size() * 8;
 		replayFile = std::make_shared<ReplayFileData>();
-		fullReplayBitReader = std::make_shared<CPPBitReader<BitReaderType>>((const BitReaderType*)data.data(), dataSizeBits, replayFile);
+		fullReplayBitReader = std::make_shared<CPPBitReader<BitReaderType>>((const BitReaderType*)data.data(), dataSizeBits, shared_from_this());
 
 		replayFile->header = {
 			fullReplayBitReader->read<uint32_t>(),	//Size
@@ -123,7 +126,7 @@ namespace CPPRP
 
 		//Reconstruct cause we got version info now,  find something better for this
 		size_t bitPos = fullReplayBitReader->GetAbsoluteBitPosition();
-		fullReplayBitReader = std::make_shared<CPPBitReader<BitReaderType>>((const BitReaderType*)data.data(), dataSizeBits, replayFile);
+		fullReplayBitReader = std::make_shared<CPPBitReader<BitReaderType>>((const BitReaderType*)data.data(), dataSizeBits, shared_from_this());
 		fullReplayBitReader->skip(bitPos);
 
 		replayFile->replayType = fullReplayBitReader->read<std::string>(); //Not sure what this is
@@ -209,6 +212,7 @@ namespace CPPRP
 		{
 			fullReplayBitReader->read<int32_t>();
 		}
+		header = replayFile->header;
 		this->FixParents();
 
 	}
@@ -224,7 +228,7 @@ namespace CPPRP
 			return false;
 		}
 		CPPBitReader<BitReaderType> bitReader((const BitReaderType*)data.data(), 
-			dataSizeBits, replayFile, 0, 0, 0);
+			dataSizeBits, shared_from_this(), 0, 0, 0);
 		const uint32_t headerSize = bitReader.read<uint32_t>();
 		const uint32_t headerReadCrc = bitReader.read<uint32_t>();
 
@@ -290,9 +294,41 @@ namespace CPPRP
 		}
 	}
 	
+	class Timer
+{
+private:
+	std::chrono::time_point<std::chrono::steady_clock> start;
+	std::chrono::time_point<std::chrono::steady_clock> end;
+	bool ended = false;
+	std::string name;
+public:
+	Timer(std::string timerName) : name(timerName)
+	{
+		start = std::chrono::steady_clock::now();
+	}
+
+	void Stop()
+	{
+		end = std::chrono::steady_clock::now();
+		ended = true;
+	}
+
+	~Timer()
+	{
+		if (!ended) Stop();
+		std::cout << name << " duration in microseconds : "
+			<< std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+			<< "\n";
+
+		/*std::cout << "Elapsed time in milliseconds : "
+			<< std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
+			<< " ms\n";*/
+	}
+};
 
 	void ReplayFile::FixParents()
 	{
+		//Timer t("Preprocessing");
 		for (uint32_t i = 0; i < replayFile->classnets.size(); ++i)
 		{
 			const uint32_t index = replayFile->classnets.at(i)->index;
@@ -369,7 +405,58 @@ namespace CPPRP
 			}
 		}
 
+		printf("Ab");
+		const std::vector<std::string> position_names = {
+			"TAGame.CrowdActor_TA", "TAGame.VehiclePickup_Boost_TA", "TAGame.InMapScoreboard_TA",
+			"TAGame.BreakOutActor_Platform_TA", "Engine.WorldInfo", "TAGame.HauntedBallTrapTrigger_TA",
+			"Engine.KActor", "TAGame.CrowdManager_TA"
+		};
+		const std::vector<std::string> rotation_names = {
+			"TAGame.Ball_TA", "TAGame.Car_TA", "TAGame.Car_Season_TA",
+			"TAGame.Ball_Breakout_TA", "TAGame.Ball_Haunted_TA", "TAGame.Ball_God_TA"
+		};
+		//printf("Preprocess\n");
+		for(size_t i = 0; i < objectsSize; i++)
+		{
+			const std::string& name = replayFile->objects.at(i);
+			if(std::find(position_names.begin(), position_names.end(), name) != position_names.end())
+			{
+				positionIDs.push_back(i);
+				//printf("Position %i %s\n", i, name.c_str());
+			}
+			if(std::find(rotation_names.begin(), rotation_names.end(), name) != rotation_names.end())
+			{
+				rotationIDs.push_back(i);
+				//printf("Rotation %i %s\n", i, name.c_str());
+			}
 
+			classnetCache.push_back(GetClassnetByNameWithLookup(name));
+			if(classnetCache[i])
+				GetMaxPropertyId(classnetCache[i].get());
+		}
+printf("Aa");
+		const std::vector<std::string> attributeNames = 
+		{
+			"TAGame.ProductAttribute_UserColor_TA",
+			"TAGame.ProductAttribute_Painted_TA",
+			"TAGame.ProductAttribute_TeamEdition_TA",
+			"TAGame.ProductAttribute_SpecialEdition_TA",
+			"TAGame.ProductAttribute_TitleID_TA"
+		};
+		printf("A");
+		PreprocessTables();
+		for(size_t i = 0; i < attributeNames.size(); ++i)
+		{
+			printf("B");
+			const uint32_t attributeID = objectToId[attributeNames.at(i)];
+			attributeIDs.push_back(attributeID);
+			printf("[%i] %s", attributeID, attributeNames.at(i).c_str());
+		}
+		//attributeIDs
+
+
+
+		//printf("Done preprocessing\n");
 	}
 
 	std::string ReplayFile::GetParseLog(size_t size)
@@ -401,12 +488,13 @@ namespace CPPRP
 		}
 
 		
-		CPPBitReader<BitReaderType> networkReader((BitReaderType*)(replayFile->netstream_data), static_cast<size_t>(endPos), replayFile);
+		CPPBitReader<BitReaderType> networkReader((BitReaderType*)(replayFile->netstream_data), static_cast<size_t>(endPos), shared_from_this());
 
 		//FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
 
-		//try
+		try
 		{
+			int first = 0;
 			//char writeBuffer[65536 * 5];
 			//rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
 
@@ -436,7 +524,7 @@ namespace CPPRP
 				#endif
 				currentFrame < numFrames)
 			{
-
+				
 				Frame& f = frames[currentFrame];
 				f.frameNumber = currentFrame;
 				f.position = networkReader.GetAbsoluteBitPosition();
@@ -456,9 +544,9 @@ namespace CPPRP
 				}
 				#endif
 
-				for (const auto& newFrame : newFrameCallbacks)
+				//for (const auto& newFrame : newFrameCallbacks)
 				{
-					newFrame(f);
+					//newFrame(f);
 				}
 
 				//While there are actors in buffer (this frame)
@@ -470,6 +558,7 @@ namespace CPPRP
 						//Is new state
 						if (networkReader.read<bool>())
 						{
+
 							uint32_t name_id;
 							if (parseNameId)
 							{
@@ -496,12 +585,14 @@ namespace CPPRP
 							}
 							#endif
 
-							const std::string typeName = replayFile->objects.at(typeId);
-							auto classNet = GetClassnetByNameWithLookup(typeName);
+							//const std::string typeName = replayFile->objects.at(typeId);
+							//printf("%s\n", typeName.c_str());
+							auto classNet = classnetCache[typeId];//GetClassnetByNameWithLookup(typeName);
 
 							#ifndef PARSE_UNSAFE
 							if (classNet == nullptr)
 							{
+								const std::string typeName = replayFile->objects.at(typeId);
 								throw GeneralParseException("Classnet for " + typeName + " not found", networkReader);
 							}
 							#endif
@@ -509,47 +600,54 @@ namespace CPPRP
 
 
 							const uint32_t classId = classNet->index;
-							const std::string className = replayFile->objects.at(classId);
+							
 							//auto found = createObjectFuncs.find(className);
 
 							const auto& funcPtr = createFunctions[classId];
 							#ifndef PARSE_UNSAFE
 							if (funcPtr == nullptr)
 							{
+								const std::string className = replayFile->objects.at(classId);
 								std::cout << "Could not find class " << className << "\n";
 								throw GeneralParseException("Could not find class " + className , networkReader);
 								return;
 							}
 							#endif
-							std::shared_ptr<Engine::Actor> actorObject = funcPtr();
-							ActorStateData asd = { actorObject, classNet, actorId, name_id, classId };
+							std::unique_ptr<Engine::Actor> actorObject = funcPtr();
+							//ActorStateData asd =
 							if constexpr (IncludeParseLog)
 							{
+								const std::string typeName = replayFile->objects.at(typeId);
+								const std::string className = replayFile->objects.at(classId);
 								parseLog.push_back("New actor for " + typeName + ", classname " + className);
 							}
-
-							if (HasInitialPosition(className))
+							//printf("%s\n", className.c_str());
+							if (HasInitialPosition(classId))
 							{
 								actorObject->Location = networkReader.read<Vector3I>();
+								//printf("has pos\n");
 							}
-							if (HasRotation(className))
+							if (HasRotation(classId))
 							{
 								actorObject->Rotation = networkReader.read<Rotator>();
+								//printf("has rot\n");
 							}
-							actorStates[actorId] = asd;
-							for(const auto& createdFunc : createdCallbacks)
+							//printf("---\n");
+							actorStates[actorId] = { std::move(actorObject), classNet, actorId, name_id, classId };
+							//for(const auto& createdFunc : createdCallbacks)
 							{
-								createdFunc(asd);
+							//	createdFunc(asd);
 							}
 						}
 						else //Is existing state
 						{
+							
 							ActorStateData& actorState = actorStates[actorId];
 							std::vector<uint32_t> updatedProperties;
 							//While there's data for this state to be updated
 							while (networkReader.read<bool>())
 							{
-								const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet);
+								const uint16_t maxPropId = GetMaxPropertyId(actorState.classNet.get());
 								const uint32_t propertyId = networkReader.readBitsMax<uint32_t>(maxPropId + 1);
 								const uint32_t propertyIndex = actorState.classNet->property_id_cache[propertyId];
 
@@ -559,38 +657,43 @@ namespace CPPRP
 									snprintf(buff, sizeof(buff), "Calling parser for %s (%i, %i, %s)", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.nameId >= namesSize ? "unknown" : replayFile->names[actorState.nameId].c_str());
 									parseLog.push_back(std::string(buff));
 								}
-								updatedProperties.push_back(propertyIndex);
-								const auto& funcPtr = parseFunctions[propertyIndex];
-								/*if (b)
-								{
-									printf("Calling parser for %s (%i, %i, %s)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.nameId >= namesSize ? "unknown" : replayFile->names[actorState.nameId].c_str());
-								}*/
 
-								#ifndef PARSE_UNSAFE
-								if(funcPtr == nullptr)
-								{
-									const std::string& objName = replayFile->objects[propertyIndex];
-									//std::cout << "Property " << objName << " is undefined\n";
+								 {
 
-									std::string exceptionText = "Property " + objName + " is undefined\n" + GetParseLog(ParseLogSize);
-									throw GeneralParseException(exceptionText, networkReader);
 
+									updatedProperties.push_back(propertyIndex);
+									const auto& funcPtr = parseFunctions[propertyIndex];
+									/*if (b)
+									{
+										printf("Calling parser for %s (%i, %i, %s)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.nameId >= namesSize ? "unknown" : replayFile->names[actorState.nameId].c_str());
+									}*/
+
+#ifndef PARSE_UNSAFE
+									if (funcPtr == nullptr)
+									{
+										const std::string& objName = replayFile->objects[propertyIndex];
+										//std::cout << "Property " << objName << " is undefined\n";
+
+										std::string exceptionText = "Property " + objName + " is undefined\n" + GetParseLog(ParseLogSize);
+										throw GeneralParseException(exceptionText, networkReader);
+
+									}
+#endif
+									funcPtr(actorState.actorObject.get(), networkReader);
 								}
-								#endif
-								funcPtr(actorState.actorObject, networkReader);
 							}
-							for(const auto& updateFunc : updatedCallbacks)
+							//for(const auto& updateFunc : updatedCallbacks)
 							{
-								updateFunc(actorState, updatedProperties);
+							//	updateFunc(actorState, updatedProperties);
 							}
 						}
 					}
 					else
 					{
 						ActorStateData& actorState = actorStates[actorId];
-						for(const auto& deleteFunc : actorDeleteCallbacks)
+						//for(const auto& deleteFunc : actorDeleteCallbacks)
 						{
-							deleteFunc(actorState);
+							//deleteFunc(actorState);
 						}
 						actorStates.erase(actorId);
 					}
@@ -612,36 +715,47 @@ namespace CPPRP
 				throw GeneralParseException("Not enough bytes parsed! Expected ~" + std::to_string(networkReader.size) + ", parsed: " + std::to_string(networkReader.GetAbsoluteBitPosition()) + ". Diff(" + std::to_string(networkReader.size - networkReader.GetAbsoluteBitPosition()) + ")", networkReader);
 			}
 		}
-		//catch (...)
+		catch (...)
 		{
-			//printf("Caught ex\n");
-			//Parse(fileName, startPos, endPos);
+			printf("Caught ex\n");
+			//Parse(startPos, endPos);
 			//fclose(fp);
-			//throw;
+			throw;
 		}
 
 	}
 
-	const bool ReplayFile::HasInitialPosition(const std::string & name) const
+	const bool ReplayFile::HasInitialPosition(const uint32_t id) const
 	{
-		return !(name.compare("TAGame.CrowdActor_TA") == 0
-			|| name.compare("TAGame.VehiclePickup_Boost_TA") == 0
-			|| name.compare("TAGame.InMapScoreboard_TA") == 0
-			|| name.compare("TAGame.BreakOutActor_Platform_TA") == 0
-			|| name.compare("Engine.WorldInfo") == 0
-			|| name.compare("TAGame.HauntedBallTrapTrigger_TA") == 0
-			|| name.compare("Engine.KActor") == 0
-			|| name.compare("TAGame.CrowdManager_TA") == 0);
+		return std::find(positionIDs.begin(), positionIDs.end(), id) == positionIDs.end();
+		/*
+			const uint32_t classId = classNet->index;
+							const std::string className = replayFile->objects.at(classId);
+							//auto found = createObjectFuncs.find(className);
+
+							const auto& funcPtr = createFunctions[classId];
+		*/
+
+
+		// return !(name.compare("TAGame.CrowdActor_TA") == 0
+		// 	|| name.compare("TAGame.VehiclePickup_Boost_TA") == 0
+		// 	|| name.compare("TAGame.InMapScoreboard_TA") == 0
+		// 	|| name.compare("TAGame.BreakOutActor_Platform_TA") == 0
+		// 	|| name.compare("Engine.WorldInfo") == 0
+		// 	|| name.compare("TAGame.HauntedBallTrapTrigger_TA") == 0
+		// 	|| name.compare("Engine.KActor") == 0
+		// 	|| name.compare("TAGame.CrowdManager_TA") == 0);
 	}
 
-	const bool ReplayFile::HasRotation(const std::string & name) const
+	const bool ReplayFile::HasRotation(const uint32_t id) const
 	{
-		return name.compare("TAGame.Ball_TA") == 0
-			|| name.compare("TAGame.Car_TA") == 0
-			|| name.compare("TAGame.Car_Season_TA") == 0
-			|| name.compare("TAGame.Ball_Breakout_TA") == 0
-			|| name.compare("TAGame.Ball_Haunted_TA") == 0
-			|| name.compare("TAGame.Ball_God_TA") == 0;
+		return std::find(rotationIDs.begin(), rotationIDs.end(), id) != rotationIDs.end();
+		// return name.compare("TAGame.Ball_TA") == 0
+		// 	|| name.compare("TAGame.Car_TA") == 0
+		// 	|| name.compare("TAGame.Car_Season_TA") == 0
+		// 	|| name.compare("TAGame.Ball_Breakout_TA") == 0
+		// 	|| name.compare("TAGame.Ball_Haunted_TA") == 0
+		// 	|| name.compare("TAGame.Ball_God_TA") == 0;
 	}
 
 	const std::pair<const uint32_t, const KeyFrame> ReplayFile::GetNearestKeyframe(uint32_t frame) const
@@ -843,7 +957,7 @@ return (*found).second;
 		return 0;
 	}
 
-	const uint16_t ReplayFile::GetMaxPropertyId(const std::shared_ptr<ClassNet>& cn)
+	const uint16_t ReplayFile::GetMaxPropertyId(ClassNet* cn)
 	{
 		if (cn == nullptr)
 		{
@@ -857,7 +971,7 @@ return (*found).second;
 		return cn->max_prop_id;
 	}
 
-	const uint16_t ReplayFile::FindMaxPropertyId(const std::shared_ptr<ClassNet>& cn, uint16_t maxProp) const
+	const uint16_t ReplayFile::FindMaxPropertyId(const ClassNet* cn, uint16_t maxProp) const
 	{
 		if (cn == nullptr)
 		{
@@ -873,7 +987,7 @@ return (*found).second;
 		}
 		if (cn->parent_class)
 		{
-			return FindMaxPropertyId(cn->parent_class, maxProp);
+			return FindMaxPropertyId(cn->parent_class.get(), maxProp);
 		}
 		return maxProp;
 	}
