@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 			{
 				if (entry.path().filename().u8string().find(".replay") == std::string::npos)
 					continue;
-				if (replayFilesToLoad.size() >= 20)
+				if (replayFilesToLoad.size() >= 5335345)
 					break;
 				replayFilesToLoad.push(entry.path());
 			}
@@ -331,6 +331,6 @@ int main(int argc, char *argv[])
 		printf("Success: %i, fail: %i (%.2f%%) corrupt: %i Average parse time %.5f ms (totaltime/successfulparses)\n", (success.load()), fail.load(), ((double)success.load() / (double)((success.load()) + fail.load())) * 100, corrupt.load(), (elapsed / (double)success.load()));*/
 	}
 	
-	system("pause");
+	//system("pause");
 	return 0;
 }

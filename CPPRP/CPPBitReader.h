@@ -84,9 +84,11 @@ namespace CPPRP
 		{
 			overflow = validBits;
 			bits -= validBits;
-			//result |= bt >> bit_position;
-			//bit_position = (64 - validBits)
-			result = (b->cachedVal >> (64 - validBits));// &((1ull << (64 - validBits)) - 1)) << (bits);
+			
+
+			//Need special case for validBits == 0, since >> 64 is UB, but is a little ugly imo
+			//result = validBits == 0 ? 0 : (b->cachedVal >> (64 - validBits));
+			result = (b->cachedVal >> (64 - validBits));
 			bitreader_load_cache(b);
 			validBits = 64;
 		}
@@ -107,11 +109,12 @@ namespace CPPRP
 	class CPPBitReader
 	{
 	public:
-		const T * start;
-		const T * data;
-		uint32_t t_position;
-		uint32_t bit_position;
-		const size_t size; //Should be in bits?
+		bitreader_t b;
+		
+
+		const int size;
+		const int t_position = 0;
+		const int bit_position = 0;
 
 		//Let's store this data in here, saves a call to owner.
 		//Use during network stream parsing
@@ -125,97 +128,15 @@ namespace CPPRP
 		template<typename X>
 		inline const X get_bits(uint16_t n)
 		{
-			#ifndef PARSE_UNSAFE
-			if (GetAbsoluteBitPosition() + n > size)
+#ifndef PARSE_UNSAFE
+			if (GetAbsoluteBitPosition() + n > b.len)
 			{
 				throw std::runtime_error("Attempted to read beyond buffer");
 			}
-			#endif
+#endif
 
-			uint32_t validBits = sizeof(T) - (bit_position % sizeof(T));
-			uint64_t result = 0;
-
-
-			uint8_t overflow = 0;
-			if (bits >= validBits)
-			{
-				overflow = validBits;
-				bits -= validBits;
-				//result |= bt >> bit_position;
-				//bit_position = (64 - validBits)
-				result = (b->cachedVal >> (64 - validBits));// &((1ull << (64 - validBits)) - 1)) << (bits);
-				bitreader_load_cache(b);
-				validBits = 64;
-			}
-			validBits -= bits;
-
-
-			//result |= ((bt >> (bit_position))& ((1ULL << n) - 1)) << bit_pos;
-			//(((b->cachedVal) >> 8) & (((1ULL << bits) - 1)))
-			result |= (((b->cachedVal) >> (64 - validBits - bits)) & ((1ULL << bits) - 1)) << overflow;// >> (validBits);
-			//result |= ((b->cachedVal >> (64 - validBits))& ((1ull << (64 - validBits)) - 1));
-
-			b->validBits = validBits;
-			return (result);
-
-			//constexpr uint16_t SIZE_T = sizeof(T) * 8;
-			//X result = 0;
-			//X bit_pos = 0;
-			//T bt = *data;
-			//if (bit_position > 0)
-			//{
-			//	if (n > (SIZE_T - bit_position)) //n finishes this byte and needs next byte for sure
-			//	{
-			//		bit_pos += SIZE_T - bit_position;
-			//		n -= SIZE_T - bit_position;
-			//		result |= bt >> bit_position;
-
-			//		bit_position = 0;
-			//		++t_position;
-			//		bt = *(++data);
-			//	}
-			//	else //n doesn't finish this byte
-			//	{
-			//		result |= (bt >> (bit_position)) & ((1ULL << n) - 1);
-			//		bit_position += n;
-
-			//		if (bit_position == SIZE_T)
-			//		{
-			//			++data;
-			//			//bt = *(++data);
-			//			++t_position;
-			//			bit_position = 0;
-			//		}
-
-			//		return result;
-			//	}
-			//}
-
-			////If we reached this point, we know n > 0
-			//while (n > (SIZE_T - 1))
-			//{
-			//	result |= static_cast<X>(bt) << (bit_pos);
-			//	++t_position;
-			//	bt = *(++data); //Valgrind says this has invalid reads, probably at end of replay and there's no bytes left?
-			//	n -= SIZE_T;
-			//	bit_pos += SIZE_T;
-			//}
-
-			//if (n > 0)
-			//{
-			//	result |= ((bt >> (bit_position)) & ((1ULL << n) - 1)) << bit_pos;
-			//	bit_position += n;
-
-			//	if (bit_position == SIZE_T)
-			//	{
-			//		++data;
-			//		//bt = *(++data);
-			//		++t_position;
-			//		bit_position = 0;
-			//	}
-			//}
-
-			//return result;
+			uint64_t res = bitreader_read_bits(&b, n);
+			return *(X*)(&res);
 		}
 
 		template<typename X>
@@ -225,16 +146,9 @@ namespace CPPRP
 
 			result = read<X>(max_bits);
 
-			if((result + (1 << max_bits)) < maxValue)
+			if ((result + (1 << max_bits)) < maxValue)
 			{
-				result |= (((*data) >> bit_position++) & 1ULL) << max_bits;
-
-				if (bit_position == sizeof(T) * 8)
-				{
-					++data;
-					t_position++;
-					bit_position = 0;
-				}
+				result |= (read<X>(1)) << max_bits;
 			}
 			return result;
 		}
@@ -543,7 +457,6 @@ namespace CPPRP
 		return uniqueId;
 	}
 
-
 	template<>
 	template<>
 	inline const std::string CPPBitReader<BitReaderType>::read<std::string>()
@@ -555,27 +468,27 @@ namespace CPPRP
 			return "";
 		}
 
-		#ifndef PARSE_UNSAFE
+#ifndef PARSE_UNSAFE
 		if (final_length > 1024)
 		{
 			if (engineVersion == 0
 				&& licenseeVersion == 0
 				&& netVersion == 0)
 			{
-				throw InvalidVersionException(0,0,0);
+				throw InvalidVersionException(0, 0, 0);
 			}
 			else
 			{
 				throw std::runtime_error("Got unwanted string length, read value " + std::to_string(length) + ", reading bytes " + std::to_string(final_length) + ". (" + std::to_string(this->bit_position) + ")");
 			}
 		}
-		#endif
+#endif
 
 		std::string str;
-		
-		if(bit_position % 8 == 0)
+
+		if (b.validBits % 8 == 0)
 		{
-			const char* text = ((char*)data) + (bit_position/8);
+			const char* text = ((char*)&b.data[b.bytes_read - ((b.validBits) / 8)]);
 			str = std::string(text);
 			skip(final_length * 8);
 		}
@@ -603,10 +516,7 @@ namespace CPPRP
 	: engineVersion(owner_->header.engineVersion), licenseeVersion(owner_->header.licenseeVersion), 
 	netVersion(owner_->header.netVersion), size(sizee)
 	{
-		this->start = data;
-		this->data = data;
-		this->t_position = 0;
-		this->bit_position = 0;
+		bitreader_init(&b, (uint8_t*)data, sizee);
 	}
 
 	template<typename T>
@@ -614,30 +524,20 @@ namespace CPPRP
 		const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV) : engineVersion(engineV), 
 		licenseeVersion(licenseeV), netVersion(netV), size(sizee)
 	{
-		this->start = data;
-		this->data = data;
-		this->t_position = 0;
-		this->bit_position = 0;
+		bitreader_init(&b, (uint8_t*)data, sizee);
 	}
 
 	template<typename T>
 	inline CPPBitReader<T>::CPPBitReader(const CPPBitReader& other) 
 	: engineVersion(other.engineVersion), licenseeVersion(other.licenseeVersion), netVersion(other.netVersion), size(other.size)
 	{
-		this->start = other.start;
-		this->data = other.data;
-		this->t_position = other.t_position;
-		this->bit_position = other.bit_position;
+		bitreader_init(&b, other.b.data, other.b.len);
 	}
 
 	template<typename T>
 	inline CPPBitReader<T>::CPPBitReader() : engineVersion(0), licenseeVersion(0), netVersion(0)
 	{
-		this->start = NULL;
-		this->data = NULL;
-		this->size = 0;
-		this->t_position = 0;
-		this->bit_position = 0;
+
 	}
 
 	template<typename T>
@@ -666,60 +566,86 @@ namespace CPPRP
 	template <typename T>
 	inline const bool CPPBitReader<T>::canRead() const noexcept
 	{
-		return GetAbsoluteBitPosition() < size;
+		return GetAbsoluteBitPosition() < b.len;
 	}
 
 	template <typename T>
 	inline const bool CPPBitReader<T>::canRead(int bits) const noexcept
 	{
-		return GetAbsoluteBitPosition() + bits < size;
+		return GetAbsoluteBitPosition() + bits < b.len;
 	}
 
 	template <typename T>
 	void CPPBitReader<T>::goback(int32_t num)
 	{
-		constexpr uint32_t SIZE_IN_BITS = (sizeof(T) * 8);
+		if (b.validBits + num > 64)
+		{
+			//num -= b.validBits;
+			int old = b.validBits;
+			if (old + num > 64)
+				int dfsdf = 5;
+			//num -= b.validBits;
+			b.validBits = 0;
+
+			b.bytes_read -= ((num / 64) + 2) * 8;
+			bitreader_load_cache(&b);
+			b.validBits = ((num + old) % 64);
+			//b.validBits = 64 - (num % 64);
+		}
+		else
+		{
+			b.validBits += num; //no need to reset cache
+		}
+		/*constexpr uint32_t SIZE_IN_BITS = (sizeof(T) * 8);
 
 		if (static_cast<int32_t>(bit_position) - num < 0)
 		{
 			num -= bit_position;
 			bit_position = SIZE_IN_BITS - (num % SIZE_IN_BITS);
-			t_position -= (abs(num)) / SIZE_IN_BITS + 1; 
+			t_position -= (abs(num)) / SIZE_IN_BITS + 1;
 		}
 		else
 		{
 			bit_position -= num;
 		}
-		data = start + t_position;
+		data = start + t_position;*/
 	}
 
 	template<typename T>
 	inline void CPPBitReader<T>::skip(uint32_t num)
 	{
-		constexpr uint32_t SIZE_IN_BITS = (sizeof(T) * 8);
-		if (bit_position + num >= SIZE_IN_BITS)
+		/*for(int i = 0; i < num; ++i)
+			read<uint64_t>(1);*/
+			//b.bytes_read += (num / 64) * 8;
+
+			//bitreader_t br2 = b;
+			//uint32_t num2 = num;
+		if (b.validBits <= num)
 		{
-			num -= SIZE_IN_BITS - bit_position;
-			bit_position = num % SIZE_IN_BITS;
-			t_position += num / SIZE_IN_BITS + 1; // +1 since bit_position + num >= SIZE_IN_BITS
+
+			num -= b.validBits;
+			b.validBits = 0;
+			b.bytes_read += ((num / 64)) * 8;
+			bitreader_load_cache(&b);
+			b.validBits = (64 - (num % 64));
 		}
 		else
 		{
-			bit_position += num;
+			b.validBits -= num;
 		}
-		data = start + t_position;
+		
 	}
 
 	template<typename T>
-	inline const size_t CPPBitReader<T>::GetAbsoluteBytePosition() const noexcept
+	const size_t CPPBitReader<T>::GetAbsoluteBytePosition() const noexcept
 	{
-		return (t_position * sizeof(T)) + (bit_position / 8);
+		return (b.bytes_read) - (b.validBits / 8);
 	}
 
 	template<typename T>
-	inline const size_t CPPBitReader<T>::GetAbsoluteBitPosition() const noexcept
+	const size_t CPPBitReader<T>::GetAbsoluteBitPosition() const noexcept
 	{
-		return (t_position * sizeof(T) * 8) + bit_position;
+		return (b.bytes_read * 8) - (b.validBits);
 	};
 
 	template<typename T>
