@@ -28,7 +28,7 @@ namespace CPPRP
 
 	struct ActorStateData
 	{
-		std::unique_ptr<Engine::Actor> actorObject;
+		std::shared_ptr<Engine::Actor> actorObject;
 		std::shared_ptr<ClassNet> classNet;
 		uint32_t actorId{0};
 		uint32_t nameId{ 0 };

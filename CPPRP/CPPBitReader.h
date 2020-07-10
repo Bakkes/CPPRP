@@ -10,6 +10,7 @@
 #include <cmath>
 #include <memory>
 
+#define USESIMD
 
 #define QUAT_NUM_BITS (18)
 #define MAX_QUAT_VALUE (0.7071067811865475244f)
@@ -215,7 +216,7 @@ namespace CPPRP
 	template<>
 	inline const float CPPBitReader<BitReaderType>::read<float>()
 	{
-		assert(sizeof(float) == sizeof(uint32_t));
+		static_assert(sizeof(float) == sizeof(uint32_t));
 		const uint32_t value = read<uint32_t>();
 		return reinterpret_cast<const float&>(value);
 	}

@@ -613,7 +613,7 @@ public:
 								return;
 							}
 							#endif
-							std::unique_ptr<Engine::Actor> actorObject = funcPtr();
+							std::shared_ptr<Engine::Actor> actorObject = funcPtr();
 							//ActorStateData asd =
 							if constexpr (IncludeParseLog)
 							{
@@ -633,17 +633,18 @@ public:
 								//printf("has rot\n");
 							}
 							//printf("---\n");
-							actorStates[actorId] = { std::move(actorObject), classNet, actorId, name_id, classId };
-							//for(const auto& createdFunc : createdCallbacks)
+							ActorStateData asd =  { std::move(actorObject), classNet, actorId, name_id, classId };
+							actorStates[actorId] = asd;
+							for(const auto& createdFunc : createdCallbacks)
 							{
-							//	createdFunc(asd);
+								createdFunc(asd);
 							}
 						}
 						else //Is existing state
 						{
 							
 							ActorStateData& actorState = actorStates[actorId];
-							//std::set<uint32_t> updatedProperties;
+							std::vector<uint32_t> updatedProperties;
 							//updatedProperties.reserve(100);
 							//While there's data for this state to be updated
 							while (networkReader.read<bool>())
@@ -662,7 +663,7 @@ public:
 								 {
 
 
-									//updatedProperties.insert(propertyIndex);
+									updatedProperties.push_back(propertyIndex);
 									const auto& funcPtr = parseFunctions[propertyIndex];
 									/*if (b)
 									{
@@ -683,18 +684,18 @@ public:
 									funcPtr(actorState.actorObject.get(), networkReader);
 								}
 							}
-							//for(const auto& updateFunc : updatedCallbacks)
+							for(const auto& updateFunc : updatedCallbacks)
 							{
-							//	updateFunc(actorState, updatedProperties);
+								updateFunc(actorState, updatedProperties);
 							}
 						}
 					}
 					else
 					{
 						ActorStateData& actorState = actorStates[actorId];
-						//for(const auto& deleteFunc : actorDeleteCallbacks)
+						for(const auto& deleteFunc : actorDeleteCallbacks)
 						{
-							//deleteFunc(actorState);
+							deleteFunc(actorState);
 						}
 						actorStates.erase(actorId);
 					}

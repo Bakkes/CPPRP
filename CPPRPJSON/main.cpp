@@ -217,7 +217,7 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 
 				writer.String("ClassName");
 				writer.String(className);
-				bool hasInitialPosition = replayFile->HasInitialPosition(className);
+				bool hasInitialPosition = replayFile->HasInitialPosition(created.nameId);
 				writer.String("HasInitialPosition");
 				writer.Bool(hasInitialPosition);
 				if (hasInitialPosition)
@@ -226,7 +226,7 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 					CPPRP::JSON::Serialize<Writer>(writer, created.actorObject->Location);
 				}
 
-				bool hasInitialRotation = replayFile->HasRotation(className);
+				bool hasInitialRotation = replayFile->HasRotation(created.nameId);
 				writer.String("HasInitialRotation");
 				writer.Bool(hasInitialRotation);
 				if (hasInitialRotation)
