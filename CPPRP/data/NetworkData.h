@@ -56,7 +56,7 @@ namespace CPPRP
 	{
 		__ParserAttribute__(NumBits, 3)
 		uint8_t number;
-		std::shared_ptr<UniqueId> player_id;
+		OnlineID player_id;
 		std::string player_name;
 		uint8_t status;
 	};
@@ -203,7 +203,7 @@ namespace CPPRP
 	__ParserAttribute__(Consume, false)
 	struct PartyLeader
 	{
-		std::shared_ptr<UniqueId> id;
+		OnlineID id;
 	};
 
 

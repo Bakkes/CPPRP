@@ -50,15 +50,8 @@ namespace CPPRP
 		AttributeType att;
 		bool unknown1 = reader.read<bool>();
 		uint32_t class_index = reader.read<uint32_t>();
-		/*if (class_index > reader.owner->replayFile->objects.size())
-		{
-			throw AttributeParseException<BitReaderType>("ProductAttribute", reader);
-		}*/
-		//std::string className = reader.owner->replayFile->objects[class_index];
 		size_t index = std::distance(reader.attributeIDs.begin(),
 			std::find(reader.attributeIDs.begin(), reader.attributeIDs.end(), class_index));
-		//printf("[%i|%i] %s", index, class_index, className.c_str());
-		//reader.owner->attributeIDs.find()
 		switch((AttributeTypes)index)
 		{
 			case AttributeTypes::UserColor:
@@ -230,18 +223,20 @@ namespace CPPRP
 
 	template<>
 	inline const PartyLeader Consume(CPPBitReader<BitReaderType>& reader) {
-		PartyLeader item{ 0 };
+		PartyLeader item;
 		uint8_t test = reader.read<uint8_t>();
 		if (test != 0)
 		{
 			reader.goback(8);
-			item.id = reader.read<std::shared_ptr<UniqueId>>();
+
+			item.id = reader.read<OnlineID>();
 		}
 		else
 		{
-			item.id = std::make_shared<UniqueId>();
-			item.id->platform = 0;
-			item.id->splitscreenID = 0;
+			UniqueId ui;
+			ui.platform = 0;
+			ui.splitscreenID = 0;
+			item.id = ui;
 		}
 		return item;
 	}
@@ -265,9 +260,10 @@ namespace CPPRP
 	inline const Reservation Consume(CPPBitReader<BitReaderType>& reader) {
 		Reservation item;
 		item.number = reader.read<uint8_t>(3);
-		item.player_id = reader.read<std::shared_ptr<UniqueId>>();
+		item.player_id = reader.read<OnlineID>();
 		
-		if (item.player_id->platform == Platform_Unknown && (reader.licenseeVersion <= 18 || reader.netVersion != 0))
+		//Is always an unique ID
+		if (reinterpret_cast<UniqueId*>(&item.player_id)->platform == Platform_Unknown && (reader.licenseeVersion <= 18 || reader.netVersion != 0))
 		{
 		}
 		else

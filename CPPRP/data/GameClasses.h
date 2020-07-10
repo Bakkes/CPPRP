@@ -111,7 +111,7 @@ namespace CPPRP
 			bool bIsInactive;
 			bool bOnlySpectator;
 			uint8_t Ping;
-			class std::shared_ptr<struct UniqueId> UniqueId;
+			OnlineID UniqueId;
 
 			//Unused
 			uint32_t Deaths;

@@ -349,101 +349,98 @@ namespace CPPRP
 	}
 #endif
 
+	
 	template<>
 	template<>
-	inline const std::shared_ptr<UniqueId> CPPBitReader<BitReaderType>::read<std::shared_ptr<UniqueId>>()
+	inline const OnlineID CPPBitReader<BitReaderType>::read<OnlineID>()
 	{
-		std::shared_ptr<UniqueId> uniqueId;
+		OnlineID uniqueId;
 		
 		const uint8_t platform = read<uint8_t>();
 		switch (platform)
 		{
 		case Platform_Steam:
-			uniqueId = std::make_shared<SteamID>();
-			std::static_pointer_cast<SteamID>(uniqueId)->steamID = read<uint64_t>(sizeof(uint64_t) * 8);
-
+		{
+			auto tmp = SteamID();
+			tmp.steamID = read<uint64_t>(sizeof(uint64_t) * 8);
+			uniqueId = tmp;
 			break;
+		}
 		case Platform_Dingo:
-			uniqueId = std::make_shared<XBoxID>();
-			std::static_pointer_cast<XBoxID>(uniqueId)->xboxID = read<uint64_t>(sizeof(uint64_t) * 8);
+		{
+			auto tmp = XBoxID();
+			tmp.xboxID = read<uint64_t>(sizeof(uint64_t) * 8);
+			uniqueId = tmp;
 			break;
+		}
 		case Platform_QQ:
-			uniqueId = std::make_shared<QQID>();
-			std::static_pointer_cast<QQID>(uniqueId)->qqID = read<uint64_t>(sizeof(uint64_t) * 8);
+		{
+			auto tmp = QQID();
+			tmp.qqID = read<uint64_t>(sizeof(uint64_t) * 8);
+			uniqueId = tmp;
 			break;
+		}
 		case Platform_PS4:
+		{
+			auto tmp = PS4ID();
 
-			//uniqueId = std::make_shared<PS4ID>();
-			//if (netVersion >= 1)
-			//{
-			//	std::static_pointer_cast<PS4ID>(uniqueId)->psId = read<uint64_t>(40 * 8);
-			//}
-			//else
-			//{
-			//	std::static_pointer_cast<PS4ID>(uniqueId)->psId = read<uint64_t>(32 * 8);
-			//}
-			//break;
-			uniqueId = std::make_shared<PS4ID>();
-			
 			#define PSY4_MAX_NAME_LENGTH 16
 			char playerNameTemp[PSY4_MAX_NAME_LENGTH];
 			for (uint32_t i = 0; i < PSY4_MAX_NAME_LENGTH; ++i)
 			{
 				playerNameTemp[i] = read<char>();
-				//if (playerNameTemp[i] == '\0')
-				//{
-				//	//skip(PSY4_MAX_NAME_LENGTH - i);
-				//	break;
-				//}
 			}
 
-			std::static_pointer_cast<PS4ID>(uniqueId)->playerName = std::string(playerNameTemp);
-			std::static_pointer_cast<PS4ID>(uniqueId)->unknown1 = read<uint64_t>();
+			tmp.playerName = std::string(playerNameTemp);
+			tmp.unknown1 = read<uint64_t>();
 			if (netVersion >= 1)
 			{
-				std::static_pointer_cast<PS4ID>(uniqueId)->unknown2 = read<uint64_t>();
+				tmp.unknown2 = read<uint64_t>();
 			}
-			std::static_pointer_cast<PS4ID>(uniqueId)->psId = read<uint64_t>();
+			tmp.psId = read<uint64_t>();
+			uniqueId = tmp;
 			break;
+		}
 		case Platform_Switch:
 		{
-			std::shared_ptr<SwitchID> switchID = std::make_shared<SwitchID>();
-			switchID->a = read<uint64_t>(64);
-			switchID->b = read<uint64_t>(64);
-			switchID->c = read<uint64_t>(64);
-			switchID->d = read<uint64_t>(64);
-			uniqueId = switchID;
+			auto tmp = SwitchID();
+			tmp.a = read<uint64_t>(64);
+			tmp.b = read<uint64_t>(64);
+			tmp.c = read<uint64_t>(64);
+			tmp.d = read<uint64_t>(64);
+			uniqueId = tmp;
 		}
 			break;
 		case Platform_PsyNet:
 		{
-			std::shared_ptr<PsyNetID> psyNetID = std::make_shared<PsyNetID>();
+			auto tmp = PsyNetID();
 			if (engineVersion >= 868 && licenseeVersion >= 24 && netVersion >= 10)
 			{
-				psyNetID->a = read<uint64_t>(64);
+				tmp.a = read<uint64_t>(64);
 			}
 			else
 			{
-				psyNetID->a = read<uint64_t>(64);
-				psyNetID->b = read<uint64_t>(64);
-				psyNetID->c = read<uint64_t>(64);
-				psyNetID->d = read<uint64_t>(64);
+				tmp.a = read<uint64_t>(64);
+				tmp.b = read<uint64_t>(64);
+				tmp.c = read<uint64_t>(64);
+				tmp.d = read<uint64_t>(64);
 			}
-			uniqueId = psyNetID;
+			uniqueId = tmp;
 		}
 			break;
 		case Platform_Unknown:
 		{
-			uniqueId = std::make_shared<UnkownId>();
+			auto tmp = UnknownId();
 			if (licenseeVersion > 18 && netVersion == 0)
 			{
-				std::static_pointer_cast<UnkownId>(uniqueId)->unknown = 0;
+				tmp.unknown = 0;
 			}
 			else
 			{
 
-				std::static_pointer_cast<UnkownId>(uniqueId)->unknown = read<uint32_t>(3 * 8);
+				tmp.unknown = read<uint32_t>(3 * 8);
 			}
+			uniqueId = tmp;
 		}
 			//printf("Unknown platform found!\n");
 			break;
@@ -452,8 +449,15 @@ namespace CPPRP
 			//assert(1 == 2);
 			break;
 		}
-		uniqueId->platform = platform;
-		uniqueId->splitscreenID= read<uint8_t>();
+		uint8_t splitscreenID = read<uint8_t>();
+		std::visit(
+			[platform, splitscreenID](UniqueId& base)
+			{
+				base.platform = platform;
+				base.splitscreenID = splitscreenID;
+			},
+			uniqueId);
+		
 		return uniqueId;
 	}
 
