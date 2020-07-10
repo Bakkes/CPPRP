@@ -148,8 +148,20 @@ namespace CPPRP
 
 			if ((result + (1 << max_bits)) < maxValue)
 			{
-				result |= (read<X>(1)) << max_bits;
+				result |= ((b.cachedVal >> (64 - b.validBits)) & 1) << max_bits;
+
+				if (b.validBits == 1)
+				{
+					read<X>(1);
+				}
+				else
+				{
+					b.validBits -= 1;
+				}
+				
+				
 			}
+
 			return result;
 		}
 
