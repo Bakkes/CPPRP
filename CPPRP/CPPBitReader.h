@@ -386,12 +386,16 @@ namespace CPPRP
 
 			#define PSY4_MAX_NAME_LENGTH 16
 			char playerNameTemp[PSY4_MAX_NAME_LENGTH];
-			for (uint32_t i = 0; i < PSY4_MAX_NAME_LENGTH; ++i)
+
+			//Psynet names are always length 16, so optimize by interpreting 128 bits
+			*reinterpret_cast<uint64_t*>(&playerNameTemp) = read<uint64_t>();
+			*reinterpret_cast<uint64_t*>(&playerNameTemp[8]) = read<uint64_t>();
+			/*for (uint32_t i = 0; i < PSY4_MAX_NAME_LENGTH; ++i)
 			{
 				playerNameTemp[i] = read<char>();
-			}
+			}*/
 
-			tmp.playerName = std::string(playerNameTemp);
+			tmp.playerName = std::string(playerNameTemp, PSY4_MAX_NAME_LENGTH);
 			tmp.unknown1 = read<uint64_t>();
 			if (netVersion >= 1)
 			{
@@ -499,7 +503,19 @@ namespace CPPRP
 		else
 		{
 			str.resize(final_length - 1);
-			for (size_t i = 0; i < final_length; ++i)
+			int todo = final_length;
+			while (todo > 7)
+			{
+				*reinterpret_cast<uint64_t*>(&str[final_length - todo]) = read<uint64_t>();
+				todo -= 8;
+			}
+			if (todo > 3)
+			{
+				*reinterpret_cast<uint64_t*>(&str[final_length - todo]) = read<uint32_t>();
+				todo -= 4;
+			}
+
+			for (size_t i = final_length - todo; i < final_length; ++i)
 			{
 				str[i] = read<uint8_t>();
 			}
