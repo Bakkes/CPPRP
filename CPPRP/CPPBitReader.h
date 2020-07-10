@@ -335,9 +335,13 @@ namespace CPPRP
 	inline const Quat CPPBitReader<BitReaderType>::read<Quat>()
 	{
 		const uint8_t largest = read<uint8_t>(2);
-		const float a = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
-		const float b = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
-		const float c = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
+		const uint64_t test = read<uint64_t>(QUAT_NUM_BITS * 3);
+		const uint64_t rightShift = static_cast<uint64_t>(64 - (QUAT_NUM_BITS * 3));
+		const float a = uncompress_quat(static_cast<int32_t>((test << rightShift) >> rightShift));
+		const float b = uncompress_quat(static_cast<int32_t>((test << (64UL - QUAT_NUM_BITS * 2UL)) >> rightShift));
+		const float c = uncompress_quat(static_cast<int32_t>((test << (64UL - QUAT_NUM_BITS * 3UL)) >> rightShift));
+
+
 		const float extra = std::sqrt(1.f - (a * a) - (b * b) - (c * c));
 
 		Quat q = { 0 };
