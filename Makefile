@@ -2,7 +2,7 @@ TARGET_BIN ?= test
 BUILD_DIR ?= build
 SRC_DIRS ?= CPPRP \
 			CPPRP/exceptions \
-						CPPRPJSON
+						CPPRPTest
 						
 										#		CPPRPTest \
 						
@@ -13,7 +13,7 @@ INC_DIRS ?= CPPRP \
 	./CPPRP/generated \
 	./CPPRP/bitreaders \
 	./libs/rapidjson/include/ \
-						CPPRPJSON
+						CPPRPTest
 
 SRCS := $(shell find $(SRC_DIRS) -maxdepth 1 -name *.cpp) ${SRC_FILES}
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
@@ -28,13 +28,13 @@ else
 	DEBUG ?= 1
 endif
 BUILDFLAGS := -DDEBUG=$(DEBUG) -DRELEASE=$(RELEASE)
-CXX ?= g++-9
-CXXFLAGS ?= -fPIC -std=c++17 -static-libstdc++ $(INC_FLAGS) -w  -Wfatal-errors -DCPPRP_PRETTYSUPPORT -lstdc++fs# -ffast-math -DUSESIMD -DPARSE_UNSAFE 
+CXX = circle #g++-9
+CXXFLAGS ?= -fPIC  $(INC_FLAGS) -DCPPRP_PRETTYSUPPORT
 LDFLAGS ?= ${LIB_FLAGS}
 ifeq ($(RELEASE),0)
 	CXXFLAGS += -O2 -ggdb
 else
-	CXXFLAGS += -O3 -s -g -DNDEBUG #-s
+	CXXFLAGS += -O3 -g -DNDEBUG #-s
 endif
 all: preprocess $(BUILD_DIR)/${TARGET_BIN}
 $(BUILD_DIR)/${TARGET_BIN}: $(OBJS) 

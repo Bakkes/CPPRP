@@ -4,7 +4,7 @@
 #pragma comment( lib, "bakkesmod.lib" )
 #pragma comment(lib, "CPPRP.lib")
 #include "../CPPRP/ReplayFile.h"
-#include "../CPPRP/ReplayException.h"
+#include "../CPPRP/exceptions/ReplayException.h"
 
 struct ReplicationData
 {
@@ -28,6 +28,6 @@ public:
 	virtual void onLoad();
 	virtual void onUnload();
 	void GVCTick(std::string name);
-	void OnTick(CarWrapper cw, void * params, string funcName);
+	void OnTick(CarWrapper cw, void * params, std::string funcName);
 };
 

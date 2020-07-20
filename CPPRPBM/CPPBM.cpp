@@ -148,7 +148,7 @@ Quat slerp(Quat q1, Quat q2, float t)
 
 void CPPBM::onLoad()
 {
-	replayFile = std::make_shared<CPPRP::ReplayFile>("F:/Alpaca/195D30EB454842FA5F3F849A120F0237.replay");
+	replayFile = std::make_shared<CPPRP::ReplayFile>("K:/Alpaca1000/0E42C57743B81717DBD855B1085F2D79.replay");
 	gameWrapper->HookEventWithCaller<CarWrapper>("Function TAGame.Car_TA.SetVehicleInput",
 		bind(&CPPBM::OnTick, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	gameWrapper->HookEvent("Function Engine.GameViewportClient.Tick",
@@ -156,15 +156,15 @@ void CPPBM::onLoad()
 
 	replayFile->Load();
 	replayFile->DeserializeHeader();
-	for (auto it : replayFile->GetProperty<std::vector<std::unordered_map<std::string, std::shared_ptr<CPPRP::Property>>>>("PlayerStats"))
+	//for (auto it : replayFile->GetProperty<std::vector<std::unordered_map<std::string, std::shared_ptr<CPPRP::Property>>>>("PlayerStats"))
 	{
-		for (auto it2 : it)
+		//for (auto it2 : it)
 		{
-			printf("%s\n", it2.first.c_str());
+		//	printf("%s\n", it2.first.c_str());
 		}
 	}
 
-	replayFile->tickables.push_back([&](const uint32_t frameNumber, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
+	replayFile->tickables.push_back([&](const CPPRP::Frame f, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
 	{
 		for (auto& actor : actorStats)
 		{
@@ -178,8 +178,8 @@ void CPPBM::onLoad()
 				rd.steer = car->ReplicatedSteer;
 				rd.throttle = car->ReplicatedThrottle;
 				rd.handbrake = car->bReplicatedHandbrake;
-				rd.delta = replayFile->frames[frameNumber].time - replayFile->frames[0].time;
-				locations[frameNumber][actor.first] = rd;
+				rd.delta = replayFile->frames[f.frameNumber].time - replayFile->frames[0].time;
+				locations[f.frameNumber][actor.first] = rd;
 				
 				cvarManager->log("replicatedsteer " + std::to_string(car->ReplicatedRBState.position.x) + "|" + std::to_string(car->ReplicatedRBState.position.y) + "|" + std::to_string(car->ReplicatedRBState.position.z) + "|" + std::to_string(rd.steer) );
 			}
@@ -300,12 +300,12 @@ void CPPBM::onLoad()
 					Quat nextQuat(end.rbState.rotation.w, end.rbState.rotation.x, end.rbState.rotation.y, end.rbState.rotation.z);
 					Quat slerped = slerp(oldQuat, nextQuat, ff);
 
-					/*locations[i][act.first].rbState.position = {
+					locations[i][act.first].rbState.position = {
 						start.rbState.position.x + (end.rbState.position.x - start.rbState.position.x) * ff,
 						start.rbState.position.y + (end.rbState.position.y - start.rbState.position.y) * ff,
 						start.rbState.position.z + (end.rbState.position.z - start.rbState.position.z) * ff,
-					};*/
-					/*locations[i][act.first].rbState.linear_velocity = {
+					};
+					locations[i][act.first].rbState.linear_velocity = {
 						start.rbState.linear_velocity.x * (1.f - ff) + end.rbState.linear_velocity.x * (ff),
 						start.rbState.linear_velocity.y * (1.f - ff) + end.rbState.linear_velocity.y * (ff),
 						start.rbState.linear_velocity.z * (1.f - ff) + end.rbState.linear_velocity.z * (ff)
@@ -314,7 +314,7 @@ void CPPBM::onLoad()
 						start.rbState.angular_velocity.x * (1.f - ff) + end.rbState.angular_velocity.x * (ff),
 						start.rbState.angular_velocity.y * (1.f - ff) + end.rbState.angular_velocity.y * (ff),
 						start.rbState.angular_velocity.z * (1.f - ff) + end.rbState.angular_velocity.z * (ff)
-					};*/
+					};
 					//locations[i][act.first].rbState.rotation = { slerped.X, slerped.Y, slerped.Z, slerped.W };
 
 				}
@@ -399,12 +399,12 @@ void CPPBM::GVCTick(std::string name)
 	};
 	//cw.SetLocation(carRbState.Location);
 	//cw.GetCollisionComponent().SetbDisableAllRigidBody(true);
-	//cw.SetCurrentRBState(carRbState);
+	//cw.SetRBState(carRbState);
 	if (diff + (1.f / 150.f) > delta) currentFrame++;
 	//cw.SetLocation(carRbState.Location);
 }
 
-void CPPBM::OnTick(CarWrapper cw, void * params, string funcName)
+void CPPBM::OnTick(CarWrapper cw, void * params, std::string funcName)
 {
 	static bool b = false;
 	if (!b)
@@ -459,7 +459,7 @@ void CPPBM::OnTick(CarWrapper cw, void * params, string funcName)
 		rbState.angular_velocity.y * ff + nextRbState.angular_velocity.y * (1.f - ff),
 		rbState.angular_velocity.z * ff + nextRbState.angular_velocity.z * (1.f - ff)
 	};
-	cw.SetCurrentRBState(carRbState);
+	cw.SetRBState(carRbState);
 
 	/*carRbState.Quaternion = { rbState.rotation.w, rbState.rotation.x, rbState.rotation.y, rbState.rotation.z };
 	carRbState.Location = { rbState.position.x, rbState.position.y, rbState.position.z };

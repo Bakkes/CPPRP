@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CPPRPJSON.h" />
     <ClInclude Include="GeneratedSerializeFunctions.h" />
     <ClInclude Include="OptionsParser.h" />
     <ClInclude Include="SerializeFunctions.h" />

@@ -544,9 +544,9 @@ public:
 				}
 				#endif
 
-				//for (const auto& newFrame : newFrameCallbacks)
+				for (const auto& newFrame : newFrameCallbacks)
 				{
-					//newFrame(f);
+					newFrame(f);
 				}
 
 				//While there are actors in buffer (this frame)

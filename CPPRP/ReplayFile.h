@@ -16,6 +16,7 @@
 #include "NetworkDataParsers.h"
 #include "./data/ReplayFileData.h"
 #include "PropertyParser.h"
+#define DllExport   __declspec( dllexport )
 
 namespace CPPRP
 {
@@ -44,7 +45,7 @@ namespace CPPRP
 	typedef std::function<void(const ActorStateData&)> actorDeleted;
 	typedef std::function<void(uint32_t, const ActorStateData&)> propertyUpdated;
 
-	class ReplayFile
+	class DllExport ReplayFile
 	{
 	private:
 		

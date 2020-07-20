@@ -9,8 +9,8 @@
 #include "./exceptions/ReplayException.h"
 #include <cmath>
 #include <memory>
-
-#define USESIMD
+#include <xmmintrin.h>
+//#define USESIMD
 
 #define QUAT_NUM_BITS (18)
 #define MAX_QUAT_VALUE (0.7071067811865475244f)
@@ -227,7 +227,7 @@ namespace CPPRP
 	inline const Vector3I CPPBitReader<BitReaderType>::read<Vector3I>()
 	{
 		//PREFETCH((char*)(this->data));
-		const uint32_t max_value = netVersion >= 7 ? 22 : 20;
+		const uint32_t max_value = 20 + (2 * (netVersion >= 7));
 		const uint32_t num_bits = get_bits_max<uint32_t>(max_value, 4); //Saves a debruijn call since its 4 for both 22 and 20
 
 		const int32_t bias = 1 << (int32_t)(num_bits + 1);
@@ -309,7 +309,7 @@ namespace CPPRP
 		const __m128 mind = _mm_sub_ps(divd, minus);
 		const __m128 result = _mm_mul_ps(mind, timestwo);
 		const float* res = (float*)&result;
-		const float extra = std::sqrt(1.f - (res[0] * res[0]) - (res[1] * res[1]) - (res[2] * res[2]));
+		const float extra = _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ps1(1.f - (res[0] * res[0]) - (res[1] * res[1]) - (res[2] * res[2]))));
 
 		Quat q = { 0 };
 		switch (largest)
