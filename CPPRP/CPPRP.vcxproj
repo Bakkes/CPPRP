@@ -142,6 +142,7 @@
     <ClInclude Include="generated\NetworkDataParsersGenerated.h" />
     <ClInclude Include="generated\GameClassMacros.h" />
     <ClInclude Include="data\NetworkData.h" />
+    <ClInclude Include="HeaderParsers.h" />
     <ClInclude Include="NetworkDataParsers.h" />
     <ClInclude Include="exceptions\ParseException.h" />
     <ClInclude Include="PropertyParser.h" />

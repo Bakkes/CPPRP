@@ -60,6 +60,9 @@
     <ClInclude Include="generated\GameClassMacros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HeaderParsers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ReplayFile.cpp">
