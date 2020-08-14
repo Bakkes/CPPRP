@@ -281,7 +281,7 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 	{
 		if (parseBody)
 		{
-			replayFile->PreprocessTables();
+			//replayFile->PreprocessTables();
 			const size_t objectsSize = replayFile->replayFile->objects.size();
 			serializer.writerFuncs.resize(objectsSize);
 			for (size_t i = 0; i < objectsSize; i++)

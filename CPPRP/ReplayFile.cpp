@@ -375,13 +375,13 @@ namespace CPPRP
 		};
 
 		
-		std::for_each(position_names.begin(), position_names.end(), [this](std::string& positionObjectName)
+		std::for_each(position_names.begin(), position_names.end(), [this](const std::string& positionObjectName)
 			{
 				const uint32_t attributeID = objectToId[positionObjectName];
 				positionIDs.push_back(attributeID);
 			});
 
-		std::for_each(rotation_names.begin(), rotation_names.end(), [this](std::string& rotationObjectName)
+		std::for_each(rotation_names.begin(), rotation_names.end(), [this](const std::string& rotationObjectName)
 			{
 				const uint32_t attributeID = objectToId[rotationObjectName];
 				rotationIDs.push_back(attributeID);
@@ -399,7 +399,7 @@ namespace CPPRP
 			"TAGame.ProductAttribute_TitleID_TA"
 		};
 
-		std::for_each(attributeNames.begin(), attributeNames.end(), [this](std::string& attributeName)
+		std::for_each(attributeNames.begin(), attributeNames.end(), [this](const std::string& attributeName)
 			{
 				const uint32_t attributeID = objectToId[attributeName];
 				attributeIDs.push_back(attributeID);

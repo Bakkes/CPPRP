@@ -245,7 +245,8 @@ namespace CPPRP
 		}
 
 		/*
-		happens in 3 out of 10000 replays, so we still need it i guess. Only happens for workshop map replays though. Never for normal replays. So this can be ommitted depending on use case.
+		happens in 3 out of 10000 replays, so we still need it i guess. Only happens for workshop map replays though. 
+		Never for normal replays. So this can be ommitted depending on use case.
 		*/
 		const int32_t dx = read<int32_t>(max);
 		const int32_t dy = read<int32_t>(max);
@@ -460,7 +461,6 @@ namespace CPPRP
 			}
 			else
 			{
-
 				tmp.unknown = read<uint32_t>(3 * 8);
 			}
 			uniqueId = tmp;
@@ -513,6 +513,7 @@ namespace CPPRP
 
 		std::string str;
 
+		//Check if current string is byte aligned, of so we can easily just copy the bytes straight from the buffer.
 		if (b.validBits % 8 == 0)
 		{
 			const char* text = ((char*)&b.data[b.bytes_read - ((b.validBits) / 8)]);
@@ -523,6 +524,9 @@ namespace CPPRP
 		{
 			str.resize(final_length - 1);
 			int todo = final_length;
+			/*
+			If not byte aligned, we need to use the bit reader. First process 8 bytes at a time, then read 4 bytes, then the remaining 3 byte by byte.
+			*/
 			while (todo > 7)
 			{
 				*reinterpret_cast<uint64_t*>(&str[final_length - todo]) = read<uint64_t>();
