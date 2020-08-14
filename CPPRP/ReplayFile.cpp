@@ -16,8 +16,8 @@
 namespace CPPRP
 {
 	/*
-	If set to true, will generate a log of everything that's parsed
-	Will make it easier to see where parsing fails, but slows down parsing, so only use when debugging a replay
+	If set to true, will generate a log of everything that's parsed.
+	Will make it easier to see where parsing fails, but slows down parsing, so only use when debugging a replay.
 	*/
 	constexpr bool IncludeParseLog = false;
 	constexpr uint32_t ParseLogSize = 100;
@@ -58,8 +58,11 @@ namespace CPPRP
 	{
 		const size_t dataSizeBits = data.size() * 8;
 		replayFile = std::make_shared<ReplayFileData>();
+
+		//Create a bitreader to parse the header 
 		fullReplayBitReader = std::make_shared<CPPBitReader<BitReaderType>>((const BitReaderType*)data.data(), dataSizeBits, replayFile);
 
+		//Parse FileHeader
 		replayFile->header = {
 			fullReplayBitReader->read<uint32_t>(),	//Size
 			fullReplayBitReader->read<uint32_t>(),	//CRC
@@ -67,12 +70,16 @@ namespace CPPRP
 			fullReplayBitReader->read<uint32_t>()	//licenseeVersion
 		};
 
+		//After this version, a netVersion is also provided
 		if (replayFile->header.engineVersion >= 868 && replayFile->header.licenseeVersion >= 18)
 		{
 			replayFile->header.netVersion = fullReplayBitReader->read<uint32_t>();
 		}
 
-		//Reconstruct cause we got version info now,  find something better for this
+		/*
+		Reconstruct the bitreader. We do this because we now have additional version information of the replay which is needed for parsing.
+		Reconstruction is done instead of simply updating members of the bitreader as we'd like to keep those const for optimization reasons.
+		*/
 		size_t bitPos = fullReplayBitReader->GetAbsoluteBitPosition();
 		fullReplayBitReader = std::make_shared<CPPBitReader<BitReaderType>>((const BitReaderType*)data.data(), dataSizeBits, replayFile);
 		fullReplayBitReader->skip(bitPos);
@@ -80,6 +87,9 @@ namespace CPPRP
 		replayFile->replayType = fullReplayBitReader->read<std::string>(); //Not sure what this is
 
 
+		/*
+		Parse property map of the replay. Keep parsing until ParseProperty returns false.
+		*/
 		while (true) 
 		{
 			auto baseProperty = std::make_shared<Property>();
@@ -97,12 +107,18 @@ namespace CPPRP
 		ReadVector(fullReplayBitReader, replayFile->levels);
 		ReadVector(fullReplayBitReader, replayFile->keyframes);
 
+		
+		/*
+		Jump over the actual netstream data to parse additional data that's present in the replay after the network data.
+		We know the header of a replay is always byte aligned, so don't need to keep bit position into account for this.
+		*/
 		const uint32_t netstreamCount = static_cast<uint32_t>(fullReplayBitReader->read<int32_t>());
-		replayFile->netstream_data = data.data() + fullReplayBitReader->GetAbsoluteBytePosition(); //We know this is always aligned, so valid
-		uint32_t test = netstreamCount * 8;
-		fullReplayBitReader->skip(test);
+		replayFile->netstream_data = data.data() + fullReplayBitReader->GetAbsoluteBytePosition(); 
+		uint32_t bytesToSkip = netstreamCount * 8;
+		fullReplayBitReader->skip(bytesToSkip);
 		replayFile->netstream_size = netstreamCount;
 
+		//Make sure we actually still have bytes to read
 		if (!fullReplayBitReader->canRead())
 		{
 			//Replay is corrupt
@@ -125,12 +141,12 @@ namespace CPPRP
 			ClassNet cn = {
 				fullReplayBitReader->read<int32_t>(),		//Index
 				fullReplayBitReader->read<int32_t>(),		//Parent
-				NULL,							//Parent class, not known yet
+				NULL,										//Parent class, not known yet
 				fullReplayBitReader->read<int32_t>(),		//Id
 				fullReplayBitReader->read<int32_t>(),		//Prop_indexes_size
-				std::vector<PropIndexId>(),		//Empty propindexid array
-				0,								//Max_prop_id
-				std::vector<uint16_t>()			//Property_id_cache
+				std::vector<PropIndexId>(),					//Empty propindexid array
+				0,											//Max_prop_id
+				std::vector<uint16_t>()						//Property_id_cache
 			};
 
 			const uint32_t newSize = cn.prop_indexes_size;
@@ -146,7 +162,7 @@ namespace CPPRP
 			std::shared_ptr<ClassNet> classNet = std::make_shared<ClassNet>(cn);
 			replayFile->classnets[i] = (classNet);
 
-			//Set parent class if exists
+			//Find and set parent class of current class if it exists.
 			for (int32_t k = (int32_t)i - 1; k >= 0; --k)
 			{
 				if (replayFile->classnets[i]->parent == replayFile->classnets[k]->id)
@@ -156,11 +172,16 @@ namespace CPPRP
 				}
 			}
 		}
+		//Need to read an extra 4 bytes here if netVersion >= 10. Not sure what's in here but it's not needed for parsing.
 		if (replayFile->header.netVersion >= 10)
 		{
 			fullReplayBitReader->read<int32_t>();
 		}
+
+		//Store an extra copy of the header to allow quick version lookups.
 		header = replayFile->header;
+
+		//Precompute tables used during parsing.
 		this->PrecomputeValues();
 
 	}
@@ -170,11 +191,13 @@ namespace CPPRP
 		if ((verifyWhat & CRC_Both) == 0) return false; //User supplied invalid value, < 0 or >= 4
 
 		const size_t dataSizeBits = data.size() * 8;
-		//Replay not loaded, less than 8 bytes
+		//Replay not loaded or file is less than 8 bytes
 		if (dataSizeBits < sizeof(uint32_t) * 2 * 8)
 		{
 			return false;
 		}
+
+		//Create new bitreader to parse this replay.
 		CPPBitReader<BitReaderType> bitReader((const BitReaderType*)data.data(), 
 			dataSizeBits, replayFile, 0, 0, 0);
 		const uint32_t headerSize = bitReader.read<uint32_t>();
@@ -189,20 +212,20 @@ namespace CPPRP
 		constexpr uint32_t CRC_SEED = 0xEFCBF201;
 		if (verifyWhat & CRC_Header)
 		{
-			/*const uint32_t headerCalculatedCRC = CalculateCRC(data,
-				static_cast<size_t>(bitReader.GetAbsoluteBytePosition()), 
-				static_cast<size_t>(headerSize), CRC_SEED);*/
+
+			//We use SB16 as it's the fastest. Can use SB1 or SB8 if needed.
 			const uint32_t headerCalculatedCRC2 = CalculateCRC_SB16(*reinterpret_cast<std::vector<uint8_t>*>(&data),
 				static_cast<size_t>(bitReader.GetAbsoluteBytePosition()),
 				static_cast<size_t>(headerSize), CRC_SEED);
-			//std::cout << "headerCalculatedCRC==headerCalculatedCRC2" << (headerCalculatedCRC == headerCalculatedCRC2 ? "true" : "false") << "\n";
 			const bool result = headerCalculatedCRC2 == headerReadCrc;
-			//If only verify header, or if already failed here
+
+			//If only verify header return the result. Similarly if CRC check already failed here return the result.
 			if (!(verifyWhat & CRC_Body) || !result)
 			{
 				return result;
 			}
 		}
+		//Jump to the netstream since we need to verify that next
 		bitReader.skip(headerSize * 8);
 
 		if (bitReader.GetAbsoluteBytePosition() + 2 > data.size())
@@ -214,20 +237,17 @@ namespace CPPRP
 
 		const uint32_t bodySize = bitReader.read<uint32_t>();
 		const uint32_t bodyReadCrc = bitReader.read<uint32_t>();
+
+		//Number of bytes in netstream exceeds end of file so we know it's going to fail.
 		if (bitReader.GetAbsoluteBytePosition() + bodySize > data.size())
 		{
 			return false;
 		}
 
-		/*const uint32_t bodyCalculatedCRC = CalculateCRC(data, 
-			static_cast<size_t>(bitReader.GetAbsoluteBytePosition()), 
-			static_cast<size_t>(bodySize), CRC_SEED);*/
-
-		//cast is ugly but works, fix later
+		//CRC the netstream data.
 		const uint32_t bodyCalculatedCRC2 = CalculateCRC_SB16(*reinterpret_cast<std::vector<uint8_t>*>(&data),
 			static_cast<size_t>(bitReader.GetAbsoluteBytePosition()),
 			static_cast<size_t>(bodySize), CRC_SEED);
-		//std::cout << "headerCalculatedCRC==headerCalculatedCRC2" << (bodyCalculatedCRC == bodyCalculatedCRC2 ? "true" : "false") << "\n";
 
 		return bodyReadCrc == bodyCalculatedCRC2;
 	}
@@ -235,24 +255,21 @@ namespace CPPRP
 
 	void ReplayFile::PrecomputeValues()
 	{
-		const size_t size = replayFile->objects.size();
-		for (size_t i = 0; i < size; ++i)
-		{
-			objectToId[replayFile->objects.at(i)] = (uint32_t)i;
-			//printf("[%i] %s", i, replayFile->objects.at(i).c_str());
-		}
 
-		//Timer t("Preprocessing");
 		for (uint32_t i = 0; i < replayFile->classnets.size(); ++i)
 		{
 			const uint32_t index = replayFile->classnets.at(i)->index;
 			const std::string objectName = replayFile->objects.at(index);
 			if (classnetMap.find(objectName) != classnetMap.end())
 			{
+				/*
+				Sometimes replays contain duplicate properties. After investigating it looks like the later one is always the right one. To fix we
+				insert the map with higher ID properties to start of array so we don't have to find and replace existing ones
+				This way the property index cacher will find these newer properties before the old ones thus making the old ones obsolete
+				*/
+
 				auto newClassnet = replayFile->classnets.at(i);
 				auto originalClassnet = classnetMap[objectName];
-				//Kind of a cheap hack, just insert map with higher ID properties to start of array so we don't have to find and replace existing ones
-				//This way the property index cacher will find these newer properties before the old ones thus making the old ones obsolete
 				originalClassnet->prop_indexes.insert(originalClassnet->prop_indexes.begin(), newClassnet->prop_indexes.begin(), newClassnet->prop_indexes.end());
 				
 			}
@@ -262,7 +279,10 @@ namespace CPPRP
 			}
 		}
 
-		for (auto& archetypeMapping : archetypeMap)
+		/*
+		Precompute and match the values in the archetype map to the classnets in the replay
+		*/
+		for (const auto& archetypeMapping : archetypeMap)
 		{
 			const auto found = classnetMap.find(archetypeMapping.first);
 			if (found == classnetMap.end())
@@ -276,7 +296,10 @@ namespace CPPRP
 			}
 		}
 
-		//TODO: derive this from gameclasses
+		/*
+		Sometimes replays dont correctly map base to parent classes.
+		We need to do some patching for this manually here.
+		*/
 		for (auto kv : class_extensions)
 		{
 			std::shared_ptr<ClassNet> childClass = GetClassnetByNameWithLookup(kv.first);
@@ -287,6 +310,9 @@ namespace CPPRP
 			}
 		}
 
+		/*
+		Store property indices per classnet in its own cache to allow quicklookups in the vector instead of recursively iterating over them every time
+		*/
 		for (auto cn : replayFile->classnets)
 		{
 			uint32_t i = 0;
@@ -301,25 +327,43 @@ namespace CPPRP
 		
 
 		const size_t objectsSize = replayFile->objects.size();
+		for (size_t i = 0; i < objectsSize; ++i)
+		{
+			
+		}
 		parseFunctions.resize(objectsSize);
 		createFunctions.resize(objectsSize);
 		for(size_t i = 0; i < objectsSize; i++)
 		{
 			const std::string& name = replayFile->objects.at(i);
+
+			//Map name of property to ID given in the replay, then fill parse table by ID
 			auto found = parsePropertyFuncs.find(name);
 			if(found != parsePropertyFuncs.end())
 			{
 				parseFunctions[i] = found->second;
 			}
 
+			//Map name of classname to ID given in the replay, then fill create table by ID
 			auto found2 = createObjectFuncs.find(name);
 			if(found2 != createObjectFuncs.end())
 			{
 				createFunctions[i] = found2->second;
 			}
+
+			//Create a mapping of objectName to ID.Not actually used during parsing but very useful to external classes using this library to look up names.
+			objectToId[name] = static_cast<uint32_t>(i);
+
+			//Precompute the max property ID for every classnet
+			classnetCache.push_back(GetClassnetByNameWithLookup(name));
+			if (classnetCache[i])
+				GetMaxPropertyId(classnetCache[i].get());
 		}
 
-		//printf("Ab");
+
+		/*
+		Store all IDs of objects that need to parse an initial position or rotation. Saves a heavy string comparison for every created actor.
+		*/
 		const std::vector<std::string> position_names = {
 			"TAGame.CrowdActor_TA", "TAGame.VehiclePickup_Boost_TA", "TAGame.InMapScoreboard_TA",
 			"TAGame.BreakOutActor_Platform_TA", "Engine.WorldInfo", "TAGame.HauntedBallTrapTrigger_TA",
@@ -329,27 +373,24 @@ namespace CPPRP
 			"TAGame.Ball_TA", "TAGame.Car_TA", "TAGame.Car_Season_TA",
 			"TAGame.Ball_Breakout_TA", "TAGame.Ball_Haunted_TA", "TAGame.Ball_God_TA"
 		};
-		//printf("Preprocess\n");
-		for(size_t i = 0; i < objectsSize; i++)
-		{
-			const std::string& name = replayFile->objects.at(i);
-			if(std::find(position_names.begin(), position_names.end(), name) != position_names.end())
-			{
-				positionIDs.push_back(i);
-				//printf("Position %i %s\n", i, name.c_str());
-			}
-			if(std::find(rotation_names.begin(), rotation_names.end(), name) != rotation_names.end())
-			{
-				rotationIDs.push_back(i);
-				//printf("Rotation %i %s\n", i, name.c_str());
-			}
 
-			classnetCache.push_back(GetClassnetByNameWithLookup(name));
-			if(classnetCache[i])
-				GetMaxPropertyId(classnetCache[i].get());
-		}
-//printf("Aa");
-		const std::vector<std::string> attributeNames = 
+		
+		std::for_each(position_names.begin(), position_names.end(), [this](std::string& positionObjectName)
+			{
+				const uint32_t attributeID = objectToId[positionObjectName];
+				positionIDs.push_back(attributeID);
+			});
+
+		std::for_each(rotation_names.begin(), rotation_names.end(), [this](std::string& rotationObjectName)
+			{
+				const uint32_t attributeID = objectToId[rotationObjectName];
+				rotationIDs.push_back(attributeID);
+			});
+
+		/*
+		Store the name IDs of product attributes. Saves a string comparison when constructing and parsing attributes.
+		*/
+		const std::vector<std::string> attributeNames =
 		{
 			"TAGame.ProductAttribute_UserColor_TA",
 			"TAGame.ProductAttribute_Painted_TA",
@@ -357,19 +398,14 @@ namespace CPPRP
 			"TAGame.ProductAttribute_SpecialEdition_TA",
 			"TAGame.ProductAttribute_TitleID_TA"
 		};
+
+		std::for_each(attributeNames.begin(), attributeNames.end(), [this](std::string& attributeName)
+			{
+				const uint32_t attributeID = objectToId[attributeName];
+				attributeIDs.push_back(attributeID);
+			});
+
 		
-		for(size_t i = 0; i < attributeNames.size(); ++i)
-		{
-			//printf("B");
-			const uint32_t attributeID = objectToId[attributeNames.at(i)];
-			attributeIDs.push_back(attributeID);
-			//printf("[%i] %s", attributeID, attributeNames.at(i).c_str());
-		}
-		//attributeIDs
-
-
-
-		//printf("Done preprocessing\n");
 	}
 
 	std::string ReplayFile::GetParseLog(size_t size)
@@ -403,18 +439,15 @@ namespace CPPRP
 		}
 
 		
+		/*
+		Construct bitreader for the network data of the replay.
+		*/
 		CPPBitReader<BitReaderType> networkReader((BitReaderType*)(replayFile->netstream_data), static_cast<size_t>(endPos), replayFile);
-
-		//FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
 
 		try
 		{
-			int first = 0;
-			//char writeBuffer[65536 * 5];
-			//rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
 
-			//rapidjson::Writer<rapidjson::FileWriteStream> writer;
-
+			//Jump to given startPos
 			networkReader.skip(startPos);
 
 			//Get some const data we're gonna need repeatedly during parsing and store for performance reasons
@@ -429,8 +462,11 @@ namespace CPPRP
 			const uint32_t engineVersion = replayFile->header.engineVersion;
 			const uint32_t licenseeVersion = replayFile->header.licenseeVersion;
 			const bool parseNameId = engineVersion > 868 || (engineVersion == 868 && licenseeVersion >= 20) || (engineVersion == 868 && licenseeVersion >= 14 && !isLan) || ((engineVersion == 868 && licenseeVersion == 17 && isLan));
+			
+			//Set the attributeIDs on the networkReader. Currently not the cleanest solution but effective.
 			networkReader.attributeIDs = attributeIDs;
 
+			//We know we're gonna parse numFrames, so pre-allocate this vector.
 			frames.resize(numFrames);
 			uint32_t currentFrame = 0;
 			while (
@@ -459,18 +495,21 @@ namespace CPPRP
 				}
 				#endif
 
+				//Call newFrame callback to alert a new frame is being parsed.
 				for (const auto& newFrame : newFrameCallbacks)
 				{
 					newFrame(f);
 				}
 
-				//While there are actors in buffer (this frame)
+				//Bit to indicate if there are more actors in this frame to update/create/delete
 				while (networkReader.read<bool>())
 				{
 					const uint32_t actorId = networkReader.readBitsMax<uint32_t>(maxChannels);
+
+					//Read bit to see if actor needs to be deleted (0 = delete, 1 = see below)
 					if (networkReader.read<bool>())
 					{
-						//Is new state
+						//Read bit to see if we need to create a new actor (1 = create, 0 is modify existing)
 						if (networkReader.read<bool>())
 						{
 
@@ -516,7 +555,6 @@ namespace CPPRP
 
 							const uint32_t classId = classNet->index;
 							
-							//auto found = createObjectFuncs.find(className);
 
 							const auto& funcPtr = createFunctions[classId];
 							#ifndef PARSE_UNSAFE
@@ -528,8 +566,8 @@ namespace CPPRP
 								return;
 							}
 							#endif
+
 							std::shared_ptr<Engine::Actor> actorObject = funcPtr();
-							//ActorStateData asd =
 							if constexpr (IncludeParseLog)
 							{
 								const std::string typeName = replayFile->objects.at(typeId);
@@ -540,16 +578,15 @@ namespace CPPRP
 							if (HasInitialPosition(classId))
 							{
 								actorObject->Location = networkReader.read<Vector3I>();
-								//printf("has pos\n");
 							}
 							if (HasRotation(classId))
 							{
 								actorObject->Rotation = networkReader.read<Rotator>();
-								//printf("has rot\n");
 							}
-							//printf("---\n");
+
 							ActorStateData asd =  { std::move(actorObject), classNet, actorId, name_id, classId };
 							actorStates[actorId] = asd;
+
 							for(const auto& createdFunc : createdCallbacks)
 							{
 								createdFunc(asd);
@@ -575,29 +612,24 @@ namespace CPPRP
 									parseLog.push_back(std::string(buff));
 								}
 
-								 {
 
 
-									updatedProperties.push_back(propertyIndex);
-									const auto& funcPtr = parseFunctions[propertyIndex];
-									/*if (b)
-									{
-										printf("Calling parser for %s (%i, %i, %s)\n", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.nameId >= namesSize ? "unknown" : replayFile->names[actorState.nameId].c_str());
-									}*/
+								updatedProperties.push_back(propertyIndex);
+								const auto& funcPtr = parseFunctions[propertyIndex];
 
-#ifndef PARSE_UNSAFE
-									if (funcPtr == nullptr)
-									{
-										const std::string& objName = replayFile->objects[propertyIndex];
-										//std::cout << "Property " << objName << " is undefined\n";
+								#ifndef PARSE_UNSAFE
+								if (funcPtr == nullptr)
+								{
+									const std::string& objName = replayFile->objects[propertyIndex];
+									//std::cout << "Property " << objName << " is undefined\n";
 
-										std::string exceptionText = "Property " + objName + " is undefined\n" + GetParseLog(ParseLogSize);
-										throw GeneralParseException(exceptionText, networkReader);
+									std::string exceptionText = "Property " + objName + " is undefined\n" + GetParseLog(ParseLogSize);
+									throw GeneralParseException(exceptionText, networkReader);
 
-									}
-#endif
-									funcPtr(actorState.actorObject.get(), networkReader);
 								}
+								#endif
+								funcPtr(actorState.actorObject.get(), networkReader);
+								
 							}
 							for(const auto& updateFunc : updatedCallbacks)
 							{
@@ -628,15 +660,13 @@ namespace CPPRP
 			}
 			if (networkReader.size - networkReader.GetAbsoluteBitPosition() > 8192)
 			{
-				//Unsure how big RL buffer sizes are, 8192 seems fair
+				//Unsure how big replay file buffer sizes are, 8192 seems fair
 				throw GeneralParseException("Not enough bytes parsed! Expected ~" + std::to_string(networkReader.size) + ", parsed: " + std::to_string(networkReader.GetAbsoluteBitPosition()) + ". Diff(" + std::to_string(networkReader.size - networkReader.GetAbsoluteBitPosition()) + ")", networkReader);
 			}
 		}
 		catch (...)
 		{
 			printf("Caught ex\n");
-			//Parse(startPos, endPos);
-			//fclose(fp);
 			throw;
 		}
 
@@ -685,7 +715,6 @@ namespace CPPRP
 		const uint32_t propertySize = fullReplayBitReader->read<uint32_t>();
 		const uint32_t idk = fullReplayBitReader->read<uint32_t>();
 
-		//Not sure why I'm doing these micro optimizations here, kinda hurts readability and its only like a nanosecond
 		switch (currentProperty->property_type[0])
 		{
 		case 'N':
