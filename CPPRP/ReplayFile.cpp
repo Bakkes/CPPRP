@@ -11,14 +11,17 @@
 #include <functional>
 #include "NetworkDataParsers.h"
 #include "PropertyParser.h"
+#include "HeaderParsers.h"
 
 namespace CPPRP
 {
-	
-	
-
+	/*
+	If set to true, will generate a log of everything that's parsed
+	Will make it easier to see where parsing fails, but slows down parsing, so only use when debugging a replay
+	*/
 	constexpr bool IncludeParseLog = false;
 	constexpr uint32_t ParseLogSize = 100;
+
 
 	ReplayFile::ReplayFile(std::filesystem::path path_) : path(path_)
 	{
@@ -50,61 +53,6 @@ namespace CPPRP
 		return (bool)file.read(data.data(), size);
 	}
 
-	template<typename T>
-	T ReadHeaderStruct(std::shared_ptr<CPPBitReader<BitReaderType>>& bitReader)
-	{
-		return bitReader->read<T>();
-	}
-
-	template<>
-	KeyFrame ReadHeaderStruct(std::shared_ptr<CPPBitReader<BitReaderType>>& bitReader)
-	{
-		return KeyFrame {
-			bitReader->read<float>(),		//Time
-			bitReader->read<uint32_t>(),	//Frame
-			bitReader->read<uint32_t>()	//File position
-		};
-	}
-
-	template<>
-	DebugString ReadHeaderStruct(std::shared_ptr<CPPBitReader<BitReaderType>>& bitReader)
-	{
-		return DebugString {
-			bitReader->read<uint32_t>(),	//Time
-			bitReader->read<std::string>(),	//Frame
-			bitReader->read<std::string>()	//File position
-		};
-	}
-
-	template<>
-	ReplayTick ReadHeaderStruct(std::shared_ptr<CPPBitReader<BitReaderType>>& bitReader)
-	{
-		return ReplayTick {
-			bitReader->read<std::string>(),	//Type
-			bitReader->read<uint32_t>()		//Frame	
-		};
-	}
-	template<>
-	ClassIndex ReadHeaderStruct(std::shared_ptr<CPPBitReader<BitReaderType>>& bitReader)
-	{
-		return ClassIndex{
-			bitReader->read<std::string>(),	//Class_name
-			bitReader->read<uint32_t>()		//Index
-		};
-	}
-	
-
-	template<typename T>
-	void ReadVector(std::shared_ptr<CPPBitReader<BitReaderType>>& bitReader, std::vector<T>& inVec)
-	{
-		const uint32_t vectorCount = bitReader->read<uint32_t>();
-		if (vectorCount * sizeof(T) > bitReader->size) throw 0; //TODO: throw proper exception
-		inVec.resize(vectorCount);
-		for (uint32_t i = 0; i < vectorCount; ++i)
-		{
-			inVec[i] = ReadHeaderStruct<T>(bitReader);
-		}
-	}
 
 	void ReplayFile::DeserializeHeader()
 	{
@@ -213,7 +161,7 @@ namespace CPPRP
 			fullReplayBitReader->read<int32_t>();
 		}
 		header = replayFile->header;
-		this->FixParents();
+		this->PrecomputeValues();
 
 	}
 
@@ -284,50 +232,16 @@ namespace CPPRP
 		return bodyReadCrc == bodyCalculatedCRC2;
 	}
 
-	void ReplayFile::PreprocessTables()
+
+	void ReplayFile::PrecomputeValues()
 	{
 		const size_t size = replayFile->objects.size();
-		for(size_t i = 0; i < size; ++i)
+		for (size_t i = 0; i < size; ++i)
 		{
 			objectToId[replayFile->objects.at(i)] = (uint32_t)i;
 			//printf("[%i] %s", i, replayFile->objects.at(i).c_str());
 		}
-	}
-	
-	class Timer
-{
-private:
-	std::chrono::time_point<std::chrono::steady_clock> start;
-	std::chrono::time_point<std::chrono::steady_clock> end;
-	bool ended = false;
-	std::string name;
-public:
-	Timer(std::string timerName) : name(timerName)
-	{
-		start = std::chrono::steady_clock::now();
-	}
 
-	void Stop()
-	{
-		end = std::chrono::steady_clock::now();
-		ended = true;
-	}
-
-	~Timer()
-	{
-		if (!ended) Stop();
-		std::cout << name << " duration in microseconds : "
-			<< std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
-			<< "\n";
-
-		/*std::cout << "Elapsed time in milliseconds : "
-			<< std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
-			<< " ms\n";*/
-	}
-};
-
-	void ReplayFile::FixParents()
-	{
 		//Timer t("Preprocessing");
 		for (uint32_t i = 0; i < replayFile->classnets.size(); ++i)
 		{
@@ -443,8 +357,7 @@ public:
 			"TAGame.ProductAttribute_SpecialEdition_TA",
 			"TAGame.ProductAttribute_TitleID_TA"
 		};
-		//printf("A");
-		PreprocessTables();
+		
 		for(size_t i = 0; i < attributeNames.size(); ++i)
 		{
 			//printf("B");
@@ -482,6 +395,8 @@ public:
 		{
 			throw InvalidVersionException(0, 0, 0);
 		}
+
+		//endPos is whatever the end of stream is
 		if (endPos < 0)
 		{
 			endPos = replayFile->netstream_size * 8;
@@ -587,7 +502,7 @@ public:
 
 							//const std::string typeName = replayFile->objects.at(typeId);
 							//printf("%s\n", typeName.c_str());
-							auto classNet = classnetCache[typeId];//GetClassnetByNameWithLookup(typeName);
+							auto classNet = classnetCache[typeId];
 
 							#ifndef PARSE_UNSAFE
 							if (classNet == nullptr)
@@ -730,34 +645,11 @@ public:
 	const bool ReplayFile::HasInitialPosition(const uint32_t id) const
 	{
 		return std::find(positionIDs.begin(), positionIDs.end(), id) == positionIDs.end();
-		/*
-			const uint32_t classId = classNet->index;
-							const std::string className = replayFile->objects.at(classId);
-							//auto found = createObjectFuncs.find(className);
-
-							const auto& funcPtr = createFunctions[classId];
-		*/
-
-
-		// return !(name.compare("TAGame.CrowdActor_TA") == 0
-		// 	|| name.compare("TAGame.VehiclePickup_Boost_TA") == 0
-		// 	|| name.compare("TAGame.InMapScoreboard_TA") == 0
-		// 	|| name.compare("TAGame.BreakOutActor_Platform_TA") == 0
-		// 	|| name.compare("Engine.WorldInfo") == 0
-		// 	|| name.compare("TAGame.HauntedBallTrapTrigger_TA") == 0
-		// 	|| name.compare("Engine.KActor") == 0
-		// 	|| name.compare("TAGame.CrowdManager_TA") == 0);
 	}
 
 	const bool ReplayFile::HasRotation(const uint32_t id) const
 	{
 		return std::find(rotationIDs.begin(), rotationIDs.end(), id) != rotationIDs.end();
-		// return name.compare("TAGame.Ball_TA") == 0
-		// 	|| name.compare("TAGame.Car_TA") == 0
-		// 	|| name.compare("TAGame.Car_Season_TA") == 0
-		// 	|| name.compare("TAGame.Ball_Breakout_TA") == 0
-		// 	|| name.compare("TAGame.Ball_Haunted_TA") == 0
-		// 	|| name.compare("TAGame.Ball_God_TA") == 0;
 	}
 
 	const std::pair<const uint32_t, const KeyFrame> ReplayFile::GetNearestKeyframe(uint32_t frame) const
