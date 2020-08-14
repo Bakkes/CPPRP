@@ -52,7 +52,7 @@ namespace CPPRP
 		uint32_t class_index = reader.read<uint32_t>();
 		size_t index = std::distance(reader.attributeIDs.begin(),
 			std::find(reader.attributeIDs.begin(), reader.attributeIDs.end(), class_index));
-		switch((AttributeTypes)index)
+		switch(static_cast<AttributeTypes>(index))
 		{
 			case AttributeTypes::UserColor:
 			{

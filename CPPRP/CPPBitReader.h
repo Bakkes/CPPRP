@@ -244,7 +244,9 @@ namespace CPPRP
 			return { (dx - bias), (dy - bias), (dz - bias) };
 		}
 
-		//happens in 3 out of 10000 replays, so we still need it i guess
+		/*
+		happens in 3 out of 10000 replays, so we still need it i guess. Only happens for workshop map replays though. Never for normal replays. So this can be ommitted depending on use case.
+		*/
 		const int32_t dx = read<int32_t>(max);
 		const int32_t dy = read<int32_t>(max);
 		const int32_t dz = read<int32_t>(max);
