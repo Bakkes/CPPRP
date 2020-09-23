@@ -330,6 +330,10 @@ namespace CPPRP
 			{
 				Serialize<Writer>(writer, qqId->qqID);
 			}
+			else if (std::shared_ptr<CPPRP::EpicID> epicId = std::dynamic_pointer_cast<CPPRP::EpicID>(item); epicId)
+			{
+				Serialize<Writer>(writer, epicId->epicId);
+			}
 			else
 			{
 				Serialize<Writer>(writer, 1337);

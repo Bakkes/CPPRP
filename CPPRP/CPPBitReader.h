@@ -354,6 +354,55 @@ namespace CPPRP
 	}
 #endif
 
+
+	template<>
+	template<>
+	inline const std::string CPPBitReader<BitReaderType>::read<std::string>()
+	{
+		const int32_t length = read<int32_t>();
+		const size_t final_length = static_cast<size_t>(length) * (length > 0 ? 1 : -2);
+		if (final_length == 0)
+		{
+			return "";
+		}
+
+#ifndef PARSE_UNSAFE
+		if (final_length > 1024)
+		{
+			if (engineVersion == 0
+				&& licenseeVersion == 0
+				&& netVersion == 0)
+			{
+				throw InvalidVersionException(0, 0, 0);
+			}
+			else
+			{
+				throw std::runtime_error("Got unwanted string length, read value " + std::to_string(length) + ", reading bytes " + std::to_string(final_length) + ". (" + std::to_string(this->bit_position) + ")");
+			}
+		}
+#endif
+
+		std::string str;
+
+		if (bit_position % 8 == 0)
+		{
+			const char* text = ((char*)data) + (bit_position / 8);
+			str = std::string(text);
+			skip(final_length * 8);
+		}
+		else
+		{
+			str.resize(final_length - 1);
+			for (size_t i = 0; i < final_length; ++i)
+			{
+				str[i] = read<uint8_t>();
+			}
+		}
+
+		return str;
+	}
+
+
 	template<>
 	template<>
 	inline const std::shared_ptr<UniqueId> CPPBitReader<BitReaderType>::read<std::shared_ptr<UniqueId>>()
@@ -437,6 +486,13 @@ namespace CPPRP
 			uniqueId = psyNetID;
 		}
 			break;
+		case Platform_Epic:
+		{
+			std::shared_ptr<EpicID> epicID = std::make_shared<EpicID>();
+			epicID->epicId = read<std::string>();
+			uniqueId = epicID;
+		}
+			break;
 		case Platform_Unknown:
 		{
 			uniqueId = std::make_shared<UnkownId>();
@@ -463,52 +519,6 @@ namespace CPPRP
 	}
 
 
-	template<>
-	template<>
-	inline const std::string CPPBitReader<BitReaderType>::read<std::string>()
-	{
-		const int32_t length = read<int32_t>();
-		const size_t final_length = static_cast<size_t>(length) * (length > 0 ? 1 : -2);
-		if (final_length == 0)
-		{
-			return "";
-		}
-
-		#ifndef PARSE_UNSAFE
-		if (final_length > 1024)
-		{
-			if (engineVersion == 0
-				&& licenseeVersion == 0
-				&& netVersion == 0)
-			{
-				throw InvalidVersionException(0,0,0);
-			}
-			else
-			{
-				throw std::runtime_error("Got unwanted string length, read value " + std::to_string(length) + ", reading bytes " + std::to_string(final_length) + ". (" + std::to_string(this->bit_position) + ")");
-			}
-		}
-		#endif
-
-		std::string str;
-		
-		if(bit_position % 8 == 0)
-		{
-			const char* text = ((char*)data) + (bit_position/8);
-			str = std::string(text);
-			skip(final_length * 8);
-		}
-		else
-		{
-			str.resize(final_length - 1);
-			for (size_t i = 0; i < final_length; ++i)
-			{
-				str[i] = read<uint8_t>();
-			}
-		}
-
-		return str;
-	}
 
 	template<typename T>
 	template<typename U>

@@ -84,7 +84,8 @@ namespace CPPRP
 		Platform_Switch = 6, //Is in gamefiles as wegame..
 		//Platform_NNX = 7,
 		Platform_PsyNet = 7, //is 8 in gamefiles
-		Platform_MAX = 9
+		Platform_Epic = 11,
+		Platform_MAX = 12
 	};
 
 	struct UniqueId
@@ -143,6 +144,11 @@ namespace CPPRP
 	struct UnkownId : public UniqueId
 	{
 		uint32_t unknown{ 0 };
+	};
+
+	struct EpicID : public UniqueId
+	{
+		std::string epicId{ "" };
 	};
 
 	struct Property

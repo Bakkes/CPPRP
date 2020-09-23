@@ -8,12 +8,13 @@
 #include <unordered_map>
 #include <mutex>
 #include <functional>
+#include "./data/ReplayFileData.h"
 #include "CPPBitReader.h"
 #include "./data/NetworkData.h"
 #include "./exceptions/ParseException.h"
 #include "./exceptions/ReplayException.h"
 
-#include "./data/ReplayFileData.h"
+
 
 
 namespace CPPRP
