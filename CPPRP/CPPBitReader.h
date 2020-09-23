@@ -343,7 +343,12 @@ namespace CPPRP
 		const float c = uncompress_quat(static_cast<int32_t>((test << (64UL - QUAT_NUM_BITS * 3UL)) >> rightShift));
 
 
-		const float extra = std::sqrt(1.f - (a * a) - (b * b) - (c * c));
+		float extra = std::sqrt(1.f - (a * a) - (b * b) - (c * c));
+
+		if (std::isnan(extra))
+		{
+			extra = .0f;
+		}
 
 		Quat q = { 0 };
 		switch (largest)
@@ -510,10 +515,11 @@ namespace CPPRP
 			break;
 		case Platform_Epic:
 		{
-
-			std::string abc = read<std::string>();
+			auto epicID = EpicID();
+			epicID.epicId = read<std::string>();
+			uniqueId = epicID;
 		}
-			break;
+		break;
 		case Platform_Unknown:
 		{
 			auto tmp = UnknownId();

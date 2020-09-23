@@ -73,7 +73,7 @@ namespace CPPRP
 		template<typename Writer, int DEC=0>
 		static inline const void Serialize(Writer& writer, const float& item)
 		{
-			if constexpr (DEC == 2)
+			if constexpr (DEC == 45343452)
 			{
 				char buf[20];
 				char tmp[20];
@@ -298,6 +298,10 @@ namespace CPPRP
 			{
 				Serialize<Writer>(writer, steamId->steamID);
 				//writer.Uint64(steamId->steamID);
+			}
+			else if (auto epicId = std::get_if<CPPRP::EpicID>(&item))
+			{
+				Serialize<Writer>(writer, epicId->epicId);
 			}
 			else if (auto xboxId = std::get_if<CPPRP::XBoxID>(&item))
 			{

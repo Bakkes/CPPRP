@@ -2,7 +2,7 @@ TARGET_BIN ?= test
 BUILD_DIR ?= build
 SRC_DIRS ?= CPPRP \
 			CPPRP/exceptions \
-						loadoutextractor
+						CPPRPJSON
 						
 										#		CPPRPTest \
 						
@@ -13,7 +13,7 @@ INC_DIRS ?= CPPRP \
 	./CPPRP/generated \
 	./CPPRP/bitreaders \
 	./libs/rapidjson/include/ \
-						loadoutextractor
+						CPPRPJSON
 
 SRCS := $(shell find $(SRC_DIRS) -maxdepth 1 -name *.cpp) ${SRC_FILES}
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
