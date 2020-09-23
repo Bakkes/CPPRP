@@ -9,18 +9,13 @@
 #include <mutex>
 #include <functional>
 #include "CPPBitReader.h"
-
 #include "./data/NetworkData.h"
 #include "./exceptions/ParseException.h"
 #include "./exceptions/ReplayException.h"
-#include "NetworkDataParsers.h"
+
 #include "./data/ReplayFileData.h"
-#include "PropertyParser.h"
-#ifdef _WIN32
-#define DllExport   __declspec( dllexport )
-#else
-#define DllExport  
-#endif
+
+
 namespace CPPRP
 {
 	enum CrcCheck
@@ -32,14 +27,15 @@ namespace CPPRP
 
 	struct ActorStateData
 	{
-		std::shared_ptr<Engine::Actor> actorObject;
+		std::unique_ptr<Engine::Actor> actorObject;
 		std::shared_ptr<ClassNet> classNet;
 		uint32_t actorId{0};
 		uint32_t nameId{ 0 };
 		uint32_t classNameId{ 0 };
 	};
 
-
+	typedef std::function<std::unique_ptr<Engine::Actor>()> createObjectFunc;
+	typedef std::function<void(Engine::Actor*, CPPBitReader<BitReaderType>& br)> parsePropertyFunc;
 
 	typedef std::function<void(const Frame, const std::unordered_map<int, ActorStateData>&)> tickable;
 	typedef std::function<void(const Frame)> onNewFrame;
@@ -48,7 +44,7 @@ namespace CPPRP
 	typedef std::function<void(const ActorStateData&)> actorDeleted;
 	typedef std::function<void(uint32_t, const ActorStateData&)> propertyUpdated;
 
-	class DllExport ReplayFile
+	class ReplayFile : std::enable_shared_from_this<ReplayFile>
 	{
 	private:
 		

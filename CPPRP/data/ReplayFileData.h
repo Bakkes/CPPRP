@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <iostream>
 #include <memory>
-#include <variant>
 
 /*
 This file contains all base types such as vectors and rotators (mostly classes that are read in the bitreader directly)
@@ -85,8 +84,7 @@ namespace CPPRP
 		Platform_Switch = 6, //Is in gamefiles as wegame..
 		//Platform_NNX = 7,
 		Platform_PsyNet = 7, //is 8 in gamefiles
-		Platform_Epic = 11,
-		Platform_MAX = 12
+		Platform_MAX = 9
 	};
 
 	struct UniqueId
@@ -142,16 +140,10 @@ namespace CPPRP
 		uint64_t d{ 0 };
 	};
 
-	struct EpicID : public UniqueId
-	{
-		std::string epicId{ "" };
-	};
-
-	struct UnknownId : public UniqueId
+	struct UnkownId : public UniqueId
 	{
 		uint32_t unknown{ 0 };
 	};
-	using OnlineID = std::variant<UniqueId, SteamID, XBoxID, SwitchID, QQID, PS4ID, PsyNetID, EpicID, UnknownId>;
 
 	struct Property
 	{
