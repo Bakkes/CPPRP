@@ -366,6 +366,65 @@ namespace CPPRP
 	}
 #endif
 
+
+	template<>
+	template<>
+	inline const std::string CPPBitReader<BitReaderType>::read<std::string>()
+	{
+		const int32_t length = read<int32_t>();
+		const size_t final_length = static_cast<size_t>(length) * (length > 0 ? 1 : -2);
+		if (final_length == 0)
+		{
+			return "";
+		}
+
+#ifndef PARSE_UNSAFE
+		if (final_length > 1024)
+		{
+			if (engineVersion == 0
+				&& licenseeVersion == 0
+				&& netVersion == 0)
+			{
+				throw InvalidVersionException(0, 0, 0);
+			}
+			else
+			{
+				throw std::runtime_error("Got unwanted string length, read value " + std::to_string(length) + ", reading bytes " + std::to_string(final_length) + ". (" + std::to_string(this->bit_position) + ")");
+			}
+		}
+#endif
+
+		std::string str;
+
+		if (b.validBits % 8 == 0)
+		{
+			const char* text = ((char*)&b.data[b.bytes_read - ((b.validBits) / 8)]);
+			str = std::string(text);
+			skip(final_length * 8);
+		}
+		else
+		{
+			str.resize(final_length - 1);
+			int todo = final_length;
+			while (todo > 7)
+			{
+				*reinterpret_cast<uint64_t*>(&str[final_length - todo]) = read<uint64_t>();
+				todo -= 8;
+			}
+			if (todo > 3)
+			{
+				*reinterpret_cast<uint64_t*>(&str[final_length - todo]) = read<uint32_t>();
+				todo -= 4;
+			}
+
+			for (size_t i = final_length - todo; i < final_length; ++i)
+			{
+				str[i] = read<uint8_t>();
+			}
+		}
+
+		return str;
+	}
 	
 	template<>
 	template<>
@@ -449,6 +508,12 @@ namespace CPPRP
 			uniqueId = tmp;
 		}
 			break;
+		case Platform_Epic:
+		{
+
+			std::string abc = read<std::string>();
+		}
+			break;
 		case Platform_Unknown:
 		{
 			auto tmp = UnknownId();
@@ -482,64 +547,6 @@ namespace CPPRP
 		return uniqueId;
 	}
 
-	template<>
-	template<>
-	inline const std::string CPPBitReader<BitReaderType>::read<std::string>()
-	{
-		const int32_t length = read<int32_t>();
-		const size_t final_length = static_cast<size_t>(length) * (length > 0 ? 1 : -2);
-		if (final_length == 0)
-		{
-			return "";
-		}
-
-#ifndef PARSE_UNSAFE
-		if (final_length > 1024)
-		{
-			if (engineVersion == 0
-				&& licenseeVersion == 0
-				&& netVersion == 0)
-			{
-				throw InvalidVersionException(0, 0, 0);
-			}
-			else
-			{
-				throw std::runtime_error("Got unwanted string length, read value " + std::to_string(length) + ", reading bytes " + std::to_string(final_length) + ". (" + std::to_string(this->bit_position) + ")");
-			}
-		}
-#endif
-
-		std::string str;
-
-		if (b.validBits % 8 == 0)
-		{
-			const char* text = ((char*)&b.data[b.bytes_read - ((b.validBits) / 8)]);
-			str = std::string(text);
-			skip(final_length * 8);
-		}
-		else
-		{
-			str.resize(final_length - 1);
-			int todo = final_length;
-			while (todo > 7)
-			{
-				*reinterpret_cast<uint64_t*>(&str[final_length - todo]) = read<uint64_t>();
-				todo -= 8;
-			}
-			if (todo > 3)
-			{
-				*reinterpret_cast<uint64_t*>(&str[final_length - todo]) = read<uint32_t>();
-				todo -= 4;
-			}
-
-			for (size_t i = final_length - todo; i < final_length; ++i)
-			{
-				str[i] = read<uint8_t>();
-			}
-		}
-
-		return str;
-	}
 
 	template<typename T>
 	template<typename U>

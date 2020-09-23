@@ -57,10 +57,12 @@ namespace CPPRP
 			float timeSinceBallHit = 0.f;
 			bool lastVal = true;
 			std::set<float> kickoffSpeeds;
+			std::set<float> scoreSpeeds;
 		public:
 
 			float GetFastestKickoff();
-
+			float GetFastestGoal();
+			float GetSlowestGoal();
 			IReplayPlayer(std::shared_ptr<CPPRP::ReplayFile> replay);
 
 			void OnTick(const Frame frame, const std::unordered_map<int, ActorStateData>& actorData);

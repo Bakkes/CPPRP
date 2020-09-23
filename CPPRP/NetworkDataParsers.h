@@ -189,6 +189,10 @@ namespace CPPRP
 		if (netVersion >= 5)
 		{
 			item.position = reader.read<Vector3>();
+			if (netVersion < 7)
+			{
+				item.position = { item.position.x * 10, item.position.y * 10, item.position.z * 10 };
+			}
 		}
 		else
 		{

@@ -8,6 +8,16 @@ namespace CPPRP
 			if (kickoffSpeeds.size() == 0) return 9999.f;
 			return *kickoffSpeeds.begin();
 		}
+		float IReplayPlayer::GetFastestGoal()
+		{
+			if (scoreSpeeds.size() == 0) return -1.f;
+			return *scoreSpeeds.begin();
+		}
+		float IReplayPlayer::GetSlowestGoal()
+		{
+			if (scoreSpeeds.size() == 0) return 10000.f;
+			return *scoreSpeeds.rbegin();
+		}
 		IReplayPlayer::IReplayPlayer(std::shared_ptr<CPPRP::ReplayFile> replay) : replay_(replay)
 		{
 			using namespace std::placeholders;
@@ -66,8 +76,34 @@ namespace CPPRP
 			RegisterActorUpdate<TAGame::Team_TA>(FIELD(TAGame::Team_TA::CustomTeamName), [](const std::shared_ptr<TAGame::Team_TA>& actor, std::string& propertyName)
 				{
 
-					printf("Score update: %s\n", actor->CustomTeamName.c_str());
+					//printf("Score update: %s\n", actor->CustomTeamName.c_str());
 
+				});
+
+			RegisterActorUpdate<TAGame::GameEvent_Soccar_TA>(FIELD(TAGame::GameEvent_Soccar_TA::ReplicatedScoredOnTeam), [&](const std::shared_ptr<TAGame::GameEvent_Soccar_TA>& actor, std::string& propertyName)
+				{
+					bool hasbol = false;
+					//printf("AAAAAAAAA: %i\n", actor->MatchGoals);
+					for (const auto& act : replay_->actorStates)
+					{
+						if (auto c = std::dynamic_pointer_cast<CPPRP::TAGame::Ball_TA>(act.second.actorObject))
+						{
+							auto lin_vel = c->ReplicatedRBState.linear_velocity;
+							float abc = powf(lin_vel.x, 2) + powf(lin_vel.y, 2) + powf(lin_vel.z, 2);
+							abc = sqrt(abc);
+
+							if (abc > .001f)
+							{
+								const float kmh = (abc * 60 * 60) / 100000;
+								scoreSpeeds.insert(kmh);
+								//printf("Score speed: %.2f\n", abc);
+							}
+						}
+					}
+					if (hasbol == false)
+					{
+						//printf("No bol!!\n");
+					}
 				});
 		}
 
@@ -100,7 +136,8 @@ namespace CPPRP
 		}
 
 		void IReplayPlayer::OnActorDeleted(const ActorStateData& deletedActor)
-		{
+		{//
+			
 		}
 
 	}

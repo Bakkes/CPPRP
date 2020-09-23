@@ -17,7 +17,7 @@ namespace CPPRP
 	
 	
 
-	constexpr bool IncludeParseLog = false;
+	constexpr bool IncludeParseLog = true;
 	constexpr uint32_t ParseLogSize = 100;
 
 	ReplayFile::ReplayFile(std::filesystem::path path_) : path(path_)

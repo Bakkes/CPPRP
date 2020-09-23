@@ -40,8 +40,17 @@ struct FK
 	float time;
 	std::string name;
 };
-std::vector<FK> kickoffs;
 
+struct GT
+{
+	float speed;
+	std::string name;
+};
+std::mutex kickoffMutex;
+std::vector<FK> kickoffs;
+std::vector<GT> fastgoals;
+std::vector<GT> slowgoals;
+std::mutex queueMutex;
 //static std::string fastestKickoffFile = "";
 //static float fastestKickoff = 10.f;
 
@@ -59,23 +68,34 @@ void AnalyzeReplay(std::filesystem::path& replayPath)
 
 	replayFile->Parse();
 
-	float k = p.GetFastestKickoff();
-	kickoffs.push_back({k, replayPath.string()});
+	//float k = p.GetFastestKickoff();
+	//float fastestGoal = p.GetFastestGoal();
+	std::lock_guard<std::mutex> mtx(kickoffMutex);
+	kickoffs.push_back({p.GetFastestKickoff(), replayPath.string()});
+	fastgoals.push_back({ p.GetFastestGoal(), replayPath.string() });
+	slowgoals.push_back({ p.GetSlowestGoal(), replayPath.string() });
+
 	//if (k < fastestKickoff)
 	//{
 	//	fastestKickoff = k;
 	//	fastestKickoffFile = replayPath.string();
 	//}
-	//printf("Fastest kickoff that replay was: %.3f\n", k);
+	printf("Fastest goal that replay was: %.3f\n", p.GetFastestGoal());
 }
 
-int main()
+int main(int argc, char* argv[])
 {
 
 	std::queue<std::filesystem::path> replayFilesToLoad;
 	{
 		//std::filesystem::path p("C:\\Users\\Bakkes\\Documents\\My Games\\Rocket League\\TAGame\\Demos\\");
-		std::filesystem::path p("C:\\Users\\Bakkes\\Downloads\\RLCS Season 9-20200723T230751Z-001\\RLCS Season 9\\");
+		
+		std::filesystem::path p;
+		if (argc > 1)
+			p = std::filesystem::path(argv[1]);
+		else
+			p = std::filesystem::path("C:\\Users\\Bakkes\\Downloads\\RLCS Season 9-20200723T230751Z-001\\RLCS Season 9\\");
+		printf("Reading path %s\n", p.u8string().c_str());
 		if (std::filesystem::is_regular_file(p))
 		{
 			replayFilesToLoad.push(p);
@@ -92,23 +112,76 @@ int main()
 			}
 		}
 	}
-	Timer t("Analyze");
-	while (!replayFilesToLoad.empty())
+
+	auto analyzeLambda = [&replayFilesToLoad]()
 	{
-		try
+		while (true)
 		{
-			AnalyzeReplay(replayFilesToLoad.front());
+			std::filesystem::path replayF;
+			{
+				std::lock_guard<std::mutex> lockGuard(queueMutex);
+				if (replayFilesToLoad.empty())
+				{
+					break;
+				}
+				replayF = replayFilesToLoad.front();
+				replayFilesToLoad.pop();
+			}
+			
+			try
+			{
+				AnalyzeReplay(replayF);
+			}
+			catch (...) {}
 		}
-		catch (...) {}
-		replayFilesToLoad.pop();
+	};
+
+	{
+		Timer t("Analyze");
+		const int bothReplayThreadsCount = 8;
+		if (bothReplayThreadsCount == 1)
+		{
+			analyzeLambda();
+		}
+		else
+		{
+			std::vector<std::thread> bothReplayThreads;
+			for (size_t i = 0; i < bothReplayThreadsCount; ++i)
+			{
+				std::thread bothReplayThread = std::thread{
+					analyzeLambda
+				};
+				bothReplayThreads.emplace_back(std::move(bothReplayThread));
+			}
+
+
+			for (auto& t : bothReplayThreads)
+			{
+				t.join();
+			}
+		}
 	}
+	printf("Kickoffs\n");
 	std::sort(kickoffs.begin(), kickoffs.end(), [](auto lhs, auto rhs) { return lhs.time < rhs.time; });
 	for (int i = 0; i < 5; ++i)
 	{
 		printf("%s: %.4f\n", kickoffs.at(i).name.c_str(), kickoffs.at(i).time);
 	}
 	//printf("%s: %.4f", fastestKickoffFile.c_str(), fastestKickoff);
-	
+	printf("\n\nFastest goals\n");
+	std::sort(fastgoals.begin(), fastgoals.end(), [](auto lhs, auto rhs) { return lhs.speed > rhs.speed; });
+	for (int i = 0; i < 5; ++i)
+	{
+		printf("%s: %.4f km/h\n", fastgoals.at(i).name.c_str(), fastgoals.at(i).speed);
+	}
+
+	printf("\n\nSlowest goals\n");
+	std::sort(slowgoals.begin(), slowgoals.end(), [](auto lhs, auto rhs) { return lhs.speed < rhs.speed; });
+	for (int i = 0; i < 5; ++i)
+	{
+		printf("%s: %.4f km/h\n", slowgoals.at(i).name.c_str(), slowgoals.at(i).speed);
+	}
+
 
 	return 0;
 }

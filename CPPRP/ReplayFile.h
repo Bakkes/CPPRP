@@ -16,8 +16,11 @@
 #include "NetworkDataParsers.h"
 #include "./data/ReplayFileData.h"
 #include "PropertyParser.h"
+#ifdef _WIN32
 #define DllExport   __declspec( dllexport )
-
+#else
+#define DllExport  
+#endif
 namespace CPPRP
 {
 	enum CrcCheck

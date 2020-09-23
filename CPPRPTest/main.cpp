@@ -56,7 +56,16 @@ int main(int argc, char *argv[])
 		std::filesystem::path p(argv[1]);
 		if (std::filesystem::is_regular_file(p))
 		{
-			replayFilesToLoad.push(p);
+			if (argc > 2)
+			{
+				int amnt = std::stoi(argv[2]);
+				for(int i = 0; i < amnt; ++i)
+					replayFilesToLoad.push(p);
+			}
+			else
+			{
+				replayFilesToLoad.push(p);
+			}
 		}
 		else 
 		{
