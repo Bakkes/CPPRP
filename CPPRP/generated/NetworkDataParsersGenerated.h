@@ -38,8 +38,8 @@ inline const CameraSettings Consume(CPPBitReader<BitReaderType>& reader)
 	item.distance = reader.read<float>();
 	item.stiffness = reader.read<float>();
 	item.swivelspeed = reader.read<float>();
-	if(reader.owner->header.engineVersion >= 868 
-		&& reader.owner->header.licenseeVersion >= 20) { 
+	if(reader.engineVersion >= 868 
+		&& reader.licenseeVersion >= 20) { 
 		item.transitionspeed = reader.read<float>();
 	} else {
 		item.transitionspeed = 0;
@@ -148,21 +148,21 @@ inline const PrivateMatchSettings Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
-inline const Attributes Consume(CPPBitReader<BitReaderType>& reader) 
-{
-	Attributes item;
-	item.product_attributes = ConsumeVector<std::shared_ptr<ProductAttribute>>(reader);
-	return item;
-}
-
-
-template<>
 inline const ActorBase Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ActorBase item;
 	item.value = reader.read<uint32_t>();
 	item.unknown1 = reader.read<bool>();
 	item.unknown2 = reader.read<bool>();
+	return item;
+}
+
+
+template<>
+inline const Attributes Consume(CPPBitReader<BitReaderType>& reader) 
+{
+	Attributes item;
+	item.product_attributes = ConsumeVector<AttributeType>(reader);
 	return item;
 }
 

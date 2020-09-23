@@ -1,11 +1,10 @@
 #pragma once
-#include "ReplayFile.h"
-#include "CPPBitReader.h"
 #include "./data/NetworkData.h"
 #include <vector>
 #include <sstream>
 #include "./exceptions/ParseException.h"
-
+#include "CPPBitReader.h"
+#include <variant>
 /*
 File responsible for parsing network data, which are the fields in the game classes
 Basically means it should parse all structs defined in data/NetworkData.h.
@@ -32,8 +31,9 @@ namespace CPPRP
 		return vec;
 	}
 
+	
 	template<>
-	inline const std::shared_ptr<ProductAttribute> Consume(CPPBitReader<BitReaderType>& reader) {
+	inline const AttributeType Consume(CPPBitReader<BitReaderType>& reader) {
 		
 		//Make sure this matches attributeNames in the preprocess function
 		enum class AttributeTypes : size_t
@@ -46,96 +46,97 @@ namespace CPPRP
 			MAX
 		};
 		
-		
-		std::shared_ptr<ProductAttribute> prodAttr;
+
+		AttributeType att;
 		bool unknown1 = reader.read<bool>();
 		uint32_t class_index = reader.read<uint32_t>();
-		if (class_index > reader.owner->replayFile->objects.size())
-		{
-			throw AttributeParseException<BitReaderType>("ProductAttribute", reader);
-		}
-		std::string className = reader.owner->replayFile->objects[class_index];
-		size_t index = std::distance(reader.owner->attributeIDs.begin(),
-			std::find(reader.owner->attributeIDs.begin(), reader.owner->attributeIDs.end(), class_index));
-		printf("[%i|%i] %s", index, class_index, className.c_str());
-		//reader.owner->attributeIDs.find()
+		size_t index = std::distance(reader.attributeIDs.begin(),
+			std::find(reader.attributeIDs.begin(), reader.attributeIDs.end(), class_index));
 		switch((AttributeTypes)index)
 		{
 			case AttributeTypes::UserColor:
 			{
 				if (reader.licenseeVersion >= 23)
 				{
-					std::shared_ptr<ProductAttributeUserColorRGB> ucargb = std::make_shared<ProductAttributeUserColorRGB>();
-
-					ucargb->r = reader.read<uint8_t>();
-					ucargb->g = reader.read<uint8_t>();
-					ucargb->b = reader.read<uint8_t>();
-					ucargb->a = reader.read<uint8_t>();
-					prodAttr = ucargb;
+					auto tmp = ProductAttributeUserColorRGB();
+					{
+						tmp.r = reader.read<uint8_t>();
+						tmp.g = reader.read<uint8_t>();
+						tmp.b = reader.read<uint8_t>();
+						tmp.a = reader.read<uint8_t>();
+						att = tmp;
+					}
 				}
 				else
 				{
-					std::shared_ptr<ProductAttributeUserColorSingle> ucas = std::make_shared<ProductAttributeUserColorSingle>();
+					auto tmp = ProductAttributeUserColorSingle();
 
-					ucas->has_value = reader.read<bool>();
-					if (ucas->has_value)
+					tmp.has_value = reader.read<bool>();
+					if (tmp.has_value)
 					{
-						ucas->value = reader.read<uint32_t>(31);
+						tmp.value = reader.read<uint32_t>(31);
 					}
 					else
 					{
-						ucas->value = 0;
+						tmp.value = 0;
 					}
-					prodAttr = ucas;
+					att = tmp;
 				}
 			}
 			break;
 			case AttributeTypes::Painted:
 			{
-				std::shared_ptr<ProductAttributePainted> pad = std::make_shared<ProductAttributePainted>();
+				auto tmp = ProductAttributePainted();
 
 				if (reader.engineVersion >= 868 && reader.licenseeVersion >= 18)
 				{
-					pad->value = reader.read<uint32_t>(31);
+					tmp.value = reader.read<uint32_t>(31);
 				}
 				else
 				{
-					pad->value = reader.readBitsMax<uint32_t>(14);
+					tmp.value = reader.readBitsMax<uint32_t>(14);
 				}
-				prodAttr = pad;
+				att = tmp;
 			}
 			break;
 			case AttributeTypes::TeamEdition:
 			{
-				std::shared_ptr<ProductAttributeTeamEdition> teamEdition = std::make_shared<ProductAttributeTeamEdition>();
-				teamEdition->value = reader.read<uint32_t>(31);
-				prodAttr = teamEdition;
+				auto tmp = ProductAttributeTeamEdition();
+				tmp.value = reader.read<uint32_t>(31);
+				att = tmp;
 			}
 			break;
 			case AttributeTypes::SpecialEdition:
 			{
-				std::shared_ptr<ProductAttributeSpecialEdition> specialEdition = std::make_shared<ProductAttributeSpecialEdition>();
-				specialEdition->value = reader.read<uint32_t>(31);
-				prodAttr = specialEdition;
+				auto tmp = ProductAttributeSpecialEdition();
+				tmp.value = reader.read<uint32_t>(31);
+				att = tmp;
 			}
 			break;
 			case AttributeTypes::TitleID:
 			{
-				std::shared_ptr<ProductAttributeTitle> title = std::make_shared<ProductAttributeTitle>();
-				title->title = reader.read<std::string>();
-				prodAttr = title;
+				auto tmp = ProductAttributeTitle();
+				tmp.title = reader.read<std::string>();
+				att = tmp;
 			}
 			break;
 			default:
 			case AttributeTypes::MAX:
 			{
-				throw AttributeParseException<BitReaderType>("Unable to parse attribute with name: " + reader.owner->replayFile->objects[class_index], reader);
+				throw AttributeParseException<BitReaderType>("Unable to parse attribute with ID: " + std::to_string(class_index), reader);
 			}
 			break;
 		}
-		prodAttr->unknown1 = unknown1;
-		prodAttr->class_index = class_index;
-		return prodAttr;
+		std::visit(
+			[unknown1, class_index](ProductAttribute& base)
+			{
+				base.unknown1 = unknown1;
+				base.class_index = class_index;
+			},
+			att);
+		//std::get<ProductAttribute>(att).unknown1 = unknown1;
+		//std::get<ProductAttribute>(att).class_index = class_index;
+		return att;
 	}
 
 
@@ -188,6 +189,10 @@ namespace CPPRP
 		if (netVersion >= 5)
 		{
 			item.position = reader.read<Vector3>();
+			if (netVersion < 7)
+			{
+				item.position = { item.position.x * 10, item.position.y * 10, item.position.z * 10 };
+			}
 		}
 		else
 		{
@@ -222,18 +227,20 @@ namespace CPPRP
 
 	template<>
 	inline const PartyLeader Consume(CPPBitReader<BitReaderType>& reader) {
-		PartyLeader item{ 0 };
+		PartyLeader item;
 		uint8_t test = reader.read<uint8_t>();
 		if (test != 0)
 		{
 			reader.goback(8);
-			item.id = reader.read<std::shared_ptr<UniqueId>>();
+
+			item.id = reader.read<OnlineID>();
 		}
 		else
 		{
-			item.id = std::make_shared<UniqueId>();
-			item.id->platform = 0;
-			item.id->splitscreenID = 0;
+			UniqueId ui;
+			ui.platform = 0;
+			ui.splitscreenID = 0;
+			item.id = ui;
 		}
 		return item;
 	}
@@ -257,9 +264,10 @@ namespace CPPRP
 	inline const Reservation Consume(CPPBitReader<BitReaderType>& reader) {
 		Reservation item;
 		item.number = reader.read<uint8_t>(3);
-		item.player_id = reader.read<std::shared_ptr<UniqueId>>();
+		item.player_id = reader.read<OnlineID>();
 		
-		if (item.player_id->platform == Platform_Unknown && (reader.licenseeVersion <= 18 || reader.netVersion != 0))
+		//Is always an unique ID
+		if (reinterpret_cast<UniqueId*>(&item.player_id)->platform == Platform_Unknown && (reader.licenseeVersion <= 18 || reader.netVersion != 0))
 		{
 		}
 		else

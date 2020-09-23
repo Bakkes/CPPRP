@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include "CPPBitReader.h"
+#include <variant>
 
 /* 
 ParserAttributes:
@@ -55,7 +56,7 @@ namespace CPPRP
 	{
 		__ParserAttribute__(NumBits, 3)
 		uint8_t number;
-		std::shared_ptr<UniqueId> player_id;
+		OnlineID player_id;
 		std::string player_name;
 		uint8_t status;
 	};
@@ -191,13 +192,6 @@ namespace CPPRP
 
 
 
-	struct Attributes
-	{
-		//uint8_t attributes_count; //Is automatically read when consuming vector
-		__ParserAttribute__(CallConsume, true)
-		std::vector<std::shared_ptr<ProductAttribute>> product_attributes;
-	};
-
 	//__ParserAttribute__(Consume, false)
 	struct ActorBase
 	{
@@ -209,16 +203,9 @@ namespace CPPRP
 	__ParserAttribute__(Consume, false)
 	struct PartyLeader
 	{
-		std::shared_ptr<UniqueId> id;
+		OnlineID id;
 	};
 
-	struct OnlineLoadout
-	{
-		//uint8_t attributes_list_count;//Is automatically read when consuming vector
-		__ParserAttribute__(CallToString, true)
-		__ParserAttribute__(CallConsume, true)
-		std::vector<Attributes> attributes_list;
-	};
 
 	__ParserAttribute__(Consume, false)
 	struct ProductAttributeUserColorSingle : public ProductAttribute 
@@ -265,6 +252,26 @@ namespace CPPRP
 	{
 
 	};
+
+	using AttributeType = std::variant<ProductAttributeUserColorRGB, ProductAttributeUserColorSingle,
+		ProductAttributePainted, ProductAttributeTeamEdition, ProductAttributeTitle,
+		ProductAttributeSpecialEdition, ProductAttribute>;
+
+	struct Attributes
+	{
+		//uint8_t attributes_count; //Is automatically read when consuming vector
+		__ParserAttribute__(CallConsume, true)
+			std::vector<AttributeType> product_attributes;
+	};
+
+	struct OnlineLoadout
+	{
+		//uint8_t attributes_list_count;//Is automatically read when consuming vector
+		__ParserAttribute__(CallToString, true)
+		__ParserAttribute__(CallConsume, true)
+		std::vector<Attributes> attributes_list;
+	};
+
 
 	struct ClientLoadoutsOnline
 	{

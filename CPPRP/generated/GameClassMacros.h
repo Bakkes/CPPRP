@@ -79,7 +79,7 @@ GAMEFIELD(Engine, PlayerReplicationInfo, bAdmin, bool);
 GAMEFIELD(Engine, PlayerReplicationInfo, bIsInactive, bool);
 GAMEFIELD(Engine, PlayerReplicationInfo, bOnlySpectator, bool);
 GAMEFIELD(Engine, PlayerReplicationInfo, Ping, uint8_t);
-GAMEFIELD(Engine, PlayerReplicationInfo, UniqueId, class std::shared_ptr<struct UniqueId>);
+GAMEFIELD(Engine, PlayerReplicationInfo, UniqueId, OnlineID);
 GAMEFIELD(Engine, PlayerReplicationInfo, Deaths, uint32_t);
 GAMEFIELD(Engine, PlayerReplicationInfo, TTSSpeaker, uint8_t);
 GAMEFIELD(Engine, PlayerReplicationInfo, bOutOfLives, bool);

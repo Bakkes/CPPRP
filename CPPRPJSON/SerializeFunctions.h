@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <functional>
 #include <memory>
+#include <variant>
 //#define RAPIDJSON_SIMD 1
 #define RAPIDJSON_HAS_STDSTRING 1
 #include "rapidjson/writer.h"
@@ -72,7 +73,7 @@ namespace CPPRP
 		template<typename Writer, int DEC=0>
 		static inline const void Serialize(Writer& writer, const float& item)
 		{
-			if constexpr (DEC == 2)
+			if constexpr (DEC == 45343452)
 			{
 				char buf[20];
 				char tmp[20];
@@ -278,24 +279,35 @@ namespace CPPRP
 		}
 
 		template<typename Writer>
-		static inline const void Serialize(Writer& writer, const std::shared_ptr<CPPRP::UniqueId>& item)
+		static inline const void Serialize(Writer& writer, const CPPRP::OnlineID item)
 		{
 			writer.StartObject();
-			writer.Key("Platform");
-			Serialize<Writer>(writer, item->platform);
-			writer.Key("SplitscreenID");
-			Serialize<Writer>(writer, item->splitscreenID);
+			std::visit(
+			[&](const UniqueId& base)
+			{
+				writer.Key("Platform");
+				Serialize<Writer>(writer, base.platform);
+				writer.Key("SplitscreenID");
+				Serialize<Writer>(writer, base.splitscreenID);
+			},
+			item);
+			
+			
 			writer.Key("UniqueID");
-			if (std::shared_ptr<CPPRP::SteamID> steamId = std::dynamic_pointer_cast<CPPRP::SteamID>(item); steamId)
+			if (auto steamId = std::get_if<CPPRP::SteamID>(&item))
 			{
 				Serialize<Writer>(writer, steamId->steamID);
 				//writer.Uint64(steamId->steamID);
 			}
-			else if (std::shared_ptr<CPPRP::XBoxID> xboxId = std::dynamic_pointer_cast<CPPRP::XBoxID>(item); xboxId)
+			else if (auto epicId = std::get_if<CPPRP::EpicID>(&item))
+			{
+				Serialize<Writer>(writer, epicId->epicId);
+			}
+			else if (auto xboxId = std::get_if<CPPRP::XBoxID>(&item))
 			{
 				Serialize<Writer>(writer, xboxId->xboxID);
 			}
-			else if (std::shared_ptr<CPPRP::SwitchID> switchId = std::dynamic_pointer_cast<CPPRP::SwitchID>(item); switchId)
+			else if (auto switchId = std::get_if<CPPRP::SwitchID>(&item))
 			{
 				writer.StartArray();
 				Serialize<Writer>(writer, switchId->a);
@@ -304,7 +316,7 @@ namespace CPPRP
 				Serialize<Writer>(writer, switchId->d);
 				writer.EndArray();
 			}
-			else if (std::shared_ptr<CPPRP::PS4ID> ps4Id = std::dynamic_pointer_cast<CPPRP::PS4ID>(item); ps4Id)
+			else if (auto ps4Id = std::get_if<CPPRP::PS4ID>(&item))
 			{
 				Serialize<Writer>(writer, ps4Id->psId);
 
@@ -317,7 +329,7 @@ namespace CPPRP
 				writer.Key("Unknown2");
 				Serialize<Writer>(writer, ps4Id->unknown2);
 			}
-			else if (std::shared_ptr<CPPRP::PsyNetID> psynetId = std::dynamic_pointer_cast<CPPRP::PsyNetID>(item); psynetId)
+			else if (auto psynetId = std::get_if<CPPRP::PsyNetID>(&item))
 			{
 				writer.StartArray();
 				Serialize<Writer>(writer, psynetId->a);
@@ -326,7 +338,7 @@ namespace CPPRP
 				Serialize<Writer>(writer, psynetId->d);
 				writer.EndArray();
 			}
-			else if (std::shared_ptr<CPPRP::QQID> qqId = std::dynamic_pointer_cast<CPPRP::QQID>(item); qqId)
+			else if (auto qqId = std::get_if<CPPRP::QQID>(&item))
 			{
 				Serialize<Writer>(writer, qqId->qqID);
 			}

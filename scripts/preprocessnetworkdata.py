@@ -85,12 +85,12 @@ def parseStruct(lines):
             
             setVersionReq = True
             if engineversion >= 0 and licenseeversion >= 0:
-                code.consumeIO.write("if(reader.owner->header.engineVersion >= {0} \n".format(engineversion))
-                code.consumeIO.write("\t&& reader.owner->header.licenseeVersion >= {0}) {{ \n".format(licenseeversion))
+                code.consumeIO.write("if(reader.engineVersion >= {0} \n".format(engineversion))
+                code.consumeIO.write("\t&& reader.licenseeVersion >= {0}) {{ \n".format(licenseeversion))
             elif engineversion >= 0:
-                code.consumeIO.write("if(reader.owner->header.engineVersion >= {0}) {{ \n".format(engineversion))
+                code.consumeIO.write("if(reader.engineVersion >= {0}) {{ \n".format(engineversion))
             elif licenseeversion >= 0:
-                code.consumeIO.write("if(reader.owner->header.licenseeVersion >= {0}) {{ \n".format(licenseeversion))
+                code.consumeIO.write("if(reader.licenseeVersion >= {0}) {{ \n".format(licenseeversion))
             else:
                 setVersionReq = False
                 

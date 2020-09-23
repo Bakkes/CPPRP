@@ -1,7 +1,7 @@
 
 #pragma comment(lib, "CPPRP.lib")
 #include "../CPPRP/ReplayFile.h"
-#include "../CPPRP/ReplayException.h"
+#include "../CPPRP/exceptions/ReplayException.h"
 #include <string>
 #include "bmloadout.h"
 #include <iostream>
@@ -9,7 +9,7 @@
 #include <map>
 #include "bmloadout.h"
 #include "bakkesmodloadoutlib.h"
-
+#include "../CPPRP/data/NetworkData.h"
 std::map<int, std::string> actorNameMap;
 std::map<int, BMLoadout> processed;
 std::map<int, CPPRP::CameraSettings> cameras;
@@ -64,6 +64,10 @@ void SetClientLoadouts(const CPPRP::ActorStateData& actor, const CPPRP::ClientLo
 	
 }
 
+template<class... Ts> struct overload : Ts... { using Ts::operator()...; };
+
+template<class... Ts> overload(Ts...) -> overload<Ts...>;
+
 void SetClientLoadoutsOnline(const CPPRP::ActorStateData& actor, const CPPRP::ClientLoadoutsOnline& loadouts)
 {
 	if (processed.find(actor.actorId) == processed.end())
@@ -73,12 +77,23 @@ void SetClientLoadoutsOnline(const CPPRP::ActorStateData& actor, const CPPRP::Cl
 	{
 		for (int j = 0; j < loadouts.online_one.attributes_list[slot].product_attributes.size(); j++)
 		{
-			std::shared_ptr<CPPRP::ProductAttribute> pa = loadouts.online_one.attributes_list[slot].product_attributes[j];
-            std::shared_ptr<CPPRP::ProductAttributePainted> paPainted = std::dynamic_pointer_cast<CPPRP::ProductAttributePainted>(pa);
+			CPPRP::AttributeType pa = loadouts.online_one.attributes_list[slot].product_attributes[j];
+			
+			std::visit(
+			//overload(
+				[&customLoadout, slot](const CPPRP::ProductAttributePainted&& paint)
+				{
+					customLoadout.body.blue_loadout[slot].paint_index = (uint8_t)(paint.value);
+				}
+			//)
+			,
+			pa);
+			
+            /*std::shared_ptr<CPPRP::ProductAttributePainted> paPainted = std::dynamic_pointer_cast<CPPRP::ProductAttributePainted>(pa);
             if (paPainted)
             {
                 customLoadout.body.blue_loadout[slot].paint_index = (uint8_t)(pa->value);
-            }
+            }*/
 		}
 	}
 
@@ -211,7 +226,7 @@ int main(int argc, char *argv[])
         //printf("%s\n", typeid(*actor.actorObject).name());
     });
 
-    replayFile->PreprocessTables();
+    
     replayFile->Parse();
 	//Engine.PlayerReplicationInfo:PlayerName
 	// crp_register_updated_callback("Engine.PlayerReplicationInfo:PlayerName", (callback_updated)&on_playername_set);

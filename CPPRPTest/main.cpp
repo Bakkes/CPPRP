@@ -56,7 +56,16 @@ int main(int argc, char *argv[])
 		std::filesystem::path p(argv[1]);
 		if (std::filesystem::is_regular_file(p))
 		{
-			replayFilesToLoad.push(p);
+			if (argc > 2)
+			{
+				int amnt = std::stoi(argv[2]);
+				for(int i = 0; i < amnt; ++i)
+					replayFilesToLoad.push(p);
+			}
+			else
+			{
+				replayFilesToLoad.push(p);
+			}
 		}
 		else 
 		{
@@ -64,7 +73,7 @@ int main(int argc, char *argv[])
 			{
 				if (entry.path().filename().u8string().find(".replay") == std::string::npos)
 					continue;
-				if (replayFilesToLoad.size() >= 20)
+				if (replayFilesToLoad.size() >= 5335345)
 					break;
 				replayFilesToLoad.push(entry.path());
 			}
@@ -331,6 +340,6 @@ int main(int argc, char *argv[])
 		printf("Success: %i, fail: %i (%.2f%%) corrupt: %i Average parse time %.5f ms (totaltime/successfulparses)\n", (success.load()), fail.load(), ((double)success.load() / (double)((success.load()) + fail.load())) * 100, corrupt.load(), (elapsed / (double)success.load()));*/
 	}
 	
-	system("pause");
+	//system("pause");
 	return 0;
 }
