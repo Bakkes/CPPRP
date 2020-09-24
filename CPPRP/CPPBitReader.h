@@ -331,7 +331,12 @@ namespace CPPRP
 		const float a = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
 		const float b = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
 		const float c = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
-		const float extra = std::sqrt(1.f - (a * a) - (b * b) - (c * c));
+		float extra = std::sqrt(1.f - (a * a) - (b * b) - (c * c));
+
+		if (std::isnan(extra))
+		{
+			extra = .0f;
+		}
 
 		Quat q = { 0 };
 		switch (largest)
