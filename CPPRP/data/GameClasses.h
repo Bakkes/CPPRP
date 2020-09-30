@@ -42,6 +42,11 @@ namespace CPPRP
 			bool bRootMotionFromInterpCurve;
 		};
 
+		struct ReplicatedActor_ORS : public Actor
+		{
+			ActiveActor ReplicatedOwner;
+		};
+
 		struct Info : public Actor
 		{
 
@@ -341,6 +346,7 @@ namespace CPPRP
 			struct ActiveActor GameEvent;
 			std::string CustomTeamName;
 			uint64_t ClubID;
+			int32_t Difficulty;
 			struct ClubColors ClubColors;
 		};
 
@@ -640,6 +646,12 @@ namespace CPPRP
 		struct HauntedBallTrapTrigger_TA : public Engine::Actor
 		{
 
+		};
+
+		struct MaxTimeWarningData_TA : public Engine::ReplicatedActor_ORS
+		{
+			uint64_t EndGameEpochTime;
+			uint64_t EndGameWarningEpochTime;
 		};
 
 		struct Cannon_TA : public Engine::Actor

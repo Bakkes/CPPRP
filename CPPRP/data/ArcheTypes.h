@@ -51,6 +51,7 @@ namespace CPPRP
 		{{"TAGame.SpecialPickup_Rugby_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Rugby"}},
 		{{"TAGame.Cannon_TA"},  {"Archetypes.Tutorial.Cannon"}},
 		{{"TAGame.GameEditor_Pawn_TA"}, {"Archetypes.GameEditor.GameEditor_Pawn_Default"} },
-		{{"ProjectX.NetModeReplicator_X"}, {"ProjectX.Default__NetModeReplicator_X"}}
+		{{"ProjectX.NetModeReplicator_X"}, {"ProjectX.Default__NetModeReplicator_X"}},
+		{{"TAGame.MaxTimeWarningData_TA" }, {"TAGame.Default__MaxTimeWarningData_TA"}} //TAGame.Default__MaxTimeWarningData_TA
 	};
 }
