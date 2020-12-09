@@ -20,15 +20,17 @@ namespace CPPRP
 		{{"TAGame.Team_Soccar_TA"}, {"Archetypes.Teams.Team0", "Archetypes.Teams.Team1"}},
 		{{"TAGame.PRI_TA"}, {"TAGame.Default__PRI_TA"}},
 		{{"TAGame.GameEvent_TrainingEditor_TA"}, {"Archetypes.GameEvent.GameEvent_TrainingEditor"}},
-		{{"TAGame.GameEvent_Tutorial_TA"}, {"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Aerial"}},
+		{{"TAGame.GameEvent_Tutorial_TA"}, {"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Aerial", "GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Goalie", "GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Striker_TA", "GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Striker"}},
+		//{{"TAGame.GameEvent_Tutorial_Goalie_TA"}, {"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Goalie"}},
+		//{{"TAGame.GameEvent_Tutorial_Striker_TA"}, {"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Striker_TA"}},
 		{{"TAGame.GameEvent_Soccar_TA"}, {/*"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Aerial",*/ "Archetypes.GameEvent.GameEvent_Basketball", "Archetypes.GameEvent.GameEvent_Hockey", "Archetypes.GameEvent.GameEvent_Soccar", "Archetypes.GameEvent.GameEvent_Items", "Archetypes.GameEvent.GameEvent_SoccarLan"}},
 		{{"TAGame.GameEvent_SoccarPrivate_TA"}, {"Archetypes.GameEvent.GameEvent_SoccarPrivate", "Archetypes.GameEvent.GameEvent_BasketballPrivate", "Archetypes.GameEvent.GameEvent_HockeyPrivate"}},
 		{{"TAGame.GameEvent_SoccarSplitscreen_TA"}, {"Archetypes.GameEvent.GameEvent_SoccarSplitscreen", "Archetypes.GameEvent.GameEvent_BasketballSplitscreen", "Archetypes.GameEvent.GameEvent_HockeySplitscreen"}},
 		{{"TAGame.GameEvent_Season_TA"}, {"Archetypes.GameEvent.GameEvent_Season"}},
 		{{"TAGame.Car_TA"}, {"Archetypes.GameEvent.GameEvent_Season:CarArchetype"}},
 		{{"TAGame.GameEvent_Breakout_TA"}, {"Archetypes.GameEvent.GameEvent_Breakout"}},
-		{{"TAGame.GameEvent_GodBall_TA"}, {"gameinfo_godball.GameInfo.gameinfo_godball:Archetype"}},
-		{{"TAGame.GRI_TA"}, {"GameInfo_TrainingEditor.GameInfo.GameInfo_TrainingEditor:GameReplicationInfoArchetype", "GameInfo_Tutorial.GameInfo.GameInfo_Tutorial:GameReplicationInfoArchetype", "GameInfo_Basketball.GameInfo.GameInfo_Basketball:GameReplicationInfoArchetype", "Gameinfo_Hockey.GameInfo.Gameinfo_Hockey:GameReplicationInfoArchetype", "GameInfo_Season.GameInfo.GameInfo_Season:GameReplicationInfoArchetype", "GameInfo_Soccar.GameInfo.GameInfo_Soccar:GameReplicationInfoArchetype", "GameInfo_Items.GameInfo.GameInfo_Items:GameReplicationInfoArchetype", "GameInfo_Breakout.GameInfo.GameInfo_Breakout:GameReplicationInfoArchetype", "gameinfo_godball.GameInfo.gameinfo_godball:GameReplicationInfoArchetype"}},
+		{{"TAGame.GameEvent_GodBall_TA"}, {"gameinfo_godball.GameInfo.gameinfo_godball:Archetype", "GameInfo_GodBall.GameInfo.GameInfo_GodBall:Archetype"}},
+		{{"TAGame.GRI_TA"}, {"GameInfo_TrainingEditor.GameInfo.GameInfo_TrainingEditor:GameReplicationInfoArchetype", "GameInfo_Tutorial.GameInfo.GameInfo_Tutorial:GameReplicationInfoArchetype", "GameInfo_Basketball.GameInfo.GameInfo_Basketball:GameReplicationInfoArchetype", "Gameinfo_Hockey.GameInfo.Gameinfo_Hockey:GameReplicationInfoArchetype", "GameInfo_Season.GameInfo.GameInfo_Season:GameReplicationInfoArchetype", "GameInfo_Soccar.GameInfo.GameInfo_Soccar:GameReplicationInfoArchetype", "GameInfo_Items.GameInfo.GameInfo_Items:GameReplicationInfoArchetype", "GameInfo_Breakout.GameInfo.GameInfo_Breakout:GameReplicationInfoArchetype", "gameinfo_godball.GameInfo.gameinfo_godball:GameReplicationInfoArchetype", "GameInfo_GodBall.GameInfo.GameInfo_GodBall:GameReplicationInfoArchetype"}},
 		{{"TAGame.CameraSettingsActor_TA"}, {"TAGame.Default__CameraSettingsActor_TA"}},
 		{{"TAGame.InMapScoreboard_TA"}, {"Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_0", "NeoTokyo_P.TheWorld:PersistentLevel.InMapScoreboard_TA_0", "NeoTokyo_P.TheWorld:PersistentLevel.InMapScoreboard_TA_1", "NeoTokyo_Standard_P.TheWorld:PersistentLevel.InMapScoreboard_TA_1", "NeoTokyo_Standard_P.TheWorld:PersistentLevel.InMapScoreboard_TA_0", "Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_1"}},
 		{{"TAGame.SpecialPickup_BallGravity_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_GravityWell"}},
@@ -52,6 +54,7 @@ namespace CPPRP
 		{{"TAGame.Cannon_TA"},  {"Archetypes.Tutorial.Cannon"}},
 		{{"TAGame.GameEditor_Pawn_TA"}, {"Archetypes.GameEditor.GameEditor_Pawn_Default"} },
 		{{"ProjectX.NetModeReplicator_X"}, {"ProjectX.Default__NetModeReplicator_X"}},
-		{{"TAGame.MaxTimeWarningData_TA" }, {"TAGame.Default__MaxTimeWarningData_TA"}} //TAGame.Default__MaxTimeWarningData_TA
+		{{"TAGame.MaxTimeWarningData_TA" }, {"TAGame.Default__MaxTimeWarningData_TA"}}, //TAGame.Default__MaxTimeWarningData_TA
+		{{"TAGame.RumblePickups_TA" }, {"TAGame.Default__RumblePickups_TA"}},
 	};
 }
