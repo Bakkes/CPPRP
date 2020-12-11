@@ -13,30 +13,41 @@
 //#define USESIMD
 
 #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
-#include<locale>
+#include <locale>
 #include <codecvt>
-
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+#ifdef _WIN32
 static inline std::string ws2s(const std::wstring& wstr)
 {
 	if (wstr.empty())
 	{
 		return std::string();
 	}
-#if defined WIN32
+
 	int size = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, &wstr[0], wstr.size(), NULL, 0, NULL, NULL);
 	std::string ret = std::string(size, 0);
 	WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, &wstr[0], wstr.size(), &ret[0], size, NULL, NULL);
-#else
-	size_t size = 0;
-	_locale_t lc = _create_locale(LC_ALL, "en_US.UTF-8");
-	errno_t err = _wcstombs_s_l(&size, NULL, 0, &wstr[0], _TRUNCATE, lc);
-	std::string ret = std::string(size, 0);
-	err = _wcstombs_s_l(&size, &ret[0], size, &wstr[0], _TRUNCATE, lc);
-	_free_locale(lc);
-	ret.resize(size - 1);
-#endif
 	return ret;
 }
+#else
+static inline std::string ws2s(const std::u16string& wstr)
+{
+	if (wstr.empty())
+	{
+		return std::string();
+	}
+	using convert_typeX = std::codecvt_utf8<char16_t>;
+	std::wstring_convert<convert_typeX, char16_t> converterX;
+	return converterX.to_bytes(wstr);
+	//char buf[2048] = { 0 };
+	//const ssize_t res = std::wcstombs(buf, wstr.c_str(), 2048);
+	//return std::string(buf);
+
+
+}
+#endif
 #undef _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 
 #define QUAT_NUM_BITS (18)
@@ -430,7 +441,11 @@ namespace CPPRP
 			{
 				test[i] = read<uint8_t>();
 			}
-			std::wstring test_ws((wchar_t*)test);
+#ifdef _WIN32
+			std::wstring test_ws(reinterpret_cast<wchar_t*>(test));
+#else
+			std::u16string test_ws(reinterpret_cast<char16_t*>(test));
+#endif
 			return ws2s(test_ws);
 		}
 
