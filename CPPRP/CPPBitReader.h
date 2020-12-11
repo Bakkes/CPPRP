@@ -12,6 +12,33 @@
 #include <xmmintrin.h>
 //#define USESIMD
 
+#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#include<locale>
+#include <codecvt>
+
+static inline std::string ws2s(const std::wstring& wstr)
+{
+	if (wstr.empty())
+	{
+		return std::string();
+	}
+#if defined WIN32
+	int size = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, &wstr[0], wstr.size(), NULL, 0, NULL, NULL);
+	std::string ret = std::string(size, 0);
+	WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, &wstr[0], wstr.size(), &ret[0], size, NULL, NULL);
+#else
+	size_t size = 0;
+	_locale_t lc = _create_locale(LC_ALL, "en_US.UTF-8");
+	errno_t err = _wcstombs_s_l(&size, NULL, 0, &wstr[0], _TRUNCATE, lc);
+	std::string ret = std::string(size, 0);
+	err = _wcstombs_s_l(&size, &ret[0], size, &wstr[0], _TRUNCATE, lc);
+	_free_locale(lc);
+	ret.resize(size - 1);
+#endif
+	return ret;
+}
+#undef _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+
 #define QUAT_NUM_BITS (18)
 #define MAX_QUAT_VALUE (0.7071067811865475244f)
 #define MAX_QUAT_VALUE_INVERSE (1.0f / MAX_QUAT_VALUE)
@@ -379,6 +406,8 @@ namespace CPPRP
 			return "";
 		}
 
+		
+
 #ifndef PARSE_UNSAFE
 		if (final_length > 1024)
 		{
@@ -394,6 +423,16 @@ namespace CPPRP
 			}
 		}
 #endif
+		if (length < 0)
+		{
+			char test[2048];
+			for (size_t i = 0; i < final_length; ++i)
+			{
+				test[i] = read<uint8_t>();
+			}
+			std::wstring test_ws((wchar_t*)test);
+			return ws2s(test_ws);
+		}
 
 		std::string str;
 
