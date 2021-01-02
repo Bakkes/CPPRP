@@ -84,7 +84,7 @@ void SerializeProp(Writer& writer, const std::string& name, std::shared_ptr<CPPR
 		break;
 		case 'Q': //QWordProperty
 		{
-			writer.Uint64(std::any_cast<uint64_t>(currentProperty->value));
+			writer.String(std::to_string(std::any_cast<uint64_t>(currentProperty->value)));
 		}
 		break;
 		case 'F': //FloatProperty
