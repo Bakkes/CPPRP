@@ -60,20 +60,38 @@ before_deploy:
       #- git config --local user.email "YOUR GIT USER EMAIL"
       #- export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
       #- git tag $TRAVIS_TAG
-      if [ "$TRAVIS_OS_NAME" == "windows" ]; then copy "./x64/JSONBuild/CPPRPJSON.exe" "cpprpjson-$NAME-$TRAVIS_TAG.exe"; done
-      if [ "$TRAVIS_OS_NAME" == "windows" ]; then copy "./x64/JSONBuild/CPPRP.lib" "cpprp-$NAME-$TRAVIS_TAG.lib"; done
+      if [ "$TRAVIS_OS_NAME" == "windows" ]; then 
+        copy "./x64/JSONBuild/CPPRPJSON.exe" "cpprpjson-$NAME-$TRAVIS_TAG.exe"; 
+        copy "./x64/JSONBuild/CPPRP.lib" "cpprp-$NAME-$TRAVIS_TAG.lib"; 
+      fi
       
-      if [ "$TRAVIS_OS_NAME" != "windows" ]; then mv "./build/test" "cpprp-$NAME-$TRAVIS_TAG"; done
+      if [ "$TRAVIS_OS_NAME" != "windows" ]; then mv "./build/test" "cpprp-$NAME-$TRAVIS_TAG"; fi
+
 deploy:
-  provider: releases
-  api_key: 
-    secure: "DN8hCiocylYWyBUca3AScBFCcTwVlm9KzvMCLvc0jzpY4ltjKcrzP8piZy9wCnv2IZLRdddg24HrXw8mI3XEgR504uU0zJ//5paDpI9K7SydWGiLNJ5PNHaezTz0+HACwOVsIUe8zibJ/mItthw0SS2n32rlZqCoYaPInc5X7k6au6eu7qasVg7GYwOjb6Kq7coauYH2XXz6Y8DYUHNz3HAbr0mAf8k1GuzncZ/luXAOjzXGLRYw4kxQrjqW1WaKNyagtQZJbS+6xjoMaFcc7atLYXRv6aiLDc014HW/oHAqU1p3jZdRTbxV5jTT2h/Kxd23V43ght132ZzH2q1ck4z88/KMIyvKRPCZeJMMT1Pv5Qcn7sy+bC49y7ctUToHMAT7UMq+v4l4M+nDwoMo7gjCVuaAvGKRkRpV+6tP3F+Q2xIsfGb40wpuWhsdjjkWsIg1BlIdjBKpy3K72TBPTB90GaBOQMLMh5oXVnOzRFkhbTkh73xoC5C8O8+6ZcxsgdiP90vITakMBf8LhYiLOeReagtUjyEwpkOKD/r4XW1DK4tXeJBVDiRJMmJKw6zpIJlgjdoxSfwlujJyU32cUnX0PYBVIG+pPT9ojl81/T49/V66nYgsQAVmEe1kfwdytDiH6Yzgs2Py5Ef7MuvgPmuWjuzTs7da8SlB8snztP4="
-  file: "cpprp-$NAME-$TRAVIS_TAG"
-  skip_cleanup: true
-  draft: true
-  on: 
-    tags: true
-    branch: master
+  - provider: releases
+    api_key: 
+      secure: "DN8hCiocylYWyBUca3AScBFCcTwVlm9KzvMCLvc0jzpY4ltjKcrzP8piZy9wCnv2IZLRdddg24HrXw8mI3XEgR504uU0zJ//5paDpI9K7SydWGiLNJ5PNHaezTz0+HACwOVsIUe8zibJ/mItthw0SS2n32rlZqCoYaPInc5X7k6au6eu7qasVg7GYwOjb6Kq7coauYH2XXz6Y8DYUHNz3HAbr0mAf8k1GuzncZ/luXAOjzXGLRYw4kxQrjqW1WaKNyagtQZJbS+6xjoMaFcc7atLYXRv6aiLDc014HW/oHAqU1p3jZdRTbxV5jTT2h/Kxd23V43ght132ZzH2q1ck4z88/KMIyvKRPCZeJMMT1Pv5Qcn7sy+bC49y7ctUToHMAT7UMq+v4l4M+nDwoMo7gjCVuaAvGKRkRpV+6tP3F+Q2xIsfGb40wpuWhsdjjkWsIg1BlIdjBKpy3K72TBPTB90GaBOQMLMh5oXVnOzRFkhbTkh73xoC5C8O8+6ZcxsgdiP90vITakMBf8LhYiLOeReagtUjyEwpkOKD/r4XW1DK4tXeJBVDiRJMmJKw6zpIJlgjdoxSfwlujJyU32cUnX0PYBVIG+pPT9ojl81/T49/V66nYgsQAVmEe1kfwdytDiH6Yzgs2Py5Ef7MuvgPmuWjuzTs7da8SlB8snztP4="
+    file: "cpprp-$NAME-$TRAVIS_TAG"
+    skip_cleanup: true
+    draft: true
+    on:
+      os: linux
+      tags: true
+      branch: master
+  - provider: releases
+    api_key: 
+      secure: "DN8hCiocylYWyBUca3AScBFCcTwVlm9KzvMCLvc0jzpY4ltjKcrzP8piZy9wCnv2IZLRdddg24HrXw8mI3XEgR504uU0zJ//5paDpI9K7SydWGiLNJ5PNHaezTz0+HACwOVsIUe8zibJ/mItthw0SS2n32rlZqCoYaPInc5X7k6au6eu7qasVg7GYwOjb6Kq7coauYH2XXz6Y8DYUHNz3HAbr0mAf8k1GuzncZ/luXAOjzXGLRYw4kxQrjqW1WaKNyagtQZJbS+6xjoMaFcc7atLYXRv6aiLDc014HW/oHAqU1p3jZdRTbxV5jTT2h/Kxd23V43ght132ZzH2q1ck4z88/KMIyvKRPCZeJMMT1Pv5Qcn7sy+bC49y7ctUToHMAT7UMq+v4l4M+nDwoMo7gjCVuaAvGKRkRpV+6tP3F+Q2xIsfGb40wpuWhsdjjkWsIg1BlIdjBKpy3K72TBPTB90GaBOQMLMh5oXVnOzRFkhbTkh73xoC5C8O8+6ZcxsgdiP90vITakMBf8LhYiLOeReagtUjyEwpkOKD/r4XW1DK4tXeJBVDiRJMmJKw6zpIJlgjdoxSfwlujJyU32cUnX0PYBVIG+pPT9ojl81/T49/V66nYgsQAVmEe1kfwdytDiH6Yzgs2Py5Ef7MuvgPmuWjuzTs7da8SlB8snztP4="
+    file:
+      - "cpprp-$NAME-$TRAVIS_TAG.lib"
+      - "cpprpjson-$NAME-$TRAVIS_TAG.exe"
+    skip_cleanup: true
+    draft: true
+    on:
+      os: linux
+      tags: true
+      branch: master      
+      
+      
 branches:
   only:
     - master
