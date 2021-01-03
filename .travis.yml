@@ -37,6 +37,12 @@ matrix:
             - CXX=g++-9
           script:
             - make RELEASE=1
+        - os: windows
+          env:
+            - MSBUILD_PATH="c:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin"
+          script:
+            - export PATH=$MSBUILD_PATH:$PATH
+            - ./buildwindows.bat
     
 notifications:
   email: false
@@ -47,7 +53,10 @@ before_deploy:
       #- git config --local user.email "YOUR GIT USER EMAIL"
       #- export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
       #- git tag $TRAVIS_TAG
-      mv "./build/test" "cpprp-$NAME-$TRAVIS_TAG"
+      if [ "$TRAVIS_OS_NAME" == "windows" ]; then copy "./x64/JSONBuild/CPPRPJSON.exe" "cpprpjson-$NAME-$TRAVIS_TAG.exe"; done
+      if [ "$TRAVIS_OS_NAME" == "windows" ]; then copy "./x64/JSONBuild/CPPRP.lib" "cpprp-$NAME-$TRAVIS_TAG.lib"; done
+      
+      if [ "$TRAVIS_OS_NAME" != "windows" ]; then mv "./build/test" "cpprp-$NAME-$TRAVIS_TAG"; done
 deploy:
   provider: releases
   api_key: 
