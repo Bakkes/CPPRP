@@ -48,7 +48,6 @@ matrix:
 #            - choco install dotnetcore-sdk
 #            - dotnet restore
           script:
-            - refreshenv
             - export PATH=$PYTHON_PATH:$MSBUILD_PATH:$PATH
             - ./buildwindows.bat
     
