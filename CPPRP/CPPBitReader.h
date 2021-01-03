@@ -5,10 +5,50 @@
 #include <assert.h>
 //#include "ParseException.h"
 #include "./data/ReplayFileData.h"
+//#include "ReplayFile.h"
 #include "./exceptions/ReplayException.h"
 #include <cmath>
 #include <memory>
+#include <xmmintrin.h>
+//#define USESIMD
 
+#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+#include <locale>
+#include <codecvt>
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+#ifdef _WIN32
+static inline std::string ws2s(const std::wstring& wstr)
+{
+	if (wstr.empty())
+	{
+		return std::string();
+	}
+
+	int size = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, &wstr[0], wstr.size(), NULL, 0, NULL, NULL);
+	std::string ret = std::string(size, 0);
+	WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, &wstr[0], wstr.size(), &ret[0], size, NULL, NULL);
+	return ret;
+}
+#else
+static inline std::string ws2s(const std::u16string& wstr)
+{
+	if (wstr.empty())
+	{
+		return std::string();
+	}
+	using convert_typeX = std::codecvt_utf8<char16_t>;
+	std::wstring_convert<convert_typeX, char16_t> converterX;
+	return converterX.to_bytes(wstr);
+	//char buf[2048] = { 0 };
+	//const ssize_t res = std::wcstombs(buf, wstr.c_str(), 2048);
+	//return std::string(buf);
+
+
+}
+#endif
+#undef _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 
 #define QUAT_NUM_BITS (18)
 #define MAX_QUAT_VALUE (0.7071067811865475244f)
@@ -45,18 +85,75 @@ namespace CPPRP
 
 		return static_cast<uint32_t>(MultiplyDeBruijnBitPosition[(const uint32_t)(v * 0x07C4ACDDU) >> 27]);
 	}
-	class ReplayFile;
+	typedef struct
+	{
+		const uint8_t* data;
+		uint64_t cachedVal;
+		uint32_t validBits;
+		size_t len;
+		size_t bytes_read;
+
+	} bitreader_t;
+
+	static inline void bitreader_load_cache(bitreader_t* b)
+	{
+		uint64_t val = *(uint64_t*)&b->data[b->bytes_read];
+
+		b->bytes_read += 8;
+		b->cachedVal = (val);// (val >> 32) | (val << 32);
+		b->validBits = 64;
+	}
+
+	static inline void bitreader_init(bitreader_t* b, const uint8_t* data, size_t len)
+	{
+		b->data = data;
+		b->len = len;
+		b->bytes_read = 0;
+		bitreader_load_cache(b);
+	}
+
+	static inline uint64_t bitreader_read_bits(bitreader_t* b, uint8_t bits)
+	{
+		uint32_t validBits = b->validBits;
+		uint64_t result = 0;
+
+
+		uint8_t overflow = 0;
+		if (bits >= validBits)
+		{
+			overflow = validBits;
+			bits -= validBits;
+			
+
+			//Need special case for validBits == 0, since >> 64 is UB, but is a little ugly imo
+			//result = validBits == 0 ? 0 : (b->cachedVal >> (64 - validBits));
+			result = (b->cachedVal >> (64 - validBits));
+			bitreader_load_cache(b);
+			validBits = 64;
+		}
+		validBits -= bits;
+
+
+		//result |= ((bt >> (bit_position))& ((1ULL << n) - 1)) << bit_pos;
+		//(((b->cachedVal) >> 8) & (((1ULL << bits) - 1)))
+		result |= (((b->cachedVal) >> (64 - validBits - bits)) & ((1ULL << bits) - 1)) << overflow;// >> (validBits);
+		//result |= ((b->cachedVal >> (64 - validBits))& ((1ull << (64 - validBits)) - 1));
+
+		b->validBits = validBits;
+		return (result);
+	}
 
 	//Attempt at writing a fast bitreader for RL replays
 	template<typename T>
 	class CPPBitReader
 	{
 	public:
-		const T * start;
-		const T * data;
-		uint32_t t_position;
-		uint32_t bit_position;
-		const size_t size; //Should be in bits?
+		bitreader_t b;
+		
+
+		const int size;
+		const int t_position = 0;
+		const int bit_position = 0;
 
 		//Let's store this data in here, saves a call to owner.
 		//Use during network stream parsing
@@ -64,77 +161,21 @@ namespace CPPRP
 		const uint8_t licenseeVersion;
 		const uint8_t netVersion;
 
-		const std::shared_ptr<ReplayFile> owner;
+		std::vector<uint32_t> attributeIDs;
 
 	private:
 		template<typename X>
 		inline const X get_bits(uint16_t n)
 		{
-			#ifndef PARSE_UNSAFE
-			if (GetAbsoluteBitPosition() + n > size)
+#ifndef PARSE_UNSAFE
+			if (GetAbsoluteBitPosition() + n > b.len)
 			{
 				throw std::runtime_error("Attempted to read beyond buffer");
 			}
-			#endif
+#endif
 
-			constexpr uint16_t SIZE_T = sizeof(T) * 8;
-			X result = 0;
-			X bit_pos = 0;
-			T bt = *data;
-			if (bit_position > 0)
-			{
-				if (n > (SIZE_T - bit_position)) //n finishes this byte and needs next byte for sure
-				{
-					bit_pos += SIZE_T - bit_position;
-					n -= SIZE_T - bit_position;
-					result |= bt >> bit_position;
-
-					bit_position = 0;
-					++t_position;
-					bt = *(++data);
-				}
-				else //n doesn't finish this byte
-				{
-					result |= (bt >> (bit_position)) & ((1ULL << n) - 1);
-					bit_position += n;
-
-					if (bit_position == SIZE_T)
-					{
-						++data;
-						//bt = *(++data);
-						++t_position;
-						bit_position = 0;
-					}
-
-					return result;
-				}
-			}
-
-			//If we reached this point, we know n > 0
-			while (n > (SIZE_T - 1))
-			{
-				result |= static_cast<X>(bt) << (bit_pos);
-				++t_position;
-				bt = *(++data); //Valgrind says this has invalid reads, probably at end of replay and there's no bytes left?
-				n -= SIZE_T;
-				bit_pos += SIZE_T;
-			}
-
-			if (n > 0)
-			{
-				result |= ((bt >> (bit_position)) & ((1ULL << n) - 1)) << bit_pos;
-				bit_position += n;
-
-				if (bit_position == SIZE_T)
-				{
-					++data;
-					//bt = *(++data);
-					++t_position;
-					bit_position = 0;
-				}
-			}
-
-			return result;
+			uint64_t res = bitreader_read_bits(&b, n);
+			return *(X*)(&res);
 		}
 
 		template<typename X>
@@ -144,17 +185,22 @@ namespace CPPRP
 
 			result = read<X>(max_bits);
 
-			if((result + (1 << max_bits)) < maxValue)
+			if ((result + (1 << max_bits)) < maxValue)
 			{
-				result |= (((*data) >> bit_position++) & 1ULL) << max_bits;
+				result |= ((b.cachedVal >> (64 - b.validBits)) & 1) << max_bits;
 
-				if (bit_position == sizeof(T) * 8)
+				if (b.validBits == 1)
 				{
-					++data;
-					t_position++;
-					bit_position = 0;
+					read<X>(1);
 				}
+				else
+				{
+					b.validBits -= 1;
+				}
+				
+				
 			}
+
 			return result;
 		}
 
@@ -164,8 +210,8 @@ namespace CPPRP
 			return get_bits_max(maxValue, msbDeBruijn32(maxValue));
 		}
 	public:
-		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFile> owner_);
-		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFile> owner_, 
+		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_);
+		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_,
 			const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV);
 		CPPBitReader(const CPPBitReader& other);
 		CPPBitReader();
@@ -208,7 +254,7 @@ namespace CPPRP
 	template<>
 	inline const float CPPBitReader<BitReaderType>::read<float>()
 	{
-		assert(sizeof(float) == sizeof(uint32_t));
+		static_assert(sizeof(float) == sizeof(uint32_t));
 		const uint32_t value = read<uint32_t>();
 		return reinterpret_cast<const float&>(value);
 	}
@@ -219,7 +265,7 @@ namespace CPPRP
 	inline const Vector3I CPPBitReader<BitReaderType>::read<Vector3I>()
 	{
 		//PREFETCH((char*)(this->data));
-		const uint32_t max_value = netVersion >= 7 ? 22 : 20;
+		const uint32_t max_value = 20 + (2 * (netVersion >= 7));
 		const uint32_t num_bits = get_bits_max<uint32_t>(max_value, 4); //Saves a debruijn call since its 4 for both 22 and 20
 
 		const int32_t bias = 1 << (int32_t)(num_bits + 1);
@@ -301,7 +347,7 @@ namespace CPPRP
 		const __m128 mind = _mm_sub_ps(divd, minus);
 		const __m128 result = _mm_mul_ps(mind, timestwo);
 		const float* res = (float*)&result;
-		const float extra = std::sqrt(1.f - (res[0] * res[0]) - (res[1] * res[1]) - (res[2] * res[2]));
+		const float extra = _mm_cvtss_f32(_mm_rsqrt_ss(_mm_set_ps1(1.f - (res[0] * res[0]) - (res[1] * res[1]) - (res[2] * res[2]))));
 
 		Quat q = { 0 };
 		switch (largest)
@@ -331,7 +377,12 @@ namespace CPPRP
 		const float a = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
 		const float b = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
 		const float c = uncompress_quat(read<uint32_t>(QUAT_NUM_BITS));
-		const float extra = std::sqrt(1.f - (a * a) - (b * b) - (c * c));
+		float extra = std::sqrt(1.f - (a * a) - (b * b) - (c * c));
+
+		if (std::isnan(extra))
+		{
+			extra = .0f;
+		}
 
 		Quat q = { 0 };
 		switch (largest)
@@ -366,6 +417,8 @@ namespace CPPRP
 			return "";
 		}
 
+		
+
 #ifndef PARSE_UNSAFE
 		if (final_length > 1024)
 		{
@@ -381,19 +434,45 @@ namespace CPPRP
 			}
 		}
 #endif
+		if (length < 0)
+		{
+			char test[2048];
+			for (size_t i = 0; i < final_length; ++i)
+			{
+				test[i] = read<uint8_t>();
+			}
+#ifdef _WIN32
+			std::wstring test_ws(reinterpret_cast<wchar_t*>(test));
+#else
+			std::u16string test_ws(reinterpret_cast<char16_t*>(test));
+#endif
+			return ws2s(test_ws);
+		}
 
 		std::string str;
 
-		if (bit_position % 8 == 0)
+		if (b.validBits % 8 == 0)
 		{
-			const char* text = ((char*)data) + (bit_position / 8);
+			const char* text = ((char*)&b.data[b.bytes_read - ((b.validBits) / 8)]);
 			str = std::string(text);
 			skip(final_length * 8);
 		}
 		else
 		{
 			str.resize(final_length - 1);
-			for (size_t i = 0; i < final_length; ++i)
+			int todo = final_length;
+			while (todo > 7)
+			{
+				*reinterpret_cast<uint64_t*>(&str[final_length - todo]) = read<uint64_t>();
+				todo -= 8;
+			}
+			if (todo > 3)
+			{
+				*reinterpret_cast<uint64_t*>(&str[final_length - todo]) = read<uint32_t>();
+				todo -= 4;
+			}
+
+			for (size_t i = final_length - todo; i < final_length; ++i)
 			{
 				str[i] = read<uint8_t>();
 			}
@@ -401,110 +480,109 @@ namespace CPPRP
 
 		return str;
 	}
-
-
+	
 	template<>
 	template<>
-	inline const std::shared_ptr<UniqueId> CPPBitReader<BitReaderType>::read<std::shared_ptr<UniqueId>>()
+	inline const OnlineID CPPBitReader<BitReaderType>::read<OnlineID>()
 	{
-		std::shared_ptr<UniqueId> uniqueId;
+		OnlineID uniqueId;
 		
 		const uint8_t platform = read<uint8_t>();
 		switch (platform)
 		{
 		case Platform_Steam:
-			uniqueId = std::make_shared<SteamID>();
-			std::static_pointer_cast<SteamID>(uniqueId)->steamID = read<uint64_t>(sizeof(uint64_t) * 8);
-
+		{
+			auto tmp = SteamID();
+			tmp.steamID = read<uint64_t>(sizeof(uint64_t) * 8);
+			uniqueId = tmp;
 			break;
+		}
 		case Platform_Dingo:
-			uniqueId = std::make_shared<XBoxID>();
-			std::static_pointer_cast<XBoxID>(uniqueId)->xboxID = read<uint64_t>(sizeof(uint64_t) * 8);
+		{
+			auto tmp = XBoxID();
+			tmp.xboxID = read<uint64_t>(sizeof(uint64_t) * 8);
+			uniqueId = tmp;
 			break;
+		}
 		case Platform_QQ:
-			uniqueId = std::make_shared<QQID>();
-			std::static_pointer_cast<QQID>(uniqueId)->qqID = read<uint64_t>(sizeof(uint64_t) * 8);
+		{
+			auto tmp = QQID();
+			tmp.qqID = read<uint64_t>(sizeof(uint64_t) * 8);
+			uniqueId = tmp;
 			break;
+		}
 		case Platform_PS4:
+		{
+			auto tmp = PS4ID();
 
-			//uniqueId = std::make_shared<PS4ID>();
-			//if (netVersion >= 1)
-			//{
-			//	std::static_pointer_cast<PS4ID>(uniqueId)->psId = read<uint64_t>(40 * 8);
-			//}
-			//else
-			//{
-			//	std::static_pointer_cast<PS4ID>(uniqueId)->psId = read<uint64_t>(32 * 8);
-			//}
-			//break;
-			uniqueId = std::make_shared<PS4ID>();
-			
 			#define PSY4_MAX_NAME_LENGTH 16
 			char playerNameTemp[PSY4_MAX_NAME_LENGTH];
-			for (uint32_t i = 0; i < PSY4_MAX_NAME_LENGTH; ++i)
+
+			//Psynet names are always length 16, so optimize by interpreting 128 bits
+			*reinterpret_cast<uint64_t*>(&playerNameTemp) = read<uint64_t>();
+			*reinterpret_cast<uint64_t*>(&playerNameTemp[8]) = read<uint64_t>();
+			/*for (uint32_t i = 0; i < PSY4_MAX_NAME_LENGTH; ++i)
 			{
 				playerNameTemp[i] = read<char>();
-				//if (playerNameTemp[i] == '\0')
-				//{
-				//	//skip(PSY4_MAX_NAME_LENGTH - i);
-				//	break;
-				//}
-			}
+			}*/
 
-			std::static_pointer_cast<PS4ID>(uniqueId)->playerName = std::string(playerNameTemp);
-			std::static_pointer_cast<PS4ID>(uniqueId)->unknown1 = read<uint64_t>();
+			tmp.playerName = std::string(playerNameTemp, PSY4_MAX_NAME_LENGTH);
+			tmp.unknown1 = read<uint64_t>();
 			if (netVersion >= 1)
 			{
-				std::static_pointer_cast<PS4ID>(uniqueId)->unknown2 = read<uint64_t>();
+				tmp.unknown2 = read<uint64_t>();
 			}
-			std::static_pointer_cast<PS4ID>(uniqueId)->psId = read<uint64_t>();
+			tmp.psId = read<uint64_t>();
+			uniqueId = tmp;
 			break;
+		}
 		case Platform_Switch:
 		{
-			std::shared_ptr<SwitchID> switchID = std::make_shared<SwitchID>();
-			switchID->a = read<uint64_t>(64);
-			switchID->b = read<uint64_t>(64);
-			switchID->c = read<uint64_t>(64);
-			switchID->d = read<uint64_t>(64);
-			uniqueId = switchID;
+			auto tmp = SwitchID();
+			tmp.a = read<uint64_t>(64);
+			tmp.b = read<uint64_t>(64);
+			tmp.c = read<uint64_t>(64);
+			tmp.d = read<uint64_t>(64);
+			uniqueId = tmp;
 		}
 			break;
 		case Platform_PsyNet:
 		{
-			std::shared_ptr<PsyNetID> psyNetID = std::make_shared<PsyNetID>();
+			auto tmp = PsyNetID();
 			if (engineVersion >= 868 && licenseeVersion >= 24 && netVersion >= 10)
 			{
-				psyNetID->a = read<uint64_t>(64);
+				tmp.a = read<uint64_t>(64);
 			}
 			else
 			{
-				psyNetID->a = read<uint64_t>(64);
-				psyNetID->b = read<uint64_t>(64);
-				psyNetID->c = read<uint64_t>(64);
-				psyNetID->d = read<uint64_t>(64);
+				tmp.a = read<uint64_t>(64);
+				tmp.b = read<uint64_t>(64);
+				tmp.c = read<uint64_t>(64);
+				tmp.d = read<uint64_t>(64);
 			}
-			uniqueId = psyNetID;
+			uniqueId = tmp;
 		}
 			break;
 		case Platform_Epic:
 		{
-			std::shared_ptr<EpicID> epicID = std::make_shared<EpicID>();
-			epicID->epicId = read<std::string>();
+			auto epicID = EpicID();
+			epicID.epicId = read<std::string>();
 			uniqueId = epicID;
 		}
-			break;
+		break;
 		case Platform_Unknown:
 		{
-			uniqueId = std::make_shared<UnkownId>();
+			auto tmp = UnknownId();
 			if (licenseeVersion > 18 && netVersion == 0)
 			{
-				std::static_pointer_cast<UnkownId>(uniqueId)->unknown = 0;
+				tmp.unknown = 0;
 			}
 			else
 			{
 
-				std::static_pointer_cast<UnkownId>(uniqueId)->unknown = read<uint32_t>(3 * 8);
+				tmp.unknown = read<uint32_t>(3 * 8);
 			}
+			uniqueId = tmp;
 		}
 			//printf("Unknown platform found!\n");
 			break;
@@ -513,11 +591,17 @@ namespace CPPRP
 			//assert(1 == 2);
 			break;
 		}
-		uniqueId->platform = platform;
-		uniqueId->splitscreenID= read<uint8_t>();
+		uint8_t splitscreenID = read<uint8_t>();
+		std::visit(
+			[platform, splitscreenID](UniqueId& base)
+			{
+				base.platform = platform;
+				base.splitscreenID = splitscreenID;
+			},
+			uniqueId);
+		
 		return uniqueId;
 	}
-
 
 
 	template<typename T>
@@ -528,45 +612,32 @@ namespace CPPRP
 	}
 
 	template<typename T>
-	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFile> owner_) 
+	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFileData> owner_) 
 	: engineVersion(owner_->header.engineVersion), licenseeVersion(owner_->header.licenseeVersion), 
-	netVersion(owner_->header.netVersion), owner(owner_), size(sizee)
+	netVersion(owner_->header.netVersion), size(sizee)
 	{
-		this->start = data;
-		this->data = data;
-		this->t_position = 0;
-		this->bit_position = 0;
+		bitreader_init(&b, (uint8_t*)data, sizee);
 	}
 
 	template<typename T>
-	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFile> owner_, 
+	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFileData> owner_, 
 		const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV) : engineVersion(engineV), 
-		licenseeVersion(licenseeV), netVersion(netV), owner(owner_), size(sizee)
+		licenseeVersion(licenseeV), netVersion(netV), size(sizee)
 	{
-		this->start = data;
-		this->data = data;
-		this->t_position = 0;
-		this->bit_position = 0;
+		bitreader_init(&b, (uint8_t*)data, sizee);
 	}
 
 	template<typename T>
 	inline CPPBitReader<T>::CPPBitReader(const CPPBitReader& other) 
-	: engineVersion(other.engineVersion), licenseeVersion(other.licenseeVersion), netVersion(other.netVersion), owner(other.owner), size(other.size)
+	: engineVersion(other.engineVersion), licenseeVersion(other.licenseeVersion), netVersion(other.netVersion), size(other.size)
 	{
-		this->start = other.start;
-		this->data = other.data;
-		this->t_position = other.t_position;
-		this->bit_position = other.bit_position;
+		bitreader_init(&b, other.b.data, other.b.len);
 	}
 
 	template<typename T>
 	inline CPPBitReader<T>::CPPBitReader() : engineVersion(0), licenseeVersion(0), netVersion(0)
 	{
-		this->start = NULL;
-		this->data = NULL;
-		this->size = 0;
-		this->t_position = 0;
-		this->bit_position = 0;
+
 	}
 
 	template<typename T>
@@ -595,60 +666,86 @@ namespace CPPRP
 	template <typename T>
 	inline const bool CPPBitReader<T>::canRead() const noexcept
 	{
-		return GetAbsoluteBitPosition() < size;
+		return GetAbsoluteBitPosition() < b.len;
 	}
 
 	template <typename T>
 	inline const bool CPPBitReader<T>::canRead(int bits) const noexcept
 	{
-		return GetAbsoluteBitPosition() + bits < size;
+		return GetAbsoluteBitPosition() + bits < b.len;
 	}
 
 	template <typename T>
 	void CPPBitReader<T>::goback(int32_t num)
 	{
-		constexpr uint32_t SIZE_IN_BITS = (sizeof(T) * 8);
+		if (b.validBits + num > 64)
+		{
+			//num -= b.validBits;
+			int old = b.validBits;
+			if (old + num > 64)
+				int dfsdf = 5;
+			//num -= b.validBits;
+			b.validBits = 0;
+
+			b.bytes_read -= ((num / 64) + 2) * 8;
+			bitreader_load_cache(&b);
+			b.validBits = ((num + old) % 64);
+			//b.validBits = 64 - (num % 64);
+		}
+		else
+		{
+			b.validBits += num; //no need to reset cache
+		}
+		/*constexpr uint32_t SIZE_IN_BITS = (sizeof(T) * 8);
 
 		if (static_cast<int32_t>(bit_position) - num < 0)
 		{
 			num -= bit_position;
 			bit_position = SIZE_IN_BITS - (num % SIZE_IN_BITS);
-			t_position -= (abs(num)) / SIZE_IN_BITS + 1; 
+			t_position -= (abs(num)) / SIZE_IN_BITS + 1;
 		}
 		else
 		{
 			bit_position -= num;
 		}
-		data = start + t_position;
+		data = start + t_position;*/
 	}
 
 	template<typename T>
 	inline void CPPBitReader<T>::skip(uint32_t num)
 	{
-		constexpr uint32_t SIZE_IN_BITS = (sizeof(T) * 8);
-		if (bit_position + num >= SIZE_IN_BITS)
+		/*for(int i = 0; i < num; ++i)
+			read<uint64_t>(1);*/
+			//b.bytes_read += (num / 64) * 8;
+
+			//bitreader_t br2 = b;
+			//uint32_t num2 = num;
+		if (b.validBits <= num)
 		{
-			num -= SIZE_IN_BITS - bit_position;
-			bit_position = num % SIZE_IN_BITS;
-			t_position += num / SIZE_IN_BITS + 1; // +1 since bit_position + num >= SIZE_IN_BITS
+
+			num -= b.validBits;
+			b.validBits = 0;
+			b.bytes_read += ((num / 64)) * 8;
+			bitreader_load_cache(&b);
+			b.validBits = (64 - (num % 64));
 		}
 		else
 		{
-			bit_position += num;
+			b.validBits -= num;
 		}
-		data = start + t_position;
+		
 	}
 
 	template<typename T>
-	inline const size_t CPPBitReader<T>::GetAbsoluteBytePosition() const noexcept
+	const size_t CPPBitReader<T>::GetAbsoluteBytePosition() const noexcept
 	{
-		return (t_position * sizeof(T)) + (bit_position / 8);
+		return (b.bytes_read) - (b.validBits / 8);
 	}
 
 	template<typename T>
-	inline const size_t CPPBitReader<T>::GetAbsoluteBitPosition() const noexcept
+	const size_t CPPBitReader<T>::GetAbsoluteBitPosition() const noexcept
 	{
-		return (t_position * sizeof(T) * 8) + bit_position;
+		return (b.bytes_read * 8) - (b.validBits);
 	};
 
 	template<typename T>

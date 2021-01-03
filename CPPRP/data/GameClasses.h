@@ -42,6 +42,11 @@ namespace CPPRP
 			bool bRootMotionFromInterpCurve;
 		};
 
+		struct ReplicatedActor_ORS : public Actor
+		{
+			ActiveActor ReplicatedOwner;
+		};
+
 		struct Info : public Actor
 		{
 
@@ -222,6 +227,7 @@ namespace CPPRP
 			int MaxTimeTillItem;
 			uint32_t MatchBreakoutDamage;
 			uint32_t BotProductName;
+			uint32_t BotBannerProductID;
 			bool bReady;
 			uint32_t SpectatorShortcut;
 			bool bUsingSecondaryCamera;
@@ -341,6 +347,7 @@ namespace CPPRP
 			struct ActiveActor GameEvent;
 			std::string CustomTeamName;
 			uint64_t ClubID;
+			int32_t Difficulty;
 			struct ClubColors ClubColors;
 		};
 
@@ -474,6 +481,7 @@ namespace CPPRP
 		struct Car_TA : public Vehicle_TA
 		{
 			struct ActiveActor AttachedPickup;
+			struct ActiveActor RumblePickups;
 			float AddedCarForceMultiplier;
 			float ReplicatedCarScale;
 			float AddedBallForceMultiplier;
@@ -557,6 +565,7 @@ namespace CPPRP
 			struct GameMode GameMode;
 			struct ReplicatedStateIndex ReplicatedStateIndex; //Might actually just be an uint8_t??
 			struct ActiveActor GameOwner; //PRI_TA
+			bool bIsBotMatch;
 			//struct CustomMatchSettings MatchSettings;
 		};
 
@@ -621,6 +630,15 @@ namespace CPPRP
 		{
 
 		};
+		struct GameEvent_Tutorial_Goalie_TA : public GameEvent_Tutorial_TA
+		{
+
+		};
+
+		struct GameEvent_Tutorial_Striker_TA : public GameEvent_Tutorial_TA
+		{
+
+		};
 
 		struct GameEvent_GameEditor_TA : public GameEvent_Soccar_TA
 		{
@@ -640,6 +658,19 @@ namespace CPPRP
 		struct HauntedBallTrapTrigger_TA : public Engine::Actor
 		{
 
+		};
+
+
+		struct MaxTimeWarningData_TA : public Engine::ReplicatedActor_ORS
+		{
+			uint64_t EndGameEpochTime;
+			uint64_t EndGameWarningEpochTime;
+		};
+
+		struct RumblePickups_TA : public Engine::Actor
+		{
+			ActiveActor AttachedPickup;
+			int ConcurrentItemCount;
 		};
 
 		struct Cannon_TA : public Engine::Actor
