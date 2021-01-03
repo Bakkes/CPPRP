@@ -153,10 +153,6 @@ namespace CPPRP
 	};
 	using OnlineID = std::variant<UniqueId, SteamID, XBoxID, SwitchID, QQID, PS4ID, PsyNetID, EpicID, UnknownId>;
 
-	struct EpicID : public UniqueId
-	{
-		std::string epicId{ "" };
-	};
 
 	struct Property
 	{
