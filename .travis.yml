@@ -69,7 +69,7 @@ before_deploy:
 
 deploy:
   - provider: releases
-    api_key: 
+    github_token: 
       secure: "miNcbt/9DgFsntnA/bHQySogWlq8Vhci8aMple/tNk3hf0D/kkK50CzYjPvbLAn3kaq0Mnh0E6IzN0wKpjIY75LFNHAQtDT6uehW8GlGaUMOZwjTe2QGgRy5yUwBBy4gQq3OZSkFndoZ/q9KKJP949otWX1PuiPQ9VNdlwF38GWzjfxK9jr//rylHv8RAZw3BKXIoBs6uBW/m7KRs/ufvnZgLFHH82piCTeA1tujtmh0Rp9j3uctkG3Rh8nRAs7MM7bL3NUhQFUaSswTEDUZEgMNpXE0n+ZcVkoxWY62V3nikNNKGv1lZqkDvfD9pfwlZQAN+YZkuw3KGNPMnE9RYUQ1Bvpl6KJmHnQTUjiHo79UYQcaz5zsPasnPJurrJMBZ9J/q1ImdeCBRx7EGUDrXQvvcjYVCjcLLqSFzG4YJOGrWtjmqrGFR3SCGtwt7oTqRpXU4wd83eCVLo8D3qj5UPyB/IReHZUeDdAMkH2qmVdL8bWnsTBH4iSbrfNqyFEt1v8IpisJbJwgVNp1Rs1BLUV5qPVChshHEc2iSA1EZH/UmpnjEX2WxT4NQS8foxEBEWcLbBsj7Qnqy/piw3qudGhEuobBDpz9ZUll6qy3oy3iSEo4lmLVmFU4OwRTqZQl2zPDdfgDo/xXuD5hAWZ/b02ZnjXWDfGBw/Cbp2svSko="
     file: "cpprp-$NAME-$TRAVIS_TAG"
     skip_cleanup: true
@@ -79,7 +79,7 @@ deploy:
       tags: true
       branch: master
   - provider: releases
-    api_key: 
+    github_token: 
       secure: "miNcbt/9DgFsntnA/bHQySogWlq8Vhci8aMple/tNk3hf0D/kkK50CzYjPvbLAn3kaq0Mnh0E6IzN0wKpjIY75LFNHAQtDT6uehW8GlGaUMOZwjTe2QGgRy5yUwBBy4gQq3OZSkFndoZ/q9KKJP949otWX1PuiPQ9VNdlwF38GWzjfxK9jr//rylHv8RAZw3BKXIoBs6uBW/m7KRs/ufvnZgLFHH82piCTeA1tujtmh0Rp9j3uctkG3Rh8nRAs7MM7bL3NUhQFUaSswTEDUZEgMNpXE0n+ZcVkoxWY62V3nikNNKGv1lZqkDvfD9pfwlZQAN+YZkuw3KGNPMnE9RYUQ1Bvpl6KJmHnQTUjiHo79UYQcaz5zsPasnPJurrJMBZ9J/q1ImdeCBRx7EGUDrXQvvcjYVCjcLLqSFzG4YJOGrWtjmqrGFR3SCGtwt7oTqRpXU4wd83eCVLo8D3qj5UPyB/IReHZUeDdAMkH2qmVdL8bWnsTBH4iSbrfNqyFEt1v8IpisJbJwgVNp1Rs1BLUV5qPVChshHEc2iSA1EZH/UmpnjEX2WxT4NQS8foxEBEWcLbBsj7Qnqy/piw3qudGhEuobBDpz9ZUll6qy3oy3iSEo4lmLVmFU4OwRTqZQl2zPDdfgDo/xXuD5hAWZ/b02ZnjXWDfGBw/Cbp2svSko="
     file:
       - "cpprp-$NAME-$TRAVIS_TAG.lib"
