@@ -34,6 +34,7 @@ matrix:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-9']
       env:
+        - NAME=msvc
         - NAME=gcc
         - CXX=g++-9
       script:
