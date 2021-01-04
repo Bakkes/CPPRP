@@ -52,8 +52,8 @@ matrix:
       script:
         - export PATH=$PYTHON_PATH:$MSBUILD_PATH:$PATH
         - ./buildwindows.bat
-        - move ".\x64\JSONBuild\CPPRPJSON.exe" "cpprpjson-$NAME-$TRAVIS_TAG.exe"; 
-        - move ".\x64\JSONBuild\CPPRP.lib" "cpprp-$NAME-$TRAVIS_TAG.lib";
+        - powershell move ".\x64\JSONBuild\CPPRPJSON.exe" "cpprpjson-$NAME-$TRAVIS_TAG.exe"; 
+        - powershell move ".\x64\JSONBuild\CPPRP.lib" "cpprp-$NAME-$TRAVIS_TAG.lib";
     
 notifications:
   email: false
