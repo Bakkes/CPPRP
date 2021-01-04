@@ -34,7 +34,6 @@ matrix:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-9']
       env:
-        - NAME=msvc
         - NAME=gcc
         - CXX=g++-9
       script:
@@ -42,6 +41,7 @@ matrix:
         - mv "./build/test" "cpprp-$NAME-$TRAVIS_TAG"
     - os: windows
       env:
+        - NAME=msvc
         - MSBUILD_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
         - PYTHON_PATH="C:/Python37:C:/Python37/Scripts:/c/Python37:/c/Python37/Scripts"
         #:/c/Python37/Scripts:$PATH
