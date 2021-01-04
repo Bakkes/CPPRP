@@ -86,7 +86,7 @@ deploy:
     skip_cleanup: true
     draft: true
     on:
-      os: linux
+      os: windows
       tags: true
       branch: master      
       
