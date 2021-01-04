@@ -51,8 +51,6 @@ matrix:
       script:
         - export PATH=$PYTHON_PATH:$MSBUILD_PATH:$PATH
         - ./buildwindows.bat
-        - cmd.exe /C move "./x64/JSONBuild/CPPRPJSON.exe" "cpprpjson-$NAME-$TRAVIS_TAG.exe"; 
-        - cmd.exe /C move "./x64/JSONBuild/CPPRP.lib" "cpprp-$NAME-$TRAVIS_TAG.lib";
     
 notifications:
   email: false
@@ -74,7 +72,7 @@ deploy:
     skip_cleanup: true
     draft: true
     on:
-      os: linux
+      condition: $TRAVIS_OS_NAME = linux
       tags: true
       branch: master
   - provider: releases
@@ -86,7 +84,7 @@ deploy:
     skip_cleanup: true
     draft: true
     on:
-      os: windows
+      condition: $TRAVIS_OS_NAME = windows
       tags: true
       branch: master      
       
