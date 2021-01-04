@@ -38,6 +38,7 @@ matrix:
         - CXX=g++-9
       script:
         - make RELEASE=1
+        - mv "./build/test" "cpprp-$NAME-$TRAVIS_TAG"
     - os: windows
       env:
         - MSBUILD_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
