@@ -1,6 +1,6 @@
 language: shell
 python:
-    - "3.6"
+  - "3.6"
 
 
 git:
@@ -12,60 +12,60 @@ before_install:
 
 matrix:
   include:
-        - compiler: clang
-          os: linux
-          dist: xenial
-          addons:
-            apt:
-              sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-xenial-8']
-              packages: ['g++-9', 'clang++-8', 'clang-tidy-8']
-          env:
-            - NAME=clang8
-            - CXX=clang++-8
-            - CLANG_TIDY=clang-tidy-8
-          script:
-            - make RELEASE=1
-        - compiler: gcc
-          os: linux
-          dist: xenial
-          addons:
-            apt:
-              sources: ['ubuntu-toolchain-r-test']
-              packages: ['g++-9']
-          env:
-            - NAME=gcc
-            - CXX=g++-9
-          script:
-            - make RELEASE=1
-        - os: windows
-          env:
-            - MSBUILD_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
-            - PYTHON_PATH="C:/Python37:C:/Python37/Scripts:/c/Python37:/c/Python37/Scripts"
-            #:/c/Python37/Scripts:$PATH
-          install:
-            - choco install python --version=3.7.2
-            - choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+    - compiler: clang
+      os: linux
+      dist: xenial
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test', 'llvm-toolchain-xenial-8']
+          packages: ['g++-9', 'clang++-8', 'clang-tidy-8']
+      env:
+        - NAME=clang8
+        - CXX=clang++-8
+        - CLANG_TIDY=clang-tidy-8
+      script:
+        - make RELEASE=1
+    - compiler: gcc
+      os: linux
+      dist: xenial
+      addons:
+        apt:
+          sources: ['ubuntu-toolchain-r-test']
+          packages: ['g++-9']
+      env:
+        - NAME=gcc
+        - CXX=g++-9
+      script:
+        - make RELEASE=1
+    - os: windows
+      env:
+        - MSBUILD_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin"
+        - PYTHON_PATH="C:/Python37:C:/Python37/Scripts:/c/Python37:/c/Python37/Scripts"
+        #:/c/Python37/Scripts:$PATH
+      install:
+        - choco install python --version=3.7.2
+        - choco install visualstudio2019buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
 #            - choco install dotnetcore-sdk
 #            - dotnet restore
-          script:
-            - export PATH=$PYTHON_PATH:$MSBUILD_PATH:$PATH
-            - ./buildwindows.bat
+      script:
+        - export PATH=$PYTHON_PATH:$MSBUILD_PATH:$PATH
+        - ./buildwindows.bat
     
 notifications:
   email: false
   
 before_deploy:
-      # Set up git user name and tag this commit
-      #- git config --local user.name "YOUR GIT USER NAME"
-      #- git config --local user.email "YOUR GIT USER EMAIL"
-      #- export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
-      #- git tag $TRAVIS_TAG
-      if [ "$TRAVIS_OS_NAME" == "windows" ]; then 
-        copy "./x64/JSONBuild/CPPRPJSON.exe" "cpprpjson-$NAME-$TRAVIS_TAG.exe"; 
-        copy "./x64/JSONBuild/CPPRP.lib" "cpprp-$NAME-$TRAVIS_TAG.lib"; 
-      fi
-      
-      if [ "$TRAVIS_OS_NAME" != "windows" ]; then mv "./build/test" "cpprp-$NAME-$TRAVIS_TAG"; fi
+  # Set up git user name and tag this commit
+  #- git config --local user.name "YOUR GIT USER NAME"
+  #- git config --local user.email "YOUR GIT USER EMAIL"
+  #- export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
+  #- git tag $TRAVIS_TAG
+  - if [ "$TRAVIS_OS_NAME" == "windows" ]; then 
+      copy "./x64/JSONBuild/CPPRPJSON.exe" "cpprpjson-$NAME-$TRAVIS_TAG.exe"; 
+      copy "./x64/JSONBuild/CPPRP.lib" "cpprp-$NAME-$TRAVIS_TAG.lib"; 
+    fi
+  
+  - if [ "$TRAVIS_OS_NAME" != "windows" ]; then mv "./build/test" "cpprp-$NAME-$TRAVIS_TAG"; fi
 
 deploy:
   - provider: releases
