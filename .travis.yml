@@ -25,6 +25,7 @@ matrix:
         - CLANG_TIDY=clang-tidy-8
       script:
         - make RELEASE=1
+        - mv "./build/test" "cpprp-$NAME-$TRAVIS_TAG"
     - compiler: gcc
       os: linux
       dist: xenial
@@ -50,19 +51,20 @@ matrix:
       script:
         - export PATH=$PYTHON_PATH:$MSBUILD_PATH:$PATH
         - ./buildwindows.bat
+        - move "./x64/JSONBuild/CPPRPJSON.exe" "cpprpjson-$NAME-$TRAVIS_TAG.exe"; 
+        - move "./x64/JSONBuild/CPPRP.lib"
     
 notifications:
   email: false
   
-before_deploy:
+#before_deploy:
   # Set up git user name and tag this commit
   #- git config --local user.name "YOUR GIT USER NAME"
   #- git config --local user.email "YOUR GIT USER EMAIL"
   #- export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
   #- git tag $TRAVIS_TAG
-  - if [ "$TRAVIS_OS_NAME" == "windows" ]; then copy "./x64/JSONBuild/CPPRPJSON.exe" "cpprpjson-$NAME-$TRAVIS_TAG.exe"; copy "./x64/JSONBuild/CPPRP.lib" "cpprp-$NAME-$TRAVIS_TAG.lib"; fi
-  
-  - if [ "$TRAVIS_OS_NAME" != "windows" ]; then mv "./build/test" "cpprp-$NAME-$TRAVIS_TAG"; fi
+  #- if [ "$TRAVIS_OS_NAME" == "windows" ]; then move "./x64/JSONBuild/CPPRPJSON.exe" "cpprpjson-$NAME-$TRAVIS_TAG.exe"; move "./x64/JSONBuild/CPPRP.lib" "cpprp-$NAME-$TRAVIS_TAG.lib"; fi
+  #- if [ "$TRAVIS_OS_NAME" != "windows" ]; then mv "./build/test" "cpprp-$NAME-$TRAVIS_TAG"; fi
 
 deploy:
   - provider: releases
