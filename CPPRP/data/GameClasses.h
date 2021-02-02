@@ -369,7 +369,6 @@ namespace CPPRP
 		struct SpecialPickup_Targeted_TA : public SpecialPickup_TA
 		{
 			struct ActiveActor Targeted;
-
 		};
 
 		struct SpecialPickup_Tornado_TA : public SpecialPickup_TA
@@ -445,6 +444,11 @@ namespace CPPRP
 		struct SpecialPickup_Swapper_TA : public SpecialPickup_Targeted_TA
 		{
 
+		};
+
+		struct SpecialPickup_Football_TA : public SpecialPickup_TA
+		{
+			struct ActiveActor WeldedBall;
 		};
 
 		struct CrowdManager_TA : public Engine::ReplicationInfo
@@ -602,6 +606,11 @@ namespace CPPRP
 		};
 
 		struct GameEvent_Breakout_TA : public GameEvent_Soccar_TA
+		{
+
+		};
+
+		struct GameEvent_Football_TA : public GameEvent_Soccar_TA
 		{
 
 		};

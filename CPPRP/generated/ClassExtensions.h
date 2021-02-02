@@ -47,6 +47,7 @@ namespace CPPRP {
 		, {"TAGame.SpecialPickup_Batarang_TA","TAGame.SpecialPickup_BallLasso_TA"}
 		, {"TAGame.SpecialPickup_HitForce_TA","TAGame.SpecialPickup_TA"}
 		, {"TAGame.SpecialPickup_Swapper_TA","TAGame.SpecialPickup_Targeted_TA"}
+		, {"TAGame.SpecialPickup_Football_TA","TAGame.SpecialPickup_TA"}
 		, {"TAGame.CrowdManager_TA","Engine.ReplicationInfo"}
 		, {"TAGame.CrowdActor_TA","Engine.ReplicationInfo"}
 		, {"TAGame.InMapScoreboard_TA","Engine.Actor"}
@@ -64,6 +65,7 @@ namespace CPPRP {
 		, {"TAGame.GameEvent_Team_TA","TAGame.GameEvent_TA"}
 		, {"TAGame.GameEvent_Soccar_TA","TAGame.GameEvent_Team_TA"}
 		, {"TAGame.GameEvent_Breakout_TA","TAGame.GameEvent_Soccar_TA"}
+		, {"TAGame.GameEvent_Football_TA","TAGame.GameEvent_Soccar_TA"}
 		, {"TAGame.GameEvent_GodBall_TA","TAGame.GameEvent_Soccar_TA"}
 		, {"TAGame.GameEvent_Season_TA","TAGame.GameEvent_Soccar_TA"}
 		, {"TAGame.GameEvent_SoccarPrivate_TA","TAGame.GameEvent_Soccar_TA"}
