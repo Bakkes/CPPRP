@@ -893,45 +893,31 @@ public:
 		return true;
 	}
 
-#define fffffind(a)\
-auto found = classnetMap.find(a);\
-if (found == classnetMap.end()) \
-{\
-return notfound;\
-}\
-return (*found).second;
-
 	const std::shared_ptr<ClassNet>& ReplayFile::GetClassnetByNameWithLookup(const std::string & name) const
 	{
 		static std::shared_ptr<ClassNet> notfound = std::shared_ptr<ClassNet>(nullptr);
-		if (name.find("CrowdActor_TA") != std::string::npos)
+		const std::map<std::string, std::string> classnetNamesLookups = {
+			{"CrowdActor_TA", "TAGame.CrowdActor_TA"},
+			{"VehiclePickup_Boost_TA", "TAGame.VehiclePickup_Boost_TA"},
+			{"CrowdManager_TA", "TAGame.CrowdManager_TA"},
+			{"BreakOutActor_Platform_TA", "TAGame.BreakOutActor_Platform_TA"},
+			{"WorldInfo", "Engine.WorldInfo"},
+			{"Archetypes.Teams.TeamWhite", "TAGame.Team_Soccar_TA"},
+			{"PersistentLevel.KActor", "Engine.KActor"}
+		};
+		for (const auto& kv : classnetNamesLookups)
 		{
-			fffffind("TAGame.CrowdActor_TA");
+			if (name.find(kv.first) != std::string::npos)
+			{
+				auto found = classnetMap.find(name); 
+				if (found == classnetMap.end()) 
+				{
+					return notfound; 
+				}
+				return (*found).second;
+			}
 		}
-		else if (name.find("VehiclePickup_Boost_TA") != std::string::npos)
-		{
-			fffffind("TAGame.VehiclePickup_Boost_TA");
-		}
-		else if (name.find("CrowdManager_TA") != std::string::npos)
-		{
-			fffffind("TAGame.CrowdManager_TA");
-		}
-		else if (name.find("BreakOutActor_Platform_TA") != std::string::npos)
-		{
-			fffffind("TAGame.BreakOutActor_Platform_TA");
-		}
-		else if (name.find("WorldInfo") != std::string::npos)
-		{
-			fffffind("Engine.WorldInfo");
-		}
-		else if (name.find("Archetypes.Teams.TeamWhite") != std::string::npos)
-		{
-			fffffind("TAGame.Team_Soccar_TA");
-		}
-		else if (name.find("PersistentLevel.KActor") != std::string::npos)
-		{
-			fffffind("Engine.KActor")
-		}
+		
 		auto found = classnetMap.find(name);
 		if (found == classnetMap.end())
 			return notfound;
