@@ -58,5 +58,6 @@ namespace CPPRP
 		{{"ProjectX.NetModeReplicator_X"}, {"ProjectX.Default__NetModeReplicator_X"}},
 		{{"TAGame.MaxTimeWarningData_TA" }, {"TAGame.Default__MaxTimeWarningData_TA"}}, //TAGame.Default__MaxTimeWarningData_TA
 		{{"TAGame.RumblePickups_TA" }, {"TAGame.Default__RumblePickups_TA"}},
+		{{"TAGame.PickupTimer_TA"}, {"TAGame.Default__PickupTimer_TA"}}
 	};
 }

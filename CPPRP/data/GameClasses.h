@@ -225,6 +225,7 @@ namespace CPPRP
 			uint32_t Title;
 			uint64_t ClubID;
 			int MaxTimeTillItem;
+			ActiveActor PickupTimer;
 			uint32_t MatchBreakoutDamage;
 			uint32_t BotProductName;
 			uint32_t BotBannerProductID;
@@ -256,6 +257,7 @@ namespace CPPRP
 			struct CameraSettings CameraSettings;
 			struct ReplicatedTitle SecondaryTitle;
 			struct HistoryKey PlayerHistoryKey;
+			
 
 			bool bIsDistracted;
 
@@ -680,6 +682,13 @@ namespace CPPRP
 		{
 			ActiveActor AttachedPickup;
 			int ConcurrentItemCount;
+			PickupInfo_TA PickupInfo;
+		};
+
+		struct PickupTimer_TA : public CarComponent_TA
+		{
+			int TimeTillItem;
+			int MaxTimeTillItem;
 		};
 
 		struct Cannon_TA : public Engine::Actor
@@ -687,6 +696,7 @@ namespace CPPRP
 			float Pitch;
 			uint8_t FireCount;
 		};
+
 	};
 
 

@@ -402,5 +402,17 @@ namespace CPPRP
 		Vector3 ang_vel;              
 		uint32_t flags;         
 	};
+
+	__ParserAttribute__(Consume, false)
+	struct PickupInfo_TA
+	{
+		ActiveActor AvailablePickups;
+		
+		//Not entirely sure what this is yet
+		bool unknown;
+		bool bItemsArePreview;
+		
+	};
+
 }
 #include "GameClasses.h"
