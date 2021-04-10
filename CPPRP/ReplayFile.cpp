@@ -909,7 +909,7 @@ public:
 		{
 			if (name.find(kv.first) != std::string::npos)
 			{
-				auto found = classnetMap.find(name); 
+				auto found = classnetMap.find(kv.second); 
 				if (found == classnetMap.end()) 
 				{
 					return notfound; 
