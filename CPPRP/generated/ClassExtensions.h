@@ -79,6 +79,7 @@ namespace CPPRP {
 		, {"TAGame.HauntedBallTrapTrigger_TA","Engine.Actor"}
 		, {"TAGame.MaxTimeWarningData_TA","Engine.ReplicatedActor_ORS"}
 		, {"TAGame.RumblePickups_TA","Engine.Actor"}
+		, {"TAGame.PickupTimer_TA","TAGame.CarComponent_TA"}
 		, {"TAGame.Cannon_TA","Engine.Actor"}
 	};
 };

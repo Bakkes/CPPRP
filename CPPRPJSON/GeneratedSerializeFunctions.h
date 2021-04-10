@@ -630,3 +630,17 @@ inline const void Serialize(Writer& writer, const RigidBodyState& item)
 }
 
 
+template<typename Writer>
+inline const void Serialize(Writer& writer, const PickupInfo_TA& item)
+{
+	writer.StartObject();
+	writer.Key("AvailablePickups");
+	Serialize(writer, item.AvailablePickups);
+	writer.Key("unknown");
+	Serialize(writer, item.unknown);
+	writer.Key("bItemsArePreview");
+	Serialize(writer, item.bItemsArePreview);
+	writer.EndObject();
+}
+
+

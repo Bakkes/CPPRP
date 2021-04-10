@@ -261,6 +261,22 @@ namespace CPPRP
 	}
 
 	template<>
+	inline const PickupInfo_TA Consume(CPPBitReader<BitReaderType>& reader)
+	{
+		PickupInfo_TA item;
+
+		ActiveActor itemz;
+		itemz.active = reader.read<bool>();
+		itemz.actor_id = reader.read<int32_t>();
+		item.AvailablePickups = itemz;
+
+		item.bItemsArePreview = reader.read<bool>();
+		item.unknown = reader.read<bool>();
+		
+		return item;
+	}
+
+	template<>
 	inline const Reservation Consume(CPPBitReader<BitReaderType>& reader) {
 		Reservation item;
 		item.number = reader.read<uint8_t>(3);

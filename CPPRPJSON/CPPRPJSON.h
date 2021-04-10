@@ -172,6 +172,23 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 	}
 	writer.EndArray();
 
+	writer.String("ReplayLog");
+	writer.StartArray();
+
+	for (auto kv : headerData->debugstrings)
+	{
+		writer.StartObject();
+		writer.String("Frame");
+		writer.Int(kv.frame);
+		writer.String("Key");
+		writer.String(kv.key);
+		writer.String("Value");
+		writer.String(kv.value);
+		writer.EndObject();
+	}
+	writer.EndArray();
+
+
 	writer.EndObject();
 
 	writer.String("Body");
