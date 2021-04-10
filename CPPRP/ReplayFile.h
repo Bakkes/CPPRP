@@ -107,6 +107,9 @@ namespace CPPRP
 		const bool HasRotation(const uint32_t name) const;
 		template<typename T>
 		const T GetProperty(const std::string& key) const;
+
+		template<typename T>
+		const std::shared_ptr<T> GetActiveActor(const ActiveActor& key) const;
 	};
 
 	template<typename T>
@@ -117,5 +120,14 @@ namespace CPPRP
 			throw PropertyDoesNotExistException(key);
 		}
 		return std::any_cast<T>(replayFile->properties.at(key)->value);
+	}
+	template<typename T>
+	inline const std::shared_ptr<T> ReplayFile::GetActiveActor(const ActiveActor& key) const
+	{
+		if (auto found = actorStates.find(key.actor_id); found != actorStates.end())
+		{
+			return std::dynamic_pointer_cast<T>(found->second.actorObject);
+		}
+		return nullptr;
 	}
 }
