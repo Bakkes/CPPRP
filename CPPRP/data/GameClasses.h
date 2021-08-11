@@ -494,6 +494,7 @@ namespace CPPRP
 			struct TeamPaint TeamPaint;
 			struct ReplicatedDemolish ReplicatedDemolish;
 			struct ReplicatedDemolish2 ReplicatedDemolish_CustomFX;
+			struct DemolishDataGoalExplosion ReplicatedDemolishGoalExplosion;
 			struct ClubColors ClubColors;
 		};
 

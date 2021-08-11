@@ -147,6 +147,20 @@ namespace CPPRP
 		int32_t victim_actor_id;
 		Vector3 attacker_velocity;
 		Vector3 victim_velocity;
+	};
+
+	//Actually extends ReplicatedDemolish but i don't think our preprocessor supports extending
+	//And we need to parse in reverse order (?)
+	struct DemolishDataGoalExplosion
+	{
+		bool goal_explosion_owner_flag;
+		int32_t goal_explosion_owner;
+		bool attacker_flag;
+		int32_t attacker_actor_id;
+		bool victim_flag;
+		int32_t victim_actor_id;
+		Vector3 attacker_velocity;
+		Vector3 victim_velocity;
 		
 	};
 

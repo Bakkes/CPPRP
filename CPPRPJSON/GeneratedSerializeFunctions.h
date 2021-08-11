@@ -223,6 +223,30 @@ inline const void Serialize(Writer& writer, const ReplicatedDemolish2& item)
 
 
 template<typename Writer>
+inline const void Serialize(Writer& writer, const DemolishDataGoalExplosion& item)
+{
+	writer.StartObject();
+	writer.Key("goal_explosion_owner_flag");
+	Serialize(writer, item.goal_explosion_owner_flag);
+	writer.Key("goal_explosion_owner");
+	Serialize(writer, item.goal_explosion_owner);
+	writer.Key("attacker_flag");
+	Serialize(writer, item.attacker_flag);
+	writer.Key("attacker_actor_id");
+	Serialize(writer, item.attacker_actor_id);
+	writer.Key("victim_flag");
+	Serialize(writer, item.victim_flag);
+	writer.Key("victim_actor_id");
+	Serialize(writer, item.victim_actor_id);
+	writer.Key("attacker_velocity");
+	Serialize(writer, item.attacker_velocity);
+	writer.Key("victim_velocity");
+	Serialize(writer, item.victim_velocity);
+	writer.EndObject();
+}
+
+
+template<typename Writer>
 inline const void Serialize(Writer& writer, const ReplicatedMusicStringer& item)
 {
 	writer.StartObject();

@@ -270,6 +270,7 @@ GAMEFIELD(TAGame, Car_TA, AddedBallForceMultiplier, float);
 GAMEFIELD(TAGame, Car_TA, TeamPaint, struct TeamPaint);
 GAMEFIELD(TAGame, Car_TA, ReplicatedDemolish, struct ReplicatedDemolish);
 GAMEFIELD(TAGame, Car_TA, ReplicatedDemolish_CustomFX, struct ReplicatedDemolish2);
+GAMEFIELD(TAGame, Car_TA, ReplicatedDemolishGoalExplosion, struct DemolishDataGoalExplosion);
 GAMEFIELD(TAGame, Car_TA, ClubColors, struct ClubColors);
 GAMECLASS(TAGame, Car_Season_TA);
 GAMECLASS(TAGame, CameraSettingsActor_TA);
