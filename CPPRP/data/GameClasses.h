@@ -287,17 +287,24 @@ namespace CPPRP
 			float ReplicatedActivityTime;
 		};
 
+
+		struct CarComponent_AirActivate_TA : public CarComponent_TA
+		{
+			int AirActivateCount;
+		};
+
 		struct CarComponent_Jump_TA : public CarComponent_TA
 		{
 
 		};
 
-		struct CarComponent_DoubleJump_TA : public CarComponent_TA
+		struct CarComponent_DoubleJump_TA : public CarComponent_AirActivate_TA
 		{
 
 		};
 
-		struct CarComponent_Boost_TA : public CarComponent_TA
+
+		struct CarComponent_Boost_TA : public CarComponent_AirActivate_TA
 		{
 			float RechargeDelay;
 			bool bUnlimitedBoost;
@@ -310,9 +317,11 @@ namespace CPPRP
 			//unused
 			float StartBoostAmount;
 			float CurrentBoostAmount;
+			bool bRechargeGroundOnly;
+
 		};
 
-		struct CarComponent_Dodge_TA : public CarComponent_TA
+		struct CarComponent_Dodge_TA : public CarComponent_AirActivate_TA
 		{
 			struct Vector3I DodgeTorque;
 		};

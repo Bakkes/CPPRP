@@ -22,10 +22,11 @@ namespace CPPRP {
 		, {"TAGame.PRI_TA","ProjectX.PRI_X"}
 		, {"TAGame.RBActor_TA","ProjectX.Pawn_X"}
 		, {"TAGame.CarComponent_TA","Engine.ReplicationInfo"}
+		, {"TAGame.CarComponent_AirActivate_TA","TAGame.CarComponent_TA"}
 		, {"TAGame.CarComponent_Jump_TA","TAGame.CarComponent_TA"}
-		, {"TAGame.CarComponent_DoubleJump_TA","TAGame.CarComponent_TA"}
-		, {"TAGame.CarComponent_Boost_TA","TAGame.CarComponent_TA"}
-		, {"TAGame.CarComponent_Dodge_TA","TAGame.CarComponent_TA"}
+		, {"TAGame.CarComponent_DoubleJump_TA","TAGame.CarComponent_AirActivate_TA"}
+		, {"TAGame.CarComponent_Boost_TA","TAGame.CarComponent_AirActivate_TA"}
+		, {"TAGame.CarComponent_Dodge_TA","TAGame.CarComponent_AirActivate_TA"}
 		, {"TAGame.CarComponent_FlipCar_TA","TAGame.CarComponent_TA"}
 		, {"TAGame.Ball_TA","TAGame.RBActor_TA"}
 		, {"TAGame.Team_TA","Engine.TeamInfo"}
