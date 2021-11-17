@@ -277,7 +277,7 @@ namespace CPPRP
 
 			float MaxLinearSpeed;
 			float MaxAngularSpeed;
-
+			uint8_t TeleportCounter;
 		};
 
 		struct CarComponent_TA : public Engine::ReplicationInfo
@@ -300,7 +300,7 @@ namespace CPPRP
 
 		struct CarComponent_DoubleJump_TA : public CarComponent_AirActivate_TA
 		{
-
+			struct Vector3I DoubleJumpImpulse;
 		};
 
 
@@ -324,6 +324,7 @@ namespace CPPRP
 		struct CarComponent_Dodge_TA : public CarComponent_AirActivate_TA
 		{
 			struct Vector3I DodgeTorque;
+			struct Vector3I DodgeImpulse;
 		};
 
 
