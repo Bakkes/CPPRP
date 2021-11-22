@@ -115,11 +115,18 @@ namespace CPPRP
 	template<typename T>
 	inline const T ReplayFile::GetProperty(const std::string& key) const
 	{
-		if (replayFile->properties.find(key) == replayFile->properties.end())
+		if (auto it = replayFile->properties.find(key); it != replayFile->properties.end())
 		{
-			throw PropertyDoesNotExistException(key);
+			auto& value = it->second->value;
+			return std::get<T>(value);
+			// could throw a custom "bad type exception" after checking or just use the std::bad_variant_access std::get throws 
+			//if (std::holds_alternative<T>(value))
+			//{
+			//	
+			//}
 		}
-		return std::any_cast<T>(replayFile->properties.at(key)->value);
+		throw PropertyDoesNotExistException(key);
+
 	}
 	template<typename T>
 	inline const std::shared_ptr<T> ReplayFile::GetActiveActor(const ActiveActor& key) const
