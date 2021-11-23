@@ -17,7 +17,7 @@ namespace CPPRP
 	
 	
 
-	constexpr bool IncludeParseLog = true;
+	constexpr bool IncludeParseLog = false;
 	constexpr uint32_t ParseLogSize = 100;
 
 	ReplayFile::ReplayFile(std::filesystem::path path_) : path(path_)
@@ -495,6 +495,7 @@ public:
 		try
 		{
 			int first = 0;
+			updatedProperties.reserve(100);
 			//char writeBuffer[65536 * 5];
 			//rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
 
@@ -644,7 +645,9 @@ public:
 						{
 							
 							ActorStateData& actorState = actorStates[actorId];
-							std::vector<uint32_t> updatedProperties;
+							updatedProperties.clear();
+							//std::vector<uint32_t> updatedProperties;
+							//updatedProperties.reserve(10);
 							//updatedProperties.reserve(100);
 							//While there's data for this state to be updated
 							while (networkReader.read<bool>())
@@ -716,6 +719,11 @@ public:
 				//Unsure how big RL buffer sizes are, 8192 seems fair
 				throw GeneralParseException("Not enough bytes parsed! Expected ~" + std::to_string(networkReader.size) + ", parsed: " + std::to_string(networkReader.GetAbsoluteBitPosition()) + ". Diff(" + std::to_string(networkReader.size - networkReader.GetAbsoluteBitPosition()) + ")", networkReader);
 			}
+		}
+		catch(std::exception& e)
+		{
+			//printf("Caught ex: %s\n", e.what());
+			throw e;
 		}
 		catch (...)
 		{
@@ -896,7 +904,7 @@ public:
 	const std::shared_ptr<ClassNet>& ReplayFile::GetClassnetByNameWithLookup(const std::string & name) const
 	{
 		static std::shared_ptr<ClassNet> notfound = std::shared_ptr<ClassNet>(nullptr);
-		const std::map<std::string, std::string> classnetNamesLookups = {
+		static const std::map<std::string, std::string> classnetNamesLookups = {
 			{"CrowdActor_TA", "TAGame.CrowdActor_TA"},
 			{"VehiclePickup_Boost_TA", "TAGame.VehiclePickup_Boost_TA"},
 			{"CrowdManager_TA", "TAGame.CrowdManager_TA"},

@@ -42,25 +42,25 @@ void SerializeProp(Writer& writer, const std::string& name, std::shared_ptr<CPPR
 			}
 			else //Type is "Name"
 			{
-				writer.String(std::any_cast<std::string>(currentProperty->value).c_str());
+				writer.String(std::get<std::string>(currentProperty->value).c_str());
 			}
 		}
 		break;
 		case 'I': //IntProperty
 		{
-			writer.Int(std::any_cast<int32_t>(currentProperty->value));
+			writer.Int(std::get<int32_t>(currentProperty->value));
 		}
 		break;
 		case 'S': //StringProperty
 		{
-			writer.String(std::any_cast<std::string>(currentProperty->value).c_str());
+			writer.String(std::get<std::string>(currentProperty->value).c_str());
 		}
 		break;
 		case 'B':
 		{
 			if (currentProperty->property_type[1] == 'y') //Type is "ByteProperty"
 			{
-				CPPRP::EnumProperty ep = std::any_cast<CPPRP::EnumProperty>(currentProperty->value);
+				CPPRP::EnumProperty ep = std::get<CPPRP::EnumProperty>(currentProperty->value);
 				writer.StartObject();
 				writer.String("Type");
 				writer.String(ep.type.c_str());
@@ -72,11 +72,11 @@ void SerializeProp(Writer& writer, const std::string& name, std::shared_ptr<CPPR
 			{
 				if (specialByteProp)
 				{
-					writer.Int(std::any_cast<uint32_t>(currentProperty->value));
+					writer.Int(std::get<uint32_t>(currentProperty->value));
 				}
 				else
 				{
-					writer.Int(std::any_cast<uint8_t>(currentProperty->value));
+					writer.Int(std::get<uint8_t>(currentProperty->value));
 				}
 
 			}
@@ -84,17 +84,17 @@ void SerializeProp(Writer& writer, const std::string& name, std::shared_ptr<CPPR
 		break;
 		case 'Q': //QWordProperty
 		{
-			writer.String(std::to_string(std::any_cast<uint64_t>(currentProperty->value)));
+			writer.String(std::to_string(std::get<uint64_t>(currentProperty->value)));
 		}
 		break;
 		case 'F': //FloatProperty
 		{
-			writer.Double(std::any_cast<float>(currentProperty->value));
+			writer.Double(std::get<float>(currentProperty->value));
 		}
 		break;
 		case 'A': //ArrayProperty
 		{
-			auto temp = (std::any_cast<std::vector<std::unordered_map<std::string, std::shared_ptr<CPPRP::Property>>>>(currentProperty->value));
+			auto temp = (std::get<std::vector<std::unordered_map<std::string, std::shared_ptr<CPPRP::Property>>>>(currentProperty->value));
 
 			writer.StartArray();
 			for (auto& wot : temp)

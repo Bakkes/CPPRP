@@ -25,7 +25,7 @@
 int main(int argc, char *argv[])
 {
 	if constexpr (false) {
-		auto replayFile = std::make_shared<CPPRP::ReplayFile>("J:/74B3720B43DEF8267DD3EB932BED44B5.replay");
+		auto replayFile = std::make_shared<CPPRP::ReplayFile>(R"(C:\Users\m4rti\Documents\My Games\Rocket League\TAGame\Demos\4AE3D3604A789A392A79EA96F2BE4B55.replay)");
 		replayFile->Load();
 		replayFile->DeserializeHeader();
 		for (auto it : replayFile->GetProperty<std::vector<std::unordered_map<std::string, std::shared_ptr<CPPRP::Property>>>>("PlayerStats"))
@@ -35,20 +35,34 @@ int main(int argc, char *argv[])
 				printf("%s\n", it2.first.c_str());
 			}
 		}
-		std::map<uint32_t, std::unordered_map<uint32_t, CPPRP::Vector3>> locations;
-		/*replayFile->tickables.push_back([&](const CPPRP::Frame frame, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
+		std::map<uint32_t, std::unordered_map<uint32_t, uint32_t>> scores;
+		struct TestData
+		{
+			CPPRP::OnlineID id;
+			uint32_t match_Score;
+		};
+		std::map<uint32_t, TestData> scores_map;
+		replayFile->updatedCallbacks.push_back([&](const CPPRP::ActorStateData& asd, const std::vector<uint32_t>& props)
+			{
+				if (auto pri = std::dynamic_pointer_cast<CPPRP::TAGame::PRI_TA>(asd.actorObject))
+				{
+					scores_map[asd.actorId] = TestData{pri->UniqueId, pri->MatchScore };
+				}
+			});
+		replayFile->tickables.push_back([&](const CPPRP::Frame frame, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
 		{
 			for (auto& actor : actorStats)
 			{
-				std::shared_ptr<CPPRP::TAGame::Car_TA> car = std::dynamic_pointer_cast<CPPRP::TAGame::Car_TA>(actor.second.actorObject);
-				if (car)
+				auto pri = std::dynamic_pointer_cast<CPPRP::TAGame::PRI_TA>(actor.second.actorObject);
+				if (pri)
 				{
-					locations[frame.frameNumber][actor.first] = car->ReplicatedRBState.position;
+					scores[frame.frameNumber][actor.first] = pri->MatchScore;
 				}
 			}
-		});*/
+		});
 		replayFile->Parse();
 		int fdfsd = 5;
+		return 0;
 	}
 	//printf("hi");
 	std::queue<std::filesystem::path> replayFilesToLoad;
@@ -274,7 +288,7 @@ int main(int argc, char *argv[])
 
 		std::cout << "Elapsed time in microseconds : "
 			<< std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
-			<< " �s" << std::endl;
+			<< " µs" << std::endl;
 
 		std::cout << "Elapsed time in milliseconds : "
 			<< std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
@@ -340,6 +354,6 @@ int main(int argc, char *argv[])
 		printf("Success: %i, fail: %i (%.2f%%) corrupt: %i Average parse time %.5f ms (totaltime/successfulparses)\n", (success.load()), fail.load(), ((double)success.load() / (double)((success.load()) + fail.load())) * 100, corrupt.load(), (elapsed / (double)success.load()));*/
 	}
 	
-	//system("pause");
+	system("pause");
 	return 0;
 }
