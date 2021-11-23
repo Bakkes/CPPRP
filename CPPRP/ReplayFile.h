@@ -41,7 +41,7 @@ namespace CPPRP
 
 
 
-	typedef std::function<void(const Frame&, const std::unordered_map<int, ActorStateData>&)> tickable;
+	typedef std::function<void(const Frame&, const std::unordered_map<decltype(ActorStateData::actorId), ActorStateData>&)> tickable;
 	typedef std::function<void(const Frame&)> onNewFrame;
 	typedef std::function<void(const ActorStateData&)> actorCreated;
 	typedef std::function<void(const ActorStateData&, const std::vector<uint32_t>&)> actorUpdated;
@@ -54,13 +54,11 @@ namespace CPPRP
 		
 		std::shared_ptr<CPPBitReader<BitReaderType>> fullReplayBitReader;
 		std::map<std::string, std::shared_ptr<ClassNet>> classnetMap;
-		//parser temporary to reduce reallocation
-		std::vector<uint32_t> updatedProperties;
 	public:
 		std::vector<char> data;
 		std::filesystem::path path;
 		std::vector<Frame> frames;
-		std::unordered_map<int, ActorStateData> actorStates;
+		std::unordered_map<decltype(ActorStateData::actorId), ActorStateData> actorStates;
 		std::shared_ptr<ReplayFileData> replayFile;
 		FileHeader header;
 		std::vector<parsePropertyFunc> parseFunctions;
