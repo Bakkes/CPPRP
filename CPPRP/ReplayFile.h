@@ -37,6 +37,7 @@ namespace CPPRP
 		uint32_t actorId{0};
 		uint32_t nameId{ 0 };
 		uint32_t classNameId{ 0 };
+		uint32_t typeId{ 0 }; // Used for checking archetypes
 	};
 
 

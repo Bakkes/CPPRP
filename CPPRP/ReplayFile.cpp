@@ -586,7 +586,7 @@ public:
 							#endif
 
 							//const std::string typeName = replayFile->objects.at(typeId);
-							//printf("%s\n", typeName.c_str());
+							//printf("%s:%i\n", typeName.c_str(), typeId);
 							auto classNet = classnetCache[typeId];//GetClassnetByNameWithLookup(typeName);
 
 							#ifndef PARSE_UNSAFE
@@ -635,7 +635,7 @@ public:
 							//printf("---\n");
 							//ActorStateData asd =  { std::move(actorObject), classNet, actorId, name_id, classId };
 							//actorStates[actorId] = asd;
-							auto [inserted, insert_result] = actorStates.emplace(actorId, ActorStateData{ std::move(actorObject), classNet, actorId, name_id, classId });
+							auto [inserted, insert_result] = actorStates.emplace(actorId, ActorStateData{ std::move(actorObject), classNet, actorId, name_id, classId, typeId });
 							for(const auto& createdFunc : createdCallbacks)
 							{
 								createdFunc(inserted->second);
