@@ -207,7 +207,7 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 			updatedActorsThisTick.push_back({ asd, props });
 		});
 
-	replayFile->tickables.push_back([&](const CPPRP::Frame frame, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
+	replayFile->tickables.push_back([&](const CPPRP::Frame frame, const std::unordered_map<uint32_t, CPPRP::ActorStateData>& actorStats)
 		{
 			writer.StartObject();
 			writer.String("Frame");
