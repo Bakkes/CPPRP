@@ -13,7 +13,7 @@ namespace CPPRP
 		const CPPBitReader<T>& bitReader;
 		explicit ParseException(const CPPBitReader<T>& br);
 	public:
-		std::string errorMsg = "";
+		std::string errorMsg;
 		const char* what() const throw();
 	};
 

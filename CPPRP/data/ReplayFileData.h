@@ -128,7 +128,7 @@ namespace CPPRP
 
 	struct PS4ID : public UniqueId
 	{
-		std::string playerName{ "" };
+		std::string playerName;
 		uint64_t unknown1{ 0 };
 		uint64_t unknown2{ 0 };
 		uint64_t psId{ 0 };
@@ -144,7 +144,7 @@ namespace CPPRP
 
 	struct EpicID : public UniqueId
 	{
-		std::string epicId{ "" };
+		std::string epicId;
 	};
 
 	struct UnknownId : public UniqueId
@@ -153,12 +153,22 @@ namespace CPPRP
 	};
 	using OnlineID = std::variant<UniqueId, SteamID, XBoxID, SwitchID, QQID, PS4ID, PsyNetID, EpicID, UnknownId>;
 
+	struct EnumProperty
+	{
+		std::string type;
+		std::string value;
+	};
+
+	struct Property;
+	using PropertyObj = std::unordered_map<std::string, std::shared_ptr<Property>>;
+	using PropertyValue = std::variant<std::string, int32_t, uint32_t, uint8_t, uint64_t, float, EnumProperty, std::vector<PropertyObj>>;
+
 
 	struct Property
 	{
-		std::string property_name{ "" };
-		std::string property_type{ "" };
-		std::any value;
+		std::string property_name;
+		std::string property_type;
+		PropertyValue value;
 	};
 
 	struct FileHeader
@@ -179,13 +189,13 @@ namespace CPPRP
 
 	struct ReplayTick
 	{
-		std::string type{ "" };
+		std::string type;
 		uint32_t frame{ 0 };
 	};
 
 	struct ClassIndex
 	{
-		std::string class_name{ "" };
+		std::string class_name;
 		uint32_t index{ 0 };
 	};
 
@@ -225,12 +235,6 @@ namespace CPPRP
 		float delta;
 		size_t position;
 		//std::unordered_map<uint32_t, ActorState> states;
-	};
-
-	struct EnumProperty
-	{
-		std::string type;
-		std::string value;
 	};
 
 	struct DebugString

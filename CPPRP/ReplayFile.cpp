@@ -14,10 +14,11 @@
 
 namespace CPPRP
 {
-	
-	
-
+#ifdef PARSELOG_ENABLED
 	constexpr bool IncludeParseLog = true;
+#else
+	constexpr bool IncludeParseLog = false;
+#endif
 	constexpr uint32_t ParseLogSize = 100;
 
 	ReplayFile::ReplayFile(std::filesystem::path path_) : path(path_)
@@ -287,9 +288,9 @@ namespace CPPRP
 	void ReplayFile::PreprocessTables()
 	{
 		const size_t size = replayFile->objects.size();
-		for(size_t i = 0; i < size; ++i)
+		for(uint32_t i = 0; i < size; ++i)
 		{
-			objectToId[replayFile->objects.at(i)] = (uint32_t)i;
+			objectToId[replayFile->objects.at(i)] = i;
 			//printf("[%i] %s", i, replayFile->objects.at(i).c_str());
 		}
 	}
@@ -363,20 +364,20 @@ public:
 		}
 
 		//TODO: derive this from gameclasses
-		for (auto kv : class_extensions)
+		for (const auto& [child_name, parent_name] : class_extensions)
 		{
-			std::shared_ptr<ClassNet> childClass = GetClassnetByNameWithLookup(kv.first);
-			std::shared_ptr<ClassNet> parentClass = GetClassnetByNameWithLookup(kv.second);
+			std::shared_ptr<ClassNet> childClass = GetClassnetByNameWithLookup(child_name);
+			std::shared_ptr<ClassNet> parentClass = GetClassnetByNameWithLookup(parent_name);
 			if (parentClass != nullptr && childClass != nullptr && (childClass->parent_class == nullptr || (childClass->parent_class->index != parentClass->index)))
 			{
 				childClass->parent_class = parentClass;
 			}
 		}
 
-		for (auto cn : replayFile->classnets)
+		for (const auto& cn : replayFile->classnets)
 		{
-			uint32_t i = 0;
-			uint32_t result = GetPropertyIndexById(cn, i);
+			uint16_t i = 0;
+			uint16_t result = GetPropertyIndexById(cn, i);
 			while (result != 0)
 			{
 				cn->property_id_cache.push_back(result);
@@ -459,11 +460,11 @@ public:
 		//printf("Done preprocessing\n");
 	}
 
-	std::string ReplayFile::GetParseLog(size_t size)
+	std::string ReplayFile::GetParseLog(size_t amount)
 	{
 		std::stringstream ss;
 		ss << "Parse log: ";
-		for (size_t i = size > parseLog.size() ?  0 : parseLog.size() - size; i < parseLog.size(); i++)
+		for (size_t i = amount > parseLog.size() ?  0 : parseLog.size() - amount; i < parseLog.size(); i++)
 		{
 			ss <<"\n\t" + parseLog.at(i);
 		}
@@ -506,7 +507,7 @@ public:
 			const uint32_t numFrames = frameCount > 0 ? frameCount : static_cast<uint32_t>(GetProperty<int32_t>("NumFrames"));
 
 			const int32_t maxChannels = GetProperty<int32_t>("MaxChannels");
-			const bool isLan = GetProperty<std::string>("MatchType").compare("Lan") == 0;
+			const bool isLan = GetProperty<std::string>("MatchType") == "Lan";
 
 			const size_t namesSize = replayFile->names.size();
 			const size_t objectsSize = replayFile->objects.size();
@@ -517,6 +518,8 @@ public:
 			networkReader.attributeIDs = attributeIDs;
 
 			frames.resize(numFrames);
+			std::vector<uint32_t> updatedProperties;
+			updatedProperties.reserve(100);
 			uint32_t currentFrame = 0;
 			while (
 				#ifndef PARSE_UNSAFE
@@ -586,7 +589,7 @@ public:
 							#endif
 
 							//const std::string typeName = replayFile->objects.at(typeId);
-							//printf("%s\n", typeName.c_str());
+							//printf("%s:%i\n", typeName.c_str(), typeId);
 							auto classNet = classnetCache[typeId];//GetClassnetByNameWithLookup(typeName);
 
 							#ifndef PARSE_UNSAFE
@@ -633,19 +636,18 @@ public:
 								//printf("has rot\n");
 							}
 							//printf("---\n");
-							ActorStateData asd =  { std::move(actorObject), classNet, actorId, name_id, classId };
-							actorStates[actorId] = asd;
+							//ActorStateData asd =  { std::move(actorObject), classNet, actorId, name_id, classId };
+							//actorStates[actorId] = asd;
+							auto [inserted, insert_result] = actorStates.emplace(actorId, ActorStateData{ std::move(actorObject), classNet, actorId, name_id, classId, typeId });
 							for(const auto& createdFunc : createdCallbacks)
 							{
-								createdFunc(asd);
+								createdFunc(inserted->second);
 							}
 						}
 						else //Is existing state
 						{
-							
 							ActorStateData& actorState = actorStates[actorId];
-							std::vector<uint32_t> updatedProperties;
-							//updatedProperties.reserve(100);
+							updatedProperties.clear();
 							//While there's data for this state to be updated
 							while (networkReader.read<bool>())
 							{
@@ -657,7 +659,7 @@ public:
 								{
 									char buff[1024];
 									snprintf(buff, sizeof(buff), "Calling parser for %s (%i, %i, %s)", replayFile->objects[propertyIndex].c_str(), propertyIndex, actorId, actorState.nameId >= namesSize ? "unknown" : replayFile->names[actorState.nameId].c_str());
-									parseLog.push_back(std::string(buff));
+									parseLog.emplace_back(buff);
 								}
 
 								 {
@@ -896,7 +898,7 @@ public:
 	const std::shared_ptr<ClassNet>& ReplayFile::GetClassnetByNameWithLookup(const std::string & name) const
 	{
 		static std::shared_ptr<ClassNet> notfound = std::shared_ptr<ClassNet>(nullptr);
-		const std::map<std::string, std::string> classnetNamesLookups = {
+		static const std::map<std::string, std::string> classnetNamesLookups = {
 			{"CrowdActor_TA", "TAGame.CrowdActor_TA"},
 			{"VehiclePickup_Boost_TA", "TAGame.VehiclePickup_Boost_TA"},
 			{"CrowdManager_TA", "TAGame.CrowdManager_TA"},

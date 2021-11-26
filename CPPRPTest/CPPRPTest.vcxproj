@@ -164,6 +164,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>_MBCS;%(PreprocessorDefinitions);USESIMD</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -193,6 +194,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bench.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CPPRP\CPPRP.vcxproj">
+      <Project>{19774f95-050f-4f93-938d-edc073e355e2}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

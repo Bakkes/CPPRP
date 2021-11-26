@@ -37,12 +37,13 @@ namespace CPPRP
 		uint32_t actorId{0};
 		uint32_t nameId{ 0 };
 		uint32_t classNameId{ 0 };
+		uint32_t typeId{ 0 }; // Used for checking archetypes
 	};
 
 
 
-	typedef std::function<void(const Frame, const std::unordered_map<int, ActorStateData>&)> tickable;
-	typedef std::function<void(const Frame)> onNewFrame;
+	typedef std::function<void(const Frame&, const std::unordered_map<decltype(ActorStateData::actorId), ActorStateData>&)> tickable;
+	typedef std::function<void(const Frame&)> onNewFrame;
 	typedef std::function<void(const ActorStateData&)> actorCreated;
 	typedef std::function<void(const ActorStateData&, const std::vector<uint32_t>&)> actorUpdated;
 	typedef std::function<void(const ActorStateData&)> actorDeleted;
@@ -58,7 +59,7 @@ namespace CPPRP
 		std::vector<char> data;
 		std::filesystem::path path;
 		std::vector<Frame> frames;
-		std::unordered_map<int, ActorStateData> actorStates;
+		std::unordered_map<decltype(ActorStateData::actorId), ActorStateData> actorStates;
 		std::shared_ptr<ReplayFileData> replayFile;
 		FileHeader header;
 		std::vector<parsePropertyFunc> parseFunctions;
@@ -115,11 +116,18 @@ namespace CPPRP
 	template<typename T>
 	inline const T ReplayFile::GetProperty(const std::string& key) const
 	{
-		if (replayFile->properties.find(key) == replayFile->properties.end())
+		if (auto it = replayFile->properties.find(key); it != replayFile->properties.end())
 		{
-			throw PropertyDoesNotExistException(key);
+			auto& value = it->second->value;
+			return std::get<T>(value);
+			// could throw a custom "bad type exception" after checking or just use the std::bad_variant_access std::get throws 
+			//if (std::holds_alternative<T>(value))
+			//{
+			//	
+			//}
 		}
-		return std::any_cast<T>(replayFile->properties.at(key)->value);
+		throw PropertyDoesNotExistException(key);
+
 	}
 	template<typename T>
 	inline const std::shared_ptr<T> ReplayFile::GetActiveActor(const ActiveActor& key) const

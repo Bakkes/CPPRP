@@ -24,8 +24,8 @@
 
 int main(int argc, char *argv[])
 {
-	if constexpr (false) {
-		auto replayFile = std::make_shared<CPPRP::ReplayFile>("J:/74B3720B43DEF8267DD3EB932BED44B5.replay");
+	if constexpr (true) {
+		auto replayFile = std::make_shared<CPPRP::ReplayFile>(R"(C:\Users\m4rti\Documents\My Games\Rocket League\TAGame\Demos\48238C814A7BF02F8A219BB9C77C2F6E.replay)");
 		replayFile->Load();
 		replayFile->DeserializeHeader();
 		for (auto it : replayFile->GetProperty<std::vector<std::unordered_map<std::string, std::shared_ptr<CPPRP::Property>>>>("PlayerStats"))
@@ -35,20 +35,48 @@ int main(int argc, char *argv[])
 				printf("%s\n", it2.first.c_str());
 			}
 		}
-		std::map<uint32_t, std::unordered_map<uint32_t, CPPRP::Vector3>> locations;
-		/*replayFile->tickables.push_back([&](const CPPRP::Frame frame, const std::unordered_map<int, CPPRP::ActorStateData>& actorStats)
+		std::map<uint32_t, std::unordered_map<uint32_t, uint32_t>> scores;
+		struct TestData
+		{
+			CPPRP::OnlineID id;
+			uint32_t match_Score;
+		};
+		std::map<uint32_t, CPPRP::TAGame::PRI_TA> pris;
+		replayFile->updatedCallbacks.push_back([&](const CPPRP::ActorStateData& asd, const std::vector<uint32_t>& props)
+			{
+				if (auto pri = std::dynamic_pointer_cast<CPPRP::TAGame::PRI_TA>(asd.actorObject))
+				{
+					pris[asd.actorId] = *pri;
+				}
+			});
+		replayFile->tickables.push_back([&](const CPPRP::Frame frame, const std::unordered_map<uint32_t, CPPRP::ActorStateData>& actorStats)
 		{
 			for (auto& actor : actorStats)
 			{
-				std::shared_ptr<CPPRP::TAGame::Car_TA> car = std::dynamic_pointer_cast<CPPRP::TAGame::Car_TA>(actor.second.actorObject);
-				if (car)
+				auto pri = std::dynamic_pointer_cast<CPPRP::TAGame::PRI_TA>(actor.second.actorObject);
+				if (pri)
 				{
-					locations[frame.frameNumber][actor.first] = car->ReplicatedRBState.position;
+					scores[frame.frameNumber][actor.first] = pri->MatchScore;
 				}
 			}
-		});*/
+		});
 		replayFile->Parse();
+		auto replay_name = replayFile->GetProperty<std::string>("ReplayName");
+		auto replay_date = replayFile->GetProperty<std::string>("Date");
+		auto replay_match_type = replayFile->GetProperty<std::string>("MatchType");
+		auto replay_id = replayFile->GetProperty<std::string>("Id");
+		auto replay_team_size = replayFile->GetProperty<int>("TeamSize");
+		auto replay_map_name = replayFile->GetProperty<std::string>("MapName");
+		for(auto& [id, pri]: pris)
+		{
+			if (pri.Team.active)
+			{
+				const auto team_object = replayFile->actorStates[pri.Team.actor_id];
+				const auto team_archetype = replayFile->replayFile->names[team_object.typeId];
+			}
+		}
 		int fdfsd = 5;
+		return 0;
 	}
 	//printf("hi");
 	std::queue<std::filesystem::path> replayFilesToLoad;
@@ -274,7 +302,7 @@ int main(int argc, char *argv[])
 
 		std::cout << "Elapsed time in microseconds : "
 			<< std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
-			<< " �s" << std::endl;
+			<< " µs" << std::endl;
 
 		std::cout << "Elapsed time in milliseconds : "
 			<< std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
@@ -340,6 +368,6 @@ int main(int argc, char *argv[])
 		printf("Success: %i, fail: %i (%.2f%%) corrupt: %i Average parse time %.5f ms (totaltime/successfulparses)\n", (success.load()), fail.load(), ((double)success.load() / (double)((success.load()) + fail.load())) * 100, corrupt.load(), (elapsed / (double)success.load()));*/
 	}
 	
-	//system("pause");
+	system("pause");
 	return 0;
 }
