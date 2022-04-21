@@ -18,7 +18,7 @@ namespace CPPRP
 		{{"TAGame.CarComponent_FlipCar_TA"}, {"Archetypes.CarComponents.CarComponent_FlipCar"}},
 		{{"TAGame.CarComponent_Jump_TA"}, {"Archetypes.CarComponents.CarComponent_Jump"}},
 		{{"TAGame.Team_Soccar_TA"}, {"Archetypes.Teams.Team0", "Archetypes.Teams.Team1"}},
-		{{"TAGame.PRI_TA"}, {"TAGame.Default__PRI_TA"}},
+		{{"TAGame.PRI_TA"}, {"TAGame.Default__PRI_TA", "TAGame.Default__PRI_Breakout_TA"}},
 		{{"TAGame.GameEvent_TrainingEditor_TA"}, {"Archetypes.GameEvent.GameEvent_TrainingEditor"}},
 		{{"TAGame.GameEvent_Tutorial_TA"}, {"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Aerial", "GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Goalie", "GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Striker_TA", "GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Striker"}},
 		//{{"TAGame.GameEvent_Tutorial_Goalie_TA"}, {"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Goalie"}},
