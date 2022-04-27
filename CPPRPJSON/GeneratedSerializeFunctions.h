@@ -589,6 +589,18 @@ inline const void Serialize(Writer& writer, const ReplicatedTitle& item)
 
 
 template<typename Writer>
+inline const void Serialize(Writer& writer, const ImpulseData& item)
+{
+	writer.StartObject();
+	writer.Key("CompressedRotation");
+	Serialize(writer, item.CompressedRotation);
+	writer.Key("ImpulseSpeed");
+	Serialize(writer, item.ImpulseSpeed);
+	writer.EndObject();
+}
+
+
+template<typename Writer>
 inline const void Serialize(Writer& writer, const HistoryKey& item)
 {
 	writer.StartObject();

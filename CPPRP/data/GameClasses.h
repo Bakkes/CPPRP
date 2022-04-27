@@ -71,7 +71,7 @@ namespace CPPRP
 			int RemainingMinute;
 			int GoalScore;
 			int TimeLimit;
-			ActiveActor winner;
+			ActiveActor Winner;
 		};
 
 		struct Pawn : public Actor
@@ -183,6 +183,7 @@ namespace CPPRP
 			std::string MatchGUID;
 			int ReplicatedGameMutatorIndex;
 			bool bGameStarted;
+			bool bGameEnded;
 			uint32_t ReplicatedGamePlaylist;
 			uint64_t GameServerID;
 			struct Reservation Reservations; //is actually array of size 0x8, first 3 bits read is index of array i guess
@@ -266,6 +267,16 @@ namespace CPPRP
 			//PlayerReplicatedEventInfo_TA               PREI
 		};
 
+		struct PRI_KnockOut_TA : public PRI_TA
+		{
+			int Knockouts;
+			int KnockoutDeaths;
+			int DamageCaused;
+			int Hits;
+			int Grabs;
+			int Blocks;
+			bool bIsActiveMVP;
+		};
 
 		struct RBActor_TA : public ProjectX::Pawn_X
 		{
@@ -303,6 +314,12 @@ namespace CPPRP
 			struct Vector3I DoubleJumpImpulse;
 		};
 
+		struct CarComponent_DoubleJump_KO_TA : public CarComponent_DoubleJump_TA
+		{
+
+		};
+		
+
 
 		struct CarComponent_Boost_TA : public CarComponent_AirActivate_TA
 		{
@@ -321,17 +338,32 @@ namespace CPPRP
 
 		};
 
+		struct CarComponent_Boost_KO_TA : public CarComponent_Boost_TA
+		{
+
+		};
+
 		struct CarComponent_Dodge_TA : public CarComponent_AirActivate_TA
 		{
 			struct Vector3I DodgeTorque;
 			struct Vector3I DodgeImpulse;
 		};
 
+		struct CarComponent_Dodge_KO_TA : public CarComponent_Dodge_TA
+		{
+			int32_t DodgeRotationCompressed;
+		};
 
 		struct CarComponent_FlipCar_TA : public CarComponent_TA
 		{
 			bool bFlipRight;
 			float FlipCarTime;
+		};
+
+		struct CarComponent_Torque_TA : public CarComponent_TA
+		{
+			float TorqueScale;
+			int32_t ReplicatedTorqueInput;
 		};
 
 		struct Ball_TA : public RBActor_TA
@@ -513,6 +545,14 @@ namespace CPPRP
 
 		};
 
+		struct Car_KnockOut_TA : public Car_TA
+		{
+			uint32_t ReplicatedStateName;
+			unsigned char ReplicatedStateChanged;
+			ImpulseData ReplicatedImpulse;
+			ActiveActor UsedAttackComponent;
+		};
+
 		struct CameraSettingsActor_TA : public Engine::ReplicationInfo
 		{
 			struct ActiveActor PRI;
@@ -556,6 +596,11 @@ namespace CPPRP
 		struct VehiclePickup_Boost_TA : public VehiclePickup_TA
 		{
 
+		};
+
+		struct VehiclePickup_Item_TA : public VehiclePickup_TA
+		{
+			ActiveActor ReplicatedFXActorArchetype;
 		};
 
 		struct Ball_Haunted_TA : public Ball_TA
@@ -616,6 +661,11 @@ namespace CPPRP
 			bool bMatchEnded;
 			unsigned char ReplicatedServerPerformanceState;
 			uint32_t MaxScore;
+		};
+
+		struct GameEvent_KnockOut_TA : public GameEvent_Soccar_TA
+		{
+			int PlayerLives;
 		};
 
 		struct GameEvent_Breakout_TA : public GameEvent_Soccar_TA
@@ -706,6 +756,18 @@ namespace CPPRP
 		{
 			float Pitch;
 			uint8_t FireCount;
+		};
+
+		struct Stunlock_TA : public Engine::Actor 
+		{
+			ActiveActor Car;
+			float MaxStunTime;
+			float StunTimeRemaining;
+		};
+
+		struct PlayerStart_Platform_TA : public Engine::Actor
+		{
+			bool bActive;
 		};
 
 	};

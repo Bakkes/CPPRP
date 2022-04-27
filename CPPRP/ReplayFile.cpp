@@ -410,10 +410,10 @@ public:
 		const std::vector<std::string> position_names = {
 			"TAGame.CrowdActor_TA", "TAGame.VehiclePickup_Boost_TA", "TAGame.InMapScoreboard_TA",
 			"TAGame.BreakOutActor_Platform_TA", "Engine.WorldInfo", "TAGame.HauntedBallTrapTrigger_TA",
-			"Engine.KActor", "TAGame.CrowdManager_TA"
+			"Engine.KActor", "TAGame.CrowdManager_TA", "TAGame.PlayerStart_Platform_TA"
 		};
 		const std::vector<std::string> rotation_names = {
-			"TAGame.Ball_TA", "TAGame.Car_TA", "TAGame.Car_Season_TA",
+			"TAGame.Ball_TA", "TAGame.Car_TA", "TAGame.Car_KnockOut_TA", "TAGame.Car_Season_TA",
 			"TAGame.Ball_Breakout_TA", "TAGame.Ball_Haunted_TA", "TAGame.Ball_God_TA"
 		};
 		//printf("Preprocess\n");

@@ -20,14 +20,19 @@ namespace CPPRP {
 		, {"ProjectX.Pawn_X","Engine.Pawn"}
 		, {"ProjectX.PRI_X","Engine.PlayerReplicationInfo"}
 		, {"TAGame.PRI_TA","ProjectX.PRI_X"}
+		, {"TAGame.PRI_KnockOut_TA","TAGame.PRI_TA"}
 		, {"TAGame.RBActor_TA","ProjectX.Pawn_X"}
 		, {"TAGame.CarComponent_TA","Engine.ReplicationInfo"}
 		, {"TAGame.CarComponent_AirActivate_TA","TAGame.CarComponent_TA"}
 		, {"TAGame.CarComponent_Jump_TA","TAGame.CarComponent_TA"}
 		, {"TAGame.CarComponent_DoubleJump_TA","TAGame.CarComponent_AirActivate_TA"}
+		, {"TAGame.CarComponent_DoubleJump_KO_TA","TAGame.CarComponent_DoubleJump_TA"}
 		, {"TAGame.CarComponent_Boost_TA","TAGame.CarComponent_AirActivate_TA"}
+		, {"TAGame.CarComponent_Boost_KO_TA","TAGame.CarComponent_Boost_TA"}
 		, {"TAGame.CarComponent_Dodge_TA","TAGame.CarComponent_AirActivate_TA"}
+		, {"TAGame.CarComponent_Dodge_KO_TA","TAGame.CarComponent_Dodge_TA"}
 		, {"TAGame.CarComponent_FlipCar_TA","TAGame.CarComponent_TA"}
+		, {"TAGame.CarComponent_Torque_TA","TAGame.CarComponent_TA"}
 		, {"TAGame.Ball_TA","TAGame.RBActor_TA"}
 		, {"TAGame.Team_TA","Engine.TeamInfo"}
 		, {"TAGame.Team_Soccar_TA","TAGame.Team_TA"}
@@ -55,16 +60,19 @@ namespace CPPRP {
 		, {"TAGame.Vehicle_TA","TAGame.RBActor_TA"}
 		, {"TAGame.Car_TA","TAGame.Vehicle_TA"}
 		, {"TAGame.Car_Season_TA","TAGame.Car_TA"}
+		, {"TAGame.Car_KnockOut_TA","TAGame.Car_TA"}
 		, {"TAGame.CameraSettingsActor_TA","Engine.ReplicationInfo"}
 		, {"TAGame.GRI_TA","ProjectX.GRI_X"}
 		, {"TAGame.Ball_Breakout_TA","TAGame.Ball_TA"}
 		, {"TAGame.Ball_God_TA","TAGame.Ball_TA"}
 		, {"TAGame.VehiclePickup_TA","Engine.ReplicationInfo"}
 		, {"TAGame.VehiclePickup_Boost_TA","TAGame.VehiclePickup_TA"}
+		, {"TAGame.VehiclePickup_Item_TA","TAGame.VehiclePickup_TA"}
 		, {"TAGame.Ball_Haunted_TA","TAGame.Ball_TA"}
 		, {"TAGame.GameEvent_TA","Engine.ReplicationInfo"}
 		, {"TAGame.GameEvent_Team_TA","TAGame.GameEvent_TA"}
 		, {"TAGame.GameEvent_Soccar_TA","TAGame.GameEvent_Team_TA"}
+		, {"TAGame.GameEvent_KnockOut_TA","TAGame.GameEvent_Soccar_TA"}
 		, {"TAGame.GameEvent_Breakout_TA","TAGame.GameEvent_Soccar_TA"}
 		, {"TAGame.GameEvent_Football_TA","TAGame.GameEvent_Soccar_TA"}
 		, {"TAGame.GameEvent_GodBall_TA","TAGame.GameEvent_Soccar_TA"}
@@ -82,6 +90,8 @@ namespace CPPRP {
 		, {"TAGame.RumblePickups_TA","Engine.Actor"}
 		, {"TAGame.PickupTimer_TA","TAGame.CarComponent_TA"}
 		, {"TAGame.Cannon_TA","Engine.Actor"}
+		, {"TAGame.Stunlock_TA","Engine.Actor"}
+		, {"TAGame.PlayerStart_Platform_TA","Engine.Actor"}
 	};
 };
 

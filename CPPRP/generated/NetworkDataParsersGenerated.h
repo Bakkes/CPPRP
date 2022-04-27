@@ -306,6 +306,16 @@ inline const ReplicatedTitle Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
+inline const ImpulseData Consume(CPPBitReader<BitReaderType>& reader) 
+{
+	ImpulseData item;
+	item.CompressedRotation = reader.read<int>();
+	item.ImpulseSpeed = reader.read<float>();
+	return item;
+}
+
+
+template<>
 inline const HistoryKey Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	HistoryKey item;

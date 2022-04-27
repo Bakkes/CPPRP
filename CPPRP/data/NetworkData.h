@@ -379,6 +379,12 @@ namespace CPPRP
 		bool unknown8;
 	};
 
+	struct ImpulseData
+	{
+		int CompressedRotation;
+		float ImpulseSpeed;
+	};
+
 	struct HistoryKey
 	{
 		__ParserAttribute__(NumBits, 14)

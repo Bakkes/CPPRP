@@ -31,7 +31,7 @@ namespace CPPRP
 		{{"TAGame.GameEvent_Breakout_TA"}, {"Archetypes.GameEvent.GameEvent_Breakout"}},
 		{{"TAGame.GameEvent_GodBall_TA"}, {"gameinfo_godball.GameInfo.gameinfo_godball:Archetype", "GameInfo_GodBall.GameInfo.GameInfo_GodBall:Archetype"}},
 		{{"TAGame.GameEvent_Football_TA"}, {"GameInfo_FootBall.GameInfo.GameInfo_FootBall:Archetype"}},
-		{{"TAGame.GRI_TA"}, {"GameInfo_TrainingEditor.GameInfo.GameInfo_TrainingEditor:GameReplicationInfoArchetype", "GameInfo_Tutorial.GameInfo.GameInfo_Tutorial:GameReplicationInfoArchetype", "GameInfo_Basketball.GameInfo.GameInfo_Basketball:GameReplicationInfoArchetype", "Gameinfo_Hockey.GameInfo.Gameinfo_Hockey:GameReplicationInfoArchetype", "GameInfo_Season.GameInfo.GameInfo_Season:GameReplicationInfoArchetype", "GameInfo_Soccar.GameInfo.GameInfo_Soccar:GameReplicationInfoArchetype", "GameInfo_Items.GameInfo.GameInfo_Items:GameReplicationInfoArchetype", "GameInfo_Breakout.GameInfo.GameInfo_Breakout:GameReplicationInfoArchetype", "gameinfo_godball.GameInfo.gameinfo_godball:GameReplicationInfoArchetype", "GameInfo_GodBall.GameInfo.GameInfo_GodBall:GameReplicationInfoArchetype", "GameInfo_FootBall.GameInfo.GameInfo_FootBall:GameReplicationInfoArchetype"}},
+		{{"TAGame.GRI_TA"}, {"GameInfo_KnockOut.KnockOut.GameInfo_KnockOut:GameReplicationInfoArchetype", "GameInfo_TrainingEditor.GameInfo.GameInfo_TrainingEditor:GameReplicationInfoArchetype", "GameInfo_Tutorial.GameInfo.GameInfo_Tutorial:GameReplicationInfoArchetype", "GameInfo_Basketball.GameInfo.GameInfo_Basketball:GameReplicationInfoArchetype", "Gameinfo_Hockey.GameInfo.Gameinfo_Hockey:GameReplicationInfoArchetype", "GameInfo_Season.GameInfo.GameInfo_Season:GameReplicationInfoArchetype", "GameInfo_Soccar.GameInfo.GameInfo_Soccar:GameReplicationInfoArchetype", "GameInfo_Items.GameInfo.GameInfo_Items:GameReplicationInfoArchetype", "GameInfo_Breakout.GameInfo.GameInfo_Breakout:GameReplicationInfoArchetype", "gameinfo_godball.GameInfo.gameinfo_godball:GameReplicationInfoArchetype", "GameInfo_GodBall.GameInfo.GameInfo_GodBall:GameReplicationInfoArchetype", "GameInfo_FootBall.GameInfo.GameInfo_FootBall:GameReplicationInfoArchetype"}},
 		{{"TAGame.CameraSettingsActor_TA"}, {"TAGame.Default__CameraSettingsActor_TA"}},
 		{{"TAGame.InMapScoreboard_TA"}, {"Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_0", "NeoTokyo_P.TheWorld:PersistentLevel.InMapScoreboard_TA_0", "NeoTokyo_P.TheWorld:PersistentLevel.InMapScoreboard_TA_1", "NeoTokyo_Standard_P.TheWorld:PersistentLevel.InMapScoreboard_TA_1", "NeoTokyo_Standard_P.TheWorld:PersistentLevel.InMapScoreboard_TA_0", "Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_1", "NeoTokyo_Toon_p.TheWorld:PersistentLevel.InMapScoreboard_TA_0", "NeoTokyo_Toon_p.TheWorld:PersistentLevel.InMapScoreboard_TA_1"}},
 		{{"TAGame.SpecialPickup_BallGravity_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_GravityWell", "Archetypes.SpecialPickups.BM.SpecialPickup_GravityWell_BM"}},
@@ -58,6 +58,17 @@ namespace CPPRP
 		{{"ProjectX.NetModeReplicator_X"}, {"ProjectX.Default__NetModeReplicator_X"}},
 		{{"TAGame.MaxTimeWarningData_TA" }, {"TAGame.Default__MaxTimeWarningData_TA"}}, //TAGame.Default__MaxTimeWarningData_TA
 		{{"TAGame.RumblePickups_TA" }, {"TAGame.Default__RumblePickups_TA"}},
-		{{"TAGame.PickupTimer_TA"}, {"TAGame.Default__PickupTimer_TA"}}
+		{{"TAGame.PickupTimer_TA"}, {"TAGame.Default__PickupTimer_TA"}},
+		{{"TAGame.PlayerStart_Platform_TA"}, {"KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_7","KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_6","KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_5","KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_4","KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_3","KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_2","KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_1","KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_0"}},
+		{{"TAGame.PRI_KnockOut_TA"}, {"TAGame.Default__PRI_KnockOut_TA"}},
+		{{"TAGame.GameEvent_KnockOut_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout"}},
+		{{"TAGame.Car_KnockOut_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype"}},
+		{{"TAGame.CarComponent_DoubleJump_KO_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype.Jump"}},
+		{{"TAGame.CarComponent_Torque_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype.Torque"}},
+		{{"TAGame.CarComponent_FlipCar_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype.Flip"}},
+		{{"TAGame.CarComponent_Dodge_KO_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype.Dodge"}},
+		{{"TAGame.CarComponent_DoubleJump_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype.DoubleJump"}},
+		{{"TAGame.CarComponent_Boost_KO_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype.Boost"}},
+		{{"TAGame.Stunlock_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype.StunlockArchetype"}}
 	};
 }
