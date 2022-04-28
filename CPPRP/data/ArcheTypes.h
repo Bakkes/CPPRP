@@ -59,7 +59,6 @@ namespace CPPRP
 		{{"TAGame.MaxTimeWarningData_TA" }, {"TAGame.Default__MaxTimeWarningData_TA"}}, //TAGame.Default__MaxTimeWarningData_TA
 		{{"TAGame.RumblePickups_TA" }, {"TAGame.Default__RumblePickups_TA"}},
 		{{"TAGame.PickupTimer_TA"}, {"TAGame.Default__PickupTimer_TA"}},
-		{{"TAGame.PlayerStart_Platform_TA"}, {"KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_7","KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_6","KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_5","KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_4","KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_3","KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_2","KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_1","KO_Calavera_P.TheWorld:PersistentLevel.PlayerStart_Platform_TA_0"}},
 		{{"TAGame.PRI_KnockOut_TA"}, {"TAGame.Default__PRI_KnockOut_TA"}},
 		{{"TAGame.GameEvent_KnockOut_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout"}},
 		{{"TAGame.Car_KnockOut_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype"}},

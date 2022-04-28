@@ -905,7 +905,8 @@ public:
 			{"BreakOutActor_Platform_TA", "TAGame.BreakOutActor_Platform_TA"},
 			{"WorldInfo", "Engine.WorldInfo"},
 			{"Archetypes.Teams.TeamWhite", "TAGame.Team_Soccar_TA"},
-			{"PersistentLevel.KActor", "Engine.KActor"}
+			{"PersistentLevel.KActor", "Engine.KActor"},
+			{"PlayerStart_Platform_TA", "TAGame.PlayerStart_Platform_TA"}
 		};
 		for (const auto& kv : classnetNamesLookups)
 		{
