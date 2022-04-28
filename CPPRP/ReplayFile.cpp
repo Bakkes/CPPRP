@@ -906,7 +906,8 @@ public:
 			{"WorldInfo", "Engine.WorldInfo"},
 			{"Archetypes.Teams.TeamWhite", "TAGame.Team_Soccar_TA"},
 			{"PersistentLevel.KActor", "Engine.KActor"},
-			{"PlayerStart_Platform_TA", "TAGame.PlayerStart_Platform_TA"}
+			{"PlayerStart_Platform_TA", "TAGame.PlayerStart_Platform_TA"},
+			{"InMapScoreboard_TA", "TAGame.InMapScoreboard_TA"}
 		};
 		for (const auto& kv : classnetNamesLookups)
 		{
