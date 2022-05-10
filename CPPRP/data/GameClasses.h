@@ -264,6 +264,7 @@ namespace CPPRP
 
 			//Unused
 			ActiveActor ReplacingBotPRI;
+			std::string CurrentVoiceRoom;
 			//PlayerReplicatedEventInfo_TA               PREI
 		};
 
