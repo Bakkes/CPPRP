@@ -168,6 +168,7 @@ GAMEFIELD(TAGame, PRI_TA, SecondaryTitle, struct ReplicatedTitle);
 GAMEFIELD(TAGame, PRI_TA, PlayerHistoryKey, struct HistoryKey);
 GAMEFIELD(TAGame, PRI_TA, bIsDistracted, bool);
 GAMEFIELD(TAGame, PRI_TA, ReplacingBotPRI, ActiveActor);
+GAMEFIELD(TAGame, PRI_TA, CurrentVoiceRoom, std::string);
 GAMECLASS(TAGame, PRI_KnockOut_TA);
 GAMEFIELD(TAGame, PRI_KnockOut_TA, Knockouts, int);
 GAMEFIELD(TAGame, PRI_KnockOut_TA, KnockoutDeaths, int);
