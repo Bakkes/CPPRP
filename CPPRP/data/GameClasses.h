@@ -181,6 +181,9 @@ namespace CPPRP
 		struct GRI_X : public Engine::GameReplicationInfo
 		{
 			std::string MatchGUID;
+			std::string MatchGuid; //TODO? Logic to merge these two? (case changed in rl 2.21)
+
+			std::string ReplicatedServerRegion;
 			int ReplicatedGameMutatorIndex;
 			bool bGameStarted;
 			bool bGameEnded;

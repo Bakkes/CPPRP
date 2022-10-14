@@ -109,6 +109,8 @@ GAMEFIELD(Engine, KActor, RBState, RigidBodyState);
 GAMEFIELD(Engine, KActor, ReplicatedDrawScale3D, Vector3);
 GAMECLASS(ProjectX, GRI_X);
 GAMEFIELD(ProjectX, GRI_X, MatchGUID, std::string);
+GAMEFIELD(ProjectX, GRI_X, MatchGuid, std::string);
+GAMEFIELD(ProjectX, GRI_X, ReplicatedServerRegion, std::string);
 GAMEFIELD(ProjectX, GRI_X, ReplicatedGameMutatorIndex, int);
 GAMEFIELD(ProjectX, GRI_X, bGameStarted, bool);
 GAMEFIELD(ProjectX, GRI_X, bGameEnded, bool);
