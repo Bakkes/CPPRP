@@ -180,8 +180,10 @@ namespace CPPRP
 	{
 		struct GRI_X : public Engine::GameReplicationInfo
 		{
+			std::string MatchGuid;
 			std::string MatchGUID;
 			int ReplicatedGameMutatorIndex;
+			std::string ReplicatedServerRegion;
 			bool bGameStarted;
 			bool bGameEnded;
 			uint32_t ReplicatedGamePlaylist;
