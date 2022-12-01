@@ -303,5 +303,24 @@ namespace CPPRP
 
 		return item;
 	}
+
+	template<>
+	inline const GameServer Consume(CPPBitReader<BitReaderType>& reader)
+	{
+		GameServer item = GameServer {0, ""};
+
+		//Update >= "221120.42953.406184" use a string for buildID, lower uses uint64_t
+		if (reader.buildVersion < std::string("221120.42953.406184"))
+		{
+			item.GameServerID = reader.read<uint64_t>();
+		}
+		else
+		{
+			item.GameServerIDString = reader.read<std::string>();
+		}
+
+		return item;
+	}
+
 #include "./generated/NetworkDataParsersGenerated.h"
 }

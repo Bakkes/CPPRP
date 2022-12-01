@@ -188,7 +188,7 @@ namespace CPPRP
 			bool bGameStarted;
 			bool bGameEnded;
 			uint32_t ReplicatedGamePlaylist;
-			uint64_t GameServerID;
+			GameServer GameServerID;
 			struct Reservation Reservations; //is actually array of size 0x8, first 3 bits read is index of array i guess
 
 

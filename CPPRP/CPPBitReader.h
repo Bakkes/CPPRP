@@ -160,6 +160,7 @@ namespace CPPRP
 		const uint16_t engineVersion;
 		const uint8_t licenseeVersion;
 		const uint8_t netVersion;
+		std::string buildVersion;
 
 		std::vector<uint32_t> attributeIDs;
 
@@ -212,7 +213,7 @@ namespace CPPRP
 	public:
 		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_);
 		CPPBitReader(const T * data, size_t size, std::shared_ptr<ReplayFileData> owner_,
-			const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV);
+			const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV, const std::string buildV);
 		CPPBitReader(const CPPBitReader& other);
 		CPPBitReader();
 		
@@ -614,28 +615,28 @@ namespace CPPRP
 	template<typename T>
 	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFileData> owner_) 
 	: engineVersion(owner_->header.engineVersion), licenseeVersion(owner_->header.licenseeVersion), 
-	netVersion(owner_->header.netVersion), size(sizee)
+	netVersion(owner_->header.netVersion), size(sizee), buildVersion(owner_->header.buildVersion)
 	{
 		bitreader_init(&b, (uint8_t*)data, sizee);
 	}
 
 	template<typename T>
 	inline CPPBitReader<T>::CPPBitReader(const T * data, size_t sizee, std::shared_ptr<ReplayFileData> owner_, 
-		const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV) : engineVersion(engineV), 
-		licenseeVersion(licenseeV), netVersion(netV), size(sizee)
+		const uint32_t engineV, const uint32_t licenseeV, const uint32_t netV, const std::string buildV) : engineVersion(engineV), 
+		licenseeVersion(licenseeV), netVersion(netV), size(sizee), buildVersion(buildV)
 	{
 		bitreader_init(&b, (uint8_t*)data, sizee);
 	}
 
 	template<typename T>
 	inline CPPBitReader<T>::CPPBitReader(const CPPBitReader& other) 
-	: engineVersion(other.engineVersion), licenseeVersion(other.licenseeVersion), netVersion(other.netVersion), size(other.size)
+	: engineVersion(other.engineVersion), licenseeVersion(other.licenseeVersion), netVersion(other.netVersion), size(other.size), buildVersion(other.buildVersion)
 	{
 		bitreader_init(&b, other.b.data, other.b.len);
 	}
 
 	template<typename T>
-	inline CPPBitReader<T>::CPPBitReader() : engineVersion(0), licenseeVersion(0), netVersion(0)
+	inline CPPBitReader<T>::CPPBitReader() : engineVersion(0), licenseeVersion(0), netVersion(0), buildVersion("")
 	{
 
 	}

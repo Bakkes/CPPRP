@@ -110,8 +110,22 @@ namespace CPPRP
 		const T GetProperty(const std::string& key) const;
 
 		template<typename T>
+		const T GetPropertyOrDefault(const std::string& key, const T defaultt) const;
+
+		template<typename T>
 		const std::shared_ptr<T> GetActiveActor(const ActiveActor& key) const;
 	};
+
+	template<typename T>
+	inline const T ReplayFile::GetPropertyOrDefault(const std::string& key, const T defaultt) const
+	{
+		if (auto it = replayFile->properties.find(key); it != replayFile->properties.end())
+		{
+			auto& value = it->second->value;
+			return std::get<T>(value);
+		}
+		return defaultt;
+	}
 
 	template<typename T>
 	inline const T ReplayFile::GetProperty(const std::string& key) const

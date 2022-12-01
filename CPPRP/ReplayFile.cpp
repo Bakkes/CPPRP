@@ -144,6 +144,13 @@ namespace CPPRP
 			replayFile->properties[baseProperty->property_name] = baseProperty;
 		}
 
+		//TODO: clean this up
+		const std::string buildVersion = GetPropertyOrDefault<std::string>("BuildVersion", "");
+		replayFile->header.buildVersion = buildVersion;
+		this->header.buildVersion = buildVersion;
+		fullReplayBitReader->buildVersion = buildVersion;
+
+
 		replayFile->body_size = fullReplayBitReader->read<uint32_t>();
 		replayFile->crc2 = fullReplayBitReader->read<uint32_t>();
 
@@ -229,7 +236,7 @@ namespace CPPRP
 			return false;
 		}
 		CPPBitReader<BitReaderType> bitReader((const BitReaderType*)data.data(), 
-			dataSizeBits, replayFile, 0, 0, 0);
+			dataSizeBits, replayFile, 0, 0, 0, "");
 		const uint32_t headerSize = bitReader.read<uint32_t>();
 		const uint32_t headerReadCrc = bitReader.read<uint32_t>();
 

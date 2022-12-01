@@ -17,6 +17,18 @@ inline const void Serialize(Writer& writer, const ReplicatedRBState& item)
 
 
 template<typename Writer>
+inline const void Serialize(Writer& writer, const GameServer& item)
+{
+	writer.StartObject();
+	writer.Key("GameServerID");
+	Serialize(writer, item.GameServerID);
+	writer.Key("GameServerIDString");
+	Serialize(writer, item.GameServerIDString);
+	writer.EndObject();
+}
+
+
+template<typename Writer>
 inline const void Serialize(Writer& writer, const LogoData& item)
 {
 	writer.StartObject();

@@ -115,7 +115,7 @@ GAMEFIELD(ProjectX, GRI_X, ReplicatedGameMutatorIndex, int);
 GAMEFIELD(ProjectX, GRI_X, bGameStarted, bool);
 GAMEFIELD(ProjectX, GRI_X, bGameEnded, bool);
 GAMEFIELD(ProjectX, GRI_X, ReplicatedGamePlaylist, uint32_t);
-GAMEFIELD(ProjectX, GRI_X, GameServerID, uint64_t);
+GAMEFIELD(ProjectX, GRI_X, GameServerID, GameServer);
 GAMEFIELD(ProjectX, GRI_X, Reservations, struct Reservation);
 GAMECLASS(ProjectX, NetModeReplicator_X);
 GAMECLASS(ProjectX, Pawn_X);

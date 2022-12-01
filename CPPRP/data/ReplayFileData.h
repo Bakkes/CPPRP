@@ -178,6 +178,7 @@ namespace CPPRP
 		uint32_t engineVersion{ 0 };
 		uint32_t licenseeVersion{ 0 };
 		uint32_t netVersion{ 0 };
+		std::string buildVersion{ "" };
 	};
 
 	struct KeyFrame

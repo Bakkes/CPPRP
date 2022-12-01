@@ -32,6 +32,13 @@ namespace CPPRP
 		bool sleeping;
 	};
 
+	__ParserAttribute__(Consume, false)
+	struct GameServer
+	{
+		uint32_t GameServerID;
+		std::string GameServerIDString; //Replays after 29-11-2022 update use a string for this, before uses the uint64_t
+	};
+
 	struct LogoData
 	{
 		bool swap_colors;
