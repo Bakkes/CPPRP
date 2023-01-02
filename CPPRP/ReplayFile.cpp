@@ -11,6 +11,7 @@
 #include <functional>
 #include "NetworkDataParsers.h"
 #include "PropertyParser.h"
+#include <format>
 
 namespace CPPRP
 {
@@ -125,7 +126,7 @@ namespace CPPRP
 			replayFile->header.netVersion = fullReplayBitReader->read<uint32_t>();
 		}
 
-		//Reconstruct cause we got version info now,  find something better for this
+		//Reconstruct because we have version info now, find something better for this
 		size_t bitPos = fullReplayBitReader->GetAbsoluteBitPosition();
 		fullReplayBitReader = std::make_shared<CPPBitReader<BitReaderType>>((const BitReaderType*)data.data(), dataSizeBits, replayFile);
 		fullReplayBitReader->skip(bitPos);
@@ -135,13 +136,15 @@ namespace CPPRP
 
 		while (true) 
 		{
-			auto baseProperty = std::make_shared<Property>();
-			const bool moreToParse = ParseProperty(baseProperty);
-			if (!moreToParse)
+			if (auto baseProperty = std::make_shared<Property>(); ParseProperty(baseProperty))
+			{
+				replayFile->properties[baseProperty->property_name] = baseProperty;
+			}
+			else
 			{
 				break;
 			}
-			replayFile->properties[baseProperty->property_name] = baseProperty;
+			
 		}
 
 		//TODO: clean this up
@@ -159,8 +162,9 @@ namespace CPPRP
 
 		const uint32_t netstreamCount = static_cast<uint32_t>(fullReplayBitReader->read<int32_t>());
 		replayFile->netstream_data = data.data() + fullReplayBitReader->GetAbsoluteBytePosition(); //We know this is always aligned, so valid
-		uint32_t test = netstreamCount * 8;
-		fullReplayBitReader->skip(test);
+		
+		const uint32_t netstreamSizeInBytes = netstreamCount * 8;
+		fullReplayBitReader->skip(netstreamSizeInBytes); //Skip netstream data for now
 		replayFile->netstream_size = netstreamCount;
 
 		if (!fullReplayBitReader->canRead())
@@ -207,7 +211,7 @@ namespace CPPRP
 			replayFile->classnets[i] = (classNet);
 
 			//Set parent class if exists
-			for (int32_t k = (int32_t)i - 1; k >= 0; --k)
+			for (int32_t k = static_cast<int32_t>(i) - 1; k >= 0; --k)
 			{
 				if (replayFile->classnets[i]->parent == replayFile->classnets[k]->id)
 				{
@@ -249,13 +253,10 @@ namespace CPPRP
 		constexpr uint32_t CRC_SEED = 0xEFCBF201;
 		if (verifyWhat & CRC_Header)
 		{
-			/*const uint32_t headerCalculatedCRC = CalculateCRC(data,
-				static_cast<size_t>(bitReader.GetAbsoluteBytePosition()), 
-				static_cast<size_t>(headerSize), CRC_SEED);*/
-			const uint32_t headerCalculatedCRC2 = CalculateCRC_SB16(*reinterpret_cast<std::vector<uint8_t>*>(&data),
+			const uint32_t headerCalculatedCRC2 = CalculateCRC_SB16(*reinterpret_cast<std::vector<uint8_t>*>(data.data()),
 				static_cast<size_t>(bitReader.GetAbsoluteBytePosition()),
 				static_cast<size_t>(headerSize), CRC_SEED);
-			//std::cout << "headerCalculatedCRC==headerCalculatedCRC2" << (headerCalculatedCRC == headerCalculatedCRC2 ? "true" : "false") << "\n";
+
 			const bool result = headerCalculatedCRC2 == headerReadCrc;
 			//If only verify header, or if already failed here
 			if (!(verifyWhat & CRC_Body) || !result)
@@ -279,65 +280,17 @@ namespace CPPRP
 			return false;
 		}
 
-		/*const uint32_t bodyCalculatedCRC = CalculateCRC(data, 
-			static_cast<size_t>(bitReader.GetAbsoluteBytePosition()), 
-			static_cast<size_t>(bodySize), CRC_SEED);*/
-
-		//cast is ugly but works, fix later
-		const uint32_t bodyCalculatedCRC2 = CalculateCRC_SB16(*reinterpret_cast<std::vector<uint8_t>*>(&data),
+		//cast is ugly but works
+		const uint32_t bodyCalculatedCRC2 = CalculateCRC_SB16(*reinterpret_cast<std::vector<uint8_t>*>(data.data()),
 			static_cast<size_t>(bitReader.GetAbsoluteBytePosition()),
 			static_cast<size_t>(bodySize), CRC_SEED);
-		//std::cout << "headerCalculatedCRC==headerCalculatedCRC2" << (bodyCalculatedCRC == bodyCalculatedCRC2 ? "true" : "false") << "\n";
 
 		return bodyReadCrc == bodyCalculatedCRC2;
 	}
 
-	void ReplayFile::PreprocessTables()
-	{
-		const size_t size = replayFile->objects.size();
-		for(uint32_t i = 0; i < size; ++i)
-		{
-			objectToId[replayFile->objects.at(i)] = i;
-			//printf("[%i] %s", i, replayFile->objects.at(i).c_str());
-		}
-	}
-	
-	class Timer
-{
-private:
-	std::chrono::time_point<std::chrono::steady_clock> start;
-	std::chrono::time_point<std::chrono::steady_clock> end;
-	bool ended = false;
-	std::string name;
-public:
-	Timer(std::string timerName) : name(timerName)
-	{
-		start = std::chrono::steady_clock::now();
-	}
-
-	void Stop()
-	{
-		end = std::chrono::steady_clock::now();
-		ended = true;
-	}
-
-	~Timer()
-	{
-		if (!ended) Stop();
-		std::cout << name << " duration in microseconds : "
-			<< std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
-			<< "\n";
-
-		/*std::cout << "Elapsed time in milliseconds : "
-			<< std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
-			<< " ms\n";*/
-	}
-};
-
 	void ReplayFile::FixParents()
 	{
-		//Timer t("Preprocessing");
-		for (uint32_t i = 0; i < replayFile->classnets.size(); ++i)
+		for (size_t i = 0; i < replayFile->classnets.size(); ++i)
 		{
 			const uint32_t index = replayFile->classnets.at(i)->index;
 			const std::string objectName = replayFile->objects.at(index);
@@ -358,15 +311,13 @@ public:
 
 		for (auto& archetypeMapping : archetypeMap)
 		{
-			const auto found = classnetMap.find(archetypeMapping.first);
-			if (found == classnetMap.end())
+			if (const auto found = classnetMap.find(archetypeMapping.first); found != classnetMap.end())
 			{
-				continue;
-			}
-			std::shared_ptr<ClassNet>& headClassnet = found->second;
-			for (auto& archetype : archetypeMapping.second)
-			{
-				classnetMap[archetype] = headClassnet;
+				std::shared_ptr<ClassNet>& headClassnet = found->second;
+				for (auto& archetype : archetypeMapping.second)
+				{
+					classnetMap[archetype] = headClassnet;
+				}
 			}
 		}
 
@@ -375,7 +326,8 @@ public:
 		{
 			std::shared_ptr<ClassNet> childClass = GetClassnetByNameWithLookup(child_name);
 			std::shared_ptr<ClassNet> parentClass = GetClassnetByNameWithLookup(parent_name);
-			if (parentClass != nullptr && childClass != nullptr && (childClass->parent_class == nullptr || (childClass->parent_class->index != parentClass->index)))
+			if (parentClass != nullptr && childClass != nullptr 
+				&& (childClass->parent_class == nullptr || (childClass->parent_class->index != parentClass->index)))
 			{
 				childClass->parent_class = parentClass;
 			}
@@ -400,20 +352,17 @@ public:
 		for(size_t i = 0; i < objectsSize; i++)
 		{
 			const std::string& name = replayFile->objects.at(i);
-			auto found = parsePropertyFuncs.find(name);
-			if(found != parsePropertyFuncs.end())
+			if(auto found = parsePropertyFuncs.find(name); found != parsePropertyFuncs.end())
 			{
 				parseFunctions[i] = found->second;
 			}
 
-			auto found2 = createObjectFuncs.find(name);
-			if(found2 != createObjectFuncs.end())
+			if(auto found = createObjectFuncs.find(name); found != createObjectFuncs.end())
 			{
-				createFunctions[i] = found2->second;
+				createFunctions[i] = found->second;
 			}
 		}
 
-		//printf("Ab");
 		const std::vector<std::string> position_names = {
 			"TAGame.CrowdActor_TA", "TAGame.VehiclePickup_Boost_TA", "TAGame.InMapScoreboard_TA",
 			"TAGame.BreakOutActor_Platform_TA", "Engine.WorldInfo", "TAGame.HauntedBallTrapTrigger_TA",
@@ -423,26 +372,30 @@ public:
 			"TAGame.Ball_TA", "TAGame.Car_TA", "TAGame.Car_KnockOut_TA", "TAGame.Car_Season_TA",
 			"TAGame.Ball_Breakout_TA", "TAGame.Ball_Haunted_TA", "TAGame.Ball_God_TA"
 		};
-		//printf("Preprocess\n");
+
 		for(size_t i = 0; i < objectsSize; i++)
 		{
 			const std::string& name = replayFile->objects.at(i);
 			if(std::find(position_names.begin(), position_names.end(), name) != position_names.end())
 			{
 				positionIDs.push_back(i);
-				//printf("Position %i %s\n", i, name.c_str());
 			}
 			if(std::find(rotation_names.begin(), rotation_names.end(), name) != rotation_names.end())
 			{
 				rotationIDs.push_back(i);
-				//printf("Rotation %i %s\n", i, name.c_str());
 			}
 
 			classnetCache.push_back(GetClassnetByNameWithLookup(name));
 			if(classnetCache[i])
 				GetMaxPropertyId(classnetCache[i].get());
 		}
-//printf("Aa");
+
+		const size_t size = replayFile->objects.size();
+		for (uint32_t i = 0; i < size; ++i)
+		{
+			objectToId[replayFile->objects.at(i)] = i;
+		}
+
 		const std::vector<std::string> attributeNames = 
 		{
 			"TAGame.ProductAttribute_UserColor_TA",
@@ -451,26 +404,19 @@ public:
 			"TAGame.ProductAttribute_SpecialEdition_TA",
 			"TAGame.ProductAttribute_TitleID_TA"
 		};
-		//printf("A");
-		PreprocessTables();
+
 		for(size_t i = 0; i < attributeNames.size(); ++i)
 		{
-			//printf("B");
 			const uint32_t attributeID = objectToId[attributeNames.at(i)];
 			attributeIDs.push_back(attributeID);
-			//printf("[%i] %s", attributeID, attributeNames.at(i).c_str());
 		}
-		//attributeIDs
-
-
-
-		//printf("Done preprocessing\n");
 	}
 
 	std::string ReplayFile::GetParseLog(size_t amount)
 	{
 		std::stringstream ss;
 		ss << "Parse log: ";
+		
 		for (size_t i = amount > parseLog.size() ?  0 : parseLog.size() - amount; i < parseLog.size(); i++)
 		{
 			ss <<"\n\t" + parseLog.at(i);
@@ -495,18 +441,11 @@ public:
 			endPos = replayFile->netstream_size * 8;
 		}
 
-		
 		CPPBitReader<BitReaderType> networkReader((BitReaderType*)(replayFile->netstream_data), static_cast<size_t>(endPos), replayFile);
-
-		//FILE* fp = fopen(("./json/" + fileName + ".json").c_str(), "wb");
 
 		try
 		{
 			int first = 0;
-			//char writeBuffer[65536 * 5];
-			//rapidjson::FileWriteStream os(fp, writeBuffer, sizeof(writeBuffer));
-
-			//rapidjson::Writer<rapidjson::FileWriteStream> writer;
 
 			networkReader.skip(startPos);
 
@@ -595,9 +534,7 @@ public:
 							}
 							#endif
 
-							//const std::string typeName = replayFile->objects.at(typeId);
-							//printf("%s:%i\n", typeName.c_str(), typeId);
-							auto classNet = classnetCache[typeId];//GetClassnetByNameWithLookup(typeName);
+							auto& classNet = classnetCache[typeId];
 
 							#ifndef PARSE_UNSAFE
 							if (classNet == nullptr)
@@ -610,15 +547,12 @@ public:
 
 
 							const uint32_t classId = classNet->index;
-							
-							//auto found = createObjectFuncs.find(className);
-
 							const auto& funcPtr = createFunctions[classId];
+
 							#ifndef PARSE_UNSAFE
 							if (funcPtr == nullptr)
 							{
 								const std::string className = replayFile->objects.at(classId);
-								std::cout << "Could not find class " << className << "\n";
 								throw GeneralParseException("Could not find class " + className , networkReader);
 								return;
 							}
@@ -627,24 +561,19 @@ public:
 							//ActorStateData asd =
 							if constexpr (IncludeParseLog)
 							{
-								const std::string typeName = replayFile->objects.at(typeId);
-								const std::string className = replayFile->objects.at(classId);
-								parseLog.push_back("New actor for " + typeName + ", classname " + className);
+								const std::string_view typeName = replayFile->objects.at(typeId);
+								const std::string_view className = replayFile->objects.at(classId);
+								parseLog.push_back(std::format("New actor for {}, classname {}", typeName, className));
 							}
-							//printf("%s\n", className.c_str());
+
 							if (HasInitialPosition(classId))
 							{
 								actorObject->Location = networkReader.read<Vector3I>();
-								//printf("has pos\n");
 							}
 							if (HasRotation(classId))
 							{
 								actorObject->Rotation = networkReader.read<Rotator>();
-								//printf("has rot\n");
 							}
-							//printf("---\n");
-							//ActorStateData asd =  { std::move(actorObject), classNet, actorId, name_id, classId };
-							//actorStates[actorId] = asd;
 							auto [inserted, insert_result] = actorStates.emplace(actorId, ActorStateData{ std::move(actorObject), classNet, actorId, name_id, classId, typeId });
 							for(const auto& createdFunc : createdCallbacks)
 							{
@@ -935,9 +864,9 @@ public:
 		return found->second;
 	}
 
-	const uint16_t ReplayFile::GetPropertyIndexById(const std::shared_ptr<ClassNet>& cn, const int id) const
+	const uint16_t ReplayFile::GetPropertyIndexById(const std::shared_ptr<ClassNet>& cn, const int32_t id) const
 	{
-		for (int i = 0; i < cn->prop_indexes_size; i++)
+		for (int32_t i = 0; i < cn->prop_indexes_size; i++)
 		{
 			if (cn->prop_indexes[i].prop_id == id)
 			{

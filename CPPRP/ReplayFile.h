@@ -88,7 +88,6 @@ namespace CPPRP
 		const bool VerifyCRC(CrcCheck verifyWhat);
 		void Parse(const uint32_t startPos = 0, int32_t endPos = -1, const uint32_t frameCount = 0);
 	
-		void PreprocessTables();
 		std::string GetParseLog(size_t amount);
 	protected:
 		void MergeDuplicates();
@@ -97,7 +96,7 @@ namespace CPPRP
 		const std::pair<const uint32_t, const KeyFrame> GetNearestKeyframe(uint32_t frame) const;
 		const bool ParseProperty(const std::shared_ptr<Property>& currentProperty);
 		const std::shared_ptr<ClassNet>& GetClassnetByNameWithLookup(const std::string& name) const;
-		const uint16_t GetPropertyIndexById(const std::shared_ptr<ClassNet>& cn, const int id) const;
+		const uint16_t GetPropertyIndexById(const std::shared_ptr<ClassNet>& cn, const int32_t id) const;
 		const uint16_t GetMaxPropertyId(ClassNet* cn);
 		const uint16_t FindMaxPropertyId(const ClassNet* cn, uint16_t maxProp) const;
 
