@@ -525,7 +525,7 @@ namespace CPPRP
 			bool bReplicatedHandbrake;
 			bool bDriving;
 			unsigned char ReplicatedSteer;
-
+			bool bHasPostMatchCelebration;
 			//Unused
 			bool bPodiumMode;
 		};

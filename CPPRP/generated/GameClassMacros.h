@@ -285,6 +285,7 @@ GAMEFIELD(TAGame, Vehicle_TA, ReplicatedThrottle, unsigned char);
 GAMEFIELD(TAGame, Vehicle_TA, bReplicatedHandbrake, bool);
 GAMEFIELD(TAGame, Vehicle_TA, bDriving, bool);
 GAMEFIELD(TAGame, Vehicle_TA, ReplicatedSteer, unsigned char);
+GAMEFIELD(TAGame, Vehicle_TA, bHasPostMatchCelebration, bool);
 GAMEFIELD(TAGame, Vehicle_TA, bPodiumMode, bool);
 GAMECLASS(TAGame, Car_TA);
 GAMEFIELD(TAGame, Car_TA, AttachedPickup, struct ActiveActor);
