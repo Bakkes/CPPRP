@@ -168,6 +168,7 @@ GAMEFIELD(TAGame, PRI_TA, ClientLoadout, struct ClientLoadout);
 GAMEFIELD(TAGame, PRI_TA, CameraSettings, struct CameraSettings);
 GAMEFIELD(TAGame, PRI_TA, SecondaryTitle, struct ReplicatedTitle);
 GAMEFIELD(TAGame, PRI_TA, PlayerHistoryKey, struct HistoryKey);
+GAMEFIELD(TAGame, PRI_TA, bIdleBanned, bool);
 GAMEFIELD(TAGame, PRI_TA, bIsDistracted, bool);
 GAMEFIELD(TAGame, PRI_TA, ReplacingBotPRI, ActiveActor);
 GAMEFIELD(TAGame, PRI_TA, CurrentVoiceRoom, std::string);

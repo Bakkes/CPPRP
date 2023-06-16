@@ -261,7 +261,7 @@ namespace CPPRP
 			struct CameraSettings CameraSettings;
 			struct ReplicatedTitle SecondaryTitle;
 			struct HistoryKey PlayerHistoryKey;
-			
+			bool bIdleBanned;
 
 			bool bIsDistracted;
 
