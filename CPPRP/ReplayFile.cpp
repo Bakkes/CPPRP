@@ -253,7 +253,7 @@ namespace CPPRP
 		constexpr uint32_t CRC_SEED = 0xEFCBF201;
 		if (verifyWhat & CRC_Header)
 		{
-			const uint32_t headerCalculatedCRC2 = CalculateCRC_SB16(*reinterpret_cast<std::vector<uint8_t>*>(data.data()),
+			const uint32_t headerCalculatedCRC2 = CalculateCRC_SB16(*reinterpret_cast<std::vector<uint8_t>*>(&data),
 				static_cast<size_t>(bitReader.GetAbsoluteBytePosition()),
 				static_cast<size_t>(headerSize), CRC_SEED);
 
@@ -281,7 +281,7 @@ namespace CPPRP
 		}
 
 		//cast is ugly but works
-		const uint32_t bodyCalculatedCRC2 = CalculateCRC_SB16(*reinterpret_cast<std::vector<uint8_t>*>(data.data()),
+		const uint32_t bodyCalculatedCRC2 = CalculateCRC_SB16(*reinterpret_cast<std::vector<uint8_t>*>(&data),
 			static_cast<size_t>(bitReader.GetAbsoluteBytePosition()),
 			static_cast<size_t>(bodySize), CRC_SEED);
 
