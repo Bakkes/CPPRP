@@ -205,6 +205,7 @@ GAMEFIELD(TAGame, CarComponent_Boost_TA, bUnlimitedBoost, bool);
 GAMEFIELD(TAGame, CarComponent_Boost_TA, UnlimitedBoostRefCount, uint32_t);
 GAMEFIELD(TAGame, CarComponent_Boost_TA, bNoBoost, bool);
 GAMEFIELD(TAGame, CarComponent_Boost_TA, ReplicatedBoostAmount, uint8_t);
+GAMEFIELD(TAGame, CarComponent_Boost_TA, ReplicatedBoost, ReplicatedBoostData);
 GAMEFIELD(TAGame, CarComponent_Boost_TA, RechargeRate, float);
 GAMEFIELD(TAGame, CarComponent_Boost_TA, BoostModifier, float);
 GAMEFIELD(TAGame, CarComponent_Boost_TA, StartBoostAmount, float);

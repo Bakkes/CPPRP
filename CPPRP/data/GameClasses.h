@@ -332,6 +332,8 @@ namespace CPPRP
 			uint32_t UnlimitedBoostRefCount;
 			bool bNoBoost;
 			uint8_t ReplicatedBoostAmount;
+			ReplicatedBoostData ReplicatedBoost;
+
 			float RechargeRate;
 			float BoostModifier;
 

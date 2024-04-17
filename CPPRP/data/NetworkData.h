@@ -332,6 +332,14 @@ namespace CPPRP
 		Rotator rotation;
 	};
 
+	struct ReplicatedBoostData
+	{
+		uint8_t grant_count;
+		uint8_t boost_amount;
+		uint8_t unused1;
+		uint8_t unused2;
+	};
+
 	enum EBreakoutDamageState
 	{
 		DamageState_Start,

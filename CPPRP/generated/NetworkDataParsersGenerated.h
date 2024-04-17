@@ -240,6 +240,18 @@ inline const WeldedInfo Consume(CPPBitReader<BitReaderType>& reader)
 
 
 template<>
+inline const ReplicatedBoostData Consume(CPPBitReader<BitReaderType>& reader) 
+{
+	ReplicatedBoostData item;
+	item.grant_count = reader.read<uint8_t>();
+	item.boost_amount = reader.read<uint8_t>();
+	item.unused1 = reader.read<uint8_t>();
+	item.unused2 = reader.read<uint8_t>();
+	return item;
+}
+
+
+template<>
 inline const DamageState Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	DamageState item;

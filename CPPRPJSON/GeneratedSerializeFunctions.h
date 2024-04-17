@@ -509,6 +509,22 @@ inline const void Serialize(Writer& writer, const WeldedInfo& item)
 
 
 template<typename Writer>
+inline const void Serialize(Writer& writer, const ReplicatedBoostData& item)
+{
+	writer.StartObject();
+	writer.Key("grant_count");
+	Serialize(writer, item.grant_count);
+	writer.Key("boost_amount");
+	Serialize(writer, item.boost_amount);
+	writer.Key("unused1");
+	Serialize(writer, item.unused1);
+	writer.Key("unused2");
+	Serialize(writer, item.unused2);
+	writer.EndObject();
+}
+
+
+template<typename Writer>
 inline const void Serialize(Writer& writer, const DamageState& item)
 {
 	writer.StartObject();
