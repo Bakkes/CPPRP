@@ -634,6 +634,7 @@ namespace CPPRP
 			struct ReplicatedStateIndex ReplicatedStateIndex; //Might actually just be an uint8_t??
 			struct ActiveActor GameOwner; //PRI_TA
 			bool bIsBotMatch;
+			uint64_t MatchStartEpoch;
 			//struct CustomMatchSettings MatchSettings;
 		};
 

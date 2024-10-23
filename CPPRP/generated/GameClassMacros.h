@@ -353,6 +353,7 @@ GAMEFIELD(TAGame, GameEvent_TA, GameMode, struct GameMode);
 GAMEFIELD(TAGame, GameEvent_TA, ReplicatedStateIndex, struct ReplicatedStateIndex);
 GAMEFIELD(TAGame, GameEvent_TA, GameOwner, struct ActiveActor);
 GAMEFIELD(TAGame, GameEvent_TA, bIsBotMatch, bool);
+GAMEFIELD(TAGame, GameEvent_TA, MatchStartEpoch, uint64_t);
 GAMECLASS(TAGame, GameEvent_Team_TA);
 GAMEFIELD(TAGame, GameEvent_Team_TA, MaxTeamSize, uint32_t);
 GAMEFIELD(TAGame, GameEvent_Team_TA, bForfeit, bool);

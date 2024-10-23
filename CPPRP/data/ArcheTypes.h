@@ -23,7 +23,7 @@ namespace CPPRP
 		{{"TAGame.GameEvent_Tutorial_TA"}, {"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Aerial", "GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Goalie", "GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Striker_TA", "GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Striker"}},
 		//{{"TAGame.GameEvent_Tutorial_Goalie_TA"}, {"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Goalie"}},
 		//{{"TAGame.GameEvent_Tutorial_Striker_TA"}, {"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Striker_TA"}},
-		{{"TAGame.GameEvent_Soccar_TA"}, {/*"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Aerial",*/ "Archetypes.GameEvent.GameEvent_Basketball", "Archetypes.GameEvent.GameEvent_Hockey", "Archetypes.GameEvent.GameEvent_Soccar", "Archetypes.GameEvent.GameEvent_Items", "Archetypes.GameEvent.GameEvent_SoccarLan", "Archetypes.GameEvent.GameEvent_FTE_Part1_Prime"}},
+		{{"TAGame.GameEvent_Soccar_TA"}, {/*"GameInfo_Tutorial.GameEvent.GameEvent_Tutorial_Aerial",*/ "Archetypes.GameEvent.GameEvent_Basketball", "Archetypes.GameEvent.GameEvent_Hockey", "Archetypes.GameEvent.GameEvent_Soccar", "Archetypes.GameEvent.GameEvent_Items", "Archetypes.GameEvent.GameEvent_SoccarLan", "Archetypes.GameEvent.GameEvent_FTE_Part1_Prime", "GameInfo_Basketball.GameInfo.GameInfo_Basketball:Archetype"}},
 		{{"TAGame.GameEvent_SoccarPrivate_TA"}, {"Archetypes.GameEvent.GameEvent_SoccarPrivate", "Archetypes.GameEvent.GameEvent_BasketballPrivate", "Archetypes.GameEvent.GameEvent_HockeyPrivate"}},
 		{{"TAGame.GameEvent_SoccarSplitscreen_TA"}, {"Archetypes.GameEvent.GameEvent_SoccarSplitscreen", "Archetypes.GameEvent.GameEvent_BasketballSplitscreen", "Archetypes.GameEvent.GameEvent_HockeySplitscreen"}},
 		{{"TAGame.GameEvent_Season_TA"}, {"Archetypes.GameEvent.GameEvent_Season"}},
