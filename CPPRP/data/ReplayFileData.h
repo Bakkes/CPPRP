@@ -159,9 +159,17 @@ namespace CPPRP
 		std::string value;
 	};
 
+
 	struct Property;
+
+	struct StructProperty
+	{
+		std::string name;
+		std::vector<std::shared_ptr<Property>> fields;
+	};
+
 	using PropertyObj = std::unordered_map<std::string, std::shared_ptr<Property>>;
-	using PropertyValue = std::variant<std::string, int32_t, uint32_t, uint8_t, uint64_t, float, EnumProperty, std::vector<PropertyObj>>;
+	using PropertyValue = std::variant<std::string, int32_t, uint32_t, uint8_t, uint64_t, float, EnumProperty, std::vector<PropertyObj>, StructProperty>;
 
 
 	struct Property

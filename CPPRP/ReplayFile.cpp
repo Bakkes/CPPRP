@@ -729,9 +729,10 @@ namespace CPPRP
 		}
 		currentProperty->property_type = fullReplayBitReader->read<std::string>();
 		const uint32_t propertySize = fullReplayBitReader->read<uint32_t>();
-		const uint32_t idk = fullReplayBitReader->read<uint32_t>();
+		const uint32_t idk = fullReplayBitReader->read<uint32_t>(); //Seems to be index of array
 
 		//Not sure why I'm doing these micro optimizations here, kinda hurts readability and its only like a nanosecond
+		//Update october 2024, this came back to bite me in the ass, good job 2018 me
 		switch (currentProperty->property_type[0])
 		{
 		case 'N':
@@ -751,9 +752,37 @@ namespace CPPRP
 			currentProperty->value = fullReplayBitReader->read<int32_t>();
 		}
 		break;
-		case 'S': //StringProperty
+		case 'S': //StrProperty / StructProperty
 		{
-			currentProperty->value = fullReplayBitReader->read<std::string>();
+			if (currentProperty->property_type[3] == 'u') //Type is "StructProperty"
+			{
+				auto structName = fullReplayBitReader->read<std::string>();
+
+				std::vector<std::shared_ptr<Property>> structFields;
+
+				while (true)
+				{
+					auto prop = std::make_shared<Property>();
+					const bool moreToParse = ParseProperty(prop);
+					if (!moreToParse)
+					{
+						break;
+					}
+					structFields.push_back(prop);
+				}
+
+				
+				currentProperty->value = StructProperty{ .name = structName, .fields = structFields };
+			} 
+			else if (currentProperty->property_type[3] == 'P') //Type is "StrProperty"
+			{
+				currentProperty->value = fullReplayBitReader->read<std::string>();
+			}
+			else
+			{
+				assert(1==2);
+			}
+			
 		}
 		break;
 		case 'B':
@@ -762,15 +791,22 @@ namespace CPPRP
 			{
 				EnumProperty ep;
 				ep.type = fullReplayBitReader->read<std::string>();
+				
 				if (ep.type.compare("OnlinePlatform_Steam") == 0 || ep.type.compare("OnlinePlatform_PS4") == 0) //for some reason if string is this, there's no value.
 				{
 					ep.value = "";
-					//fullReplayBitReader->read<uint32_t>();
+				}
+				else if (ep.type.compare("None") == 0)
+				{
+					//TODO: Regression test on older replays
+					//I guess this just means its a normal char type (int8)
+					ep.value = fullReplayBitReader->read<uint8_t>(8);
 				}
 				else
 				{
 					ep.value = fullReplayBitReader->read<std::string>(); //Value
 				}
+				
 				currentProperty->value = ep;
 			}
 			else //Type is "BoolProperty", but unlike network data, is stored as entire byte

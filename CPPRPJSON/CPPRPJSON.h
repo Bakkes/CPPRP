@@ -53,7 +53,29 @@ void SerializeProp(Writer& writer, const std::string& name, std::shared_ptr<CPPR
 		break;
 		case 'S': //StringProperty
 		{
-			writer.String(std::get<std::string>(currentProperty->value).c_str());
+			if (currentProperty->property_type[3] == 'u') //Type is "StructProperty"
+			{
+				auto& structProp = std::get<CPPRP::StructProperty>(currentProperty->value);
+				writer.StartObject();
+				writer.String("Name");
+				writer.String(structProp.name);
+				writer.String("Fields");
+
+				writer.StartArray();
+				for (auto& field : structProp.fields)
+				{
+					writer.StartObject();
+					SerializeProp(writer, field->property_name, field, specialByteProp);
+					writer.EndObject();
+				}
+				writer.EndArray();
+
+				writer.EndObject();
+			}
+			else
+			{
+				writer.String(std::get<std::string>(currentProperty->value).c_str());
+			}
 		}
 		break;
 		case 'B':
@@ -65,7 +87,21 @@ void SerializeProp(Writer& writer, const std::string& name, std::shared_ptr<CPPR
 				writer.String("Type");
 				writer.String(ep.type.c_str());
 				writer.String("Value");
-				writer.String(ep.value.c_str());
+
+				if (uint8_t* val = std::get_if<uint8_t>(&ep.value))
+				{
+					writer.Int(*val);
+				} 
+				else if (std::string* val = std::get_if<std::string>(&ep.value))
+				{
+					writer.String(val->c_str());
+				}
+				else
+				{
+					writer.String("ERROR!!");
+					assert(1 == 2);
+				}
+				
 				writer.EndObject();
 			}
 			else //Type is "BoolProperty", but unlike network data, is stored as entire byte
