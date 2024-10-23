@@ -156,7 +156,7 @@ namespace CPPRP
 	struct EnumProperty
 	{
 		std::string type;
-		std::string value;
+		std::variant<std::string, uint8_t> value;
 	};
 
 
