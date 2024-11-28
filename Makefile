@@ -29,7 +29,7 @@ else
 endif
 BUILDFLAGS := -DDEBUG=$(DEBUG) -DRELEASE=$(RELEASE)
 CXX ?= g++-9
-CXXFLAGS ?= -fPIC -std=c++17 -static-libstdc++ $(INC_FLAGS) -w  -Wfatal-errors -DCPPRP_PRETTYSUPPORT -lstdc++fs #-DPARSE_UNSAFE 
+CXXFLAGS ?= -fPIC -std=c++20 -static-libstdc++ $(INC_FLAGS) -w  -Wfatal-errors -DCPPRP_PRETTYSUPPORT -lstdc++fs #-DPARSE_UNSAFE
 LDFLAGS ?= ${LIB_FLAGS}
 ifeq ($(RELEASE),0)
 	CXXFLAGS += -O0 -ggdb
