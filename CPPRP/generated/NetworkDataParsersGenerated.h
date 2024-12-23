@@ -130,6 +130,25 @@ inline const DemolishDataGoalExplosion Consume(CPPBitReader<BitReaderType>& read
 
 
 template<>
+inline const DemolishDataExtended Consume(CPPBitReader<BitReaderType>& reader) 
+{
+	DemolishDataExtended item;
+	item.attacker_pri = Consume<ActiveActor>(reader);
+	item.self_demofx = Consume<ActiveActor>(reader);
+	item.self_demolish = reader.read<bool>();
+	item.goal_explosion_owner_flag = reader.read<bool>();
+	item.goal_explosion_owner = reader.read<int32_t>();
+	item.attacker_flag = reader.read<bool>();
+	item.attacker_actor_id = reader.read<int32_t>();
+	item.victim_flag = reader.read<bool>();
+	item.victim_actor_id = reader.read<int32_t>();
+	item.attacker_velocity = reader.read<Vector3>();
+	item.victim_velocity = reader.read<Vector3>();
+	return item;
+}
+
+
+template<>
 inline const ReplicatedMusicStringer Consume(CPPBitReader<BitReaderType>& reader) 
 {
 	ReplicatedMusicStringer item;

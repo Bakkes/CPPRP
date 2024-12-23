@@ -540,6 +540,7 @@ namespace CPPRP
 			float ReplicatedCarScale;
 			float AddedBallForceMultiplier;
 			struct TeamPaint TeamPaint;
+			struct DemolishDataExtended ReplicatedDemolishExtended;
 			struct ReplicatedDemolish ReplicatedDemolish;
 			struct ReplicatedDemolish2 ReplicatedDemolish_CustomFX;
 			struct DemolishDataGoalExplosion ReplicatedDemolishGoalExplosion;

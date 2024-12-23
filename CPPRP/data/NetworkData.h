@@ -168,7 +168,29 @@ namespace CPPRP
 		int32_t victim_actor_id;
 		Vector3 attacker_velocity;
 		Vector3 victim_velocity;
+	};
+
+	//Extends from DemolishDataGoalExplosion, see comment there
+	//TODO: maybe? change all _flag + _id in the whole file to activeactors/object targets
+	// if no dependencies break
+	//Also these CallConsumes should be deducible automatically.
+	struct DemolishDataExtended
+	{
+		__ParserAttribute__(CallConsume, true)
+		ActiveActor attacker_pri; 
+
+		__ParserAttribute__(CallConsume, true)
+		ActiveActor self_demofx;        
 		
+		bool self_demolish;
+		bool goal_explosion_owner_flag;
+		int32_t goal_explosion_owner;
+		bool attacker_flag;
+		int32_t attacker_actor_id;
+		bool victim_flag;
+		int32_t victim_actor_id;
+		Vector3 attacker_velocity;
+		Vector3 victim_velocity;
 	};
 
 	struct ReplicatedMusicStringer
