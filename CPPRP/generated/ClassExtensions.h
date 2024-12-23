@@ -33,6 +33,7 @@ namespace CPPRP {
 		, {"TAGame.CarComponent_Dodge_KO_TA","TAGame.CarComponent_Dodge_TA"}
 		, {"TAGame.CarComponent_FlipCar_TA","TAGame.CarComponent_TA"}
 		, {"TAGame.CarComponent_Torque_TA","TAGame.CarComponent_TA"}
+		, {"TAGame.CarComponent_TerritoryDemolish_TA","TAGame.CarComponent_TA"}
 		, {"TAGame.Ball_TA","TAGame.RBActor_TA"}
 		, {"TAGame.Team_TA","Engine.TeamInfo"}
 		, {"TAGame.Team_Soccar_TA","TAGame.Team_TA"}
@@ -93,6 +94,8 @@ namespace CPPRP {
 		, {"TAGame.Stunlock_TA","Engine.Actor"}
 		, {"TAGame.PlayerStart_Platform_TA","Engine.Actor"}
 		, {"TAGame.FreeplayCommands_TA","Engine.Actor"}
+		, {"TAGame.DynamicMeshActor_TA","Engine.Actor"}
+		, {"TAGame.TrackerWallDynamicMeshActor_TA","TAGame.DynamicMeshActor_TA"}
 	};
 };
 

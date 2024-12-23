@@ -69,6 +69,9 @@ namespace CPPRP
 		{{"TAGame.CarComponent_Dodge_KO_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype.Dodge"}},
 		{{"TAGame.CarComponent_DoubleJump_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype.DoubleJump"}},
 		{{"TAGame.CarComponent_Boost_KO_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype.Boost"}},
+		{{"TAGame.CarComponent_TerritoryDemolish_TA"}, {"Archetypes.CarComponents.CarComponent_TerritoryDemolish"}},
+
+		{{"TAGame.TrackerWallDynamicMeshActor_TA"}, {"TAGame.Default__TrackerWallDynamicMeshActor_TA"} },
 		{{"TAGame.Stunlock_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype.StunlockArchetype"}}
 	};
 }

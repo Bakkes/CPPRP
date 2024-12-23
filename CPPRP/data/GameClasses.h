@@ -372,6 +372,11 @@ namespace CPPRP
 			int32_t ReplicatedTorqueInput;
 		};
 
+		struct CarComponent_TerritoryDemolish_TA : public CarComponent_TA
+		{
+
+		};
+
 		struct Ball_TA : public RBActor_TA
 		{
 			struct ActiveActor GameEvent;
@@ -385,6 +390,7 @@ namespace CPPRP
 			float ReplicatedBallMaxLinearSpeedScale;
 			struct ReplicatedExplosionDataExtended ReplicatedExplosionDataExtended;
 			Vector3I MagnusCoefficient;
+			bool bWarnBallReset;
 
 			//Unused
 			bool bEndOfGameHidden;
@@ -782,6 +788,16 @@ namespace CPPRP
 
 
 		struct FreeplayCommands_TA : public Engine::Actor
+		{
+
+		};
+
+		struct DynamicMeshActor_TA : public Engine::Actor
+		{
+
+		};
+
+		struct TrackerWallDynamicMeshActor_TA : public DynamicMeshActor_TA
 		{
 
 		};

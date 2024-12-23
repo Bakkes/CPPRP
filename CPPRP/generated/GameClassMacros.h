@@ -223,6 +223,7 @@ GAMEFIELD(TAGame, CarComponent_FlipCar_TA, FlipCarTime, float);
 GAMECLASS(TAGame, CarComponent_Torque_TA);
 GAMEFIELD(TAGame, CarComponent_Torque_TA, TorqueScale, float);
 GAMEFIELD(TAGame, CarComponent_Torque_TA, ReplicatedTorqueInput, int32_t);
+GAMECLASS(TAGame, CarComponent_TerritoryDemolish_TA);
 GAMECLASS(TAGame, Ball_TA);
 GAMEFIELD(TAGame, Ball_TA, GameEvent, struct ActiveActor);
 GAMEFIELD(TAGame, Ball_TA, ReplicatedPhysMatOverride, struct ObjectTarget);
@@ -235,6 +236,7 @@ GAMEFIELD(TAGame, Ball_TA, ReplicatedExplosionData, struct ReplicatedExplosionDa
 GAMEFIELD(TAGame, Ball_TA, ReplicatedBallMaxLinearSpeedScale, float);
 GAMEFIELD(TAGame, Ball_TA, ReplicatedExplosionDataExtended, struct ReplicatedExplosionDataExtended);
 GAMEFIELD(TAGame, Ball_TA, MagnusCoefficient, Vector3I);
+GAMEFIELD(TAGame, Ball_TA, bWarnBallReset, bool);
 GAMEFIELD(TAGame, Ball_TA, bEndOfGameHidden, bool);
 GAMECLASS(TAGame, Team_TA);
 GAMEFIELD(TAGame, Team_TA, LogoData, struct LogoData);
@@ -417,4 +419,6 @@ GAMEFIELD(TAGame, Stunlock_TA, StunTimeRemaining, float);
 GAMECLASS(TAGame, PlayerStart_Platform_TA);
 GAMEFIELD(TAGame, PlayerStart_Platform_TA, bActive, bool);
 GAMECLASS(TAGame, FreeplayCommands_TA);
+GAMECLASS(TAGame, DynamicMeshActor_TA);
+GAMECLASS(TAGame, TrackerWallDynamicMeshActor_TA);
 
