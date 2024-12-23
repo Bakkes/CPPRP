@@ -636,6 +636,7 @@ namespace CPPRP
 			struct ActiveActor GameOwner; //PRI_TA
 			bool bIsBotMatch;
 			uint64_t MatchStartEpoch;
+			std::string RichPresenceString;
 			//struct CustomMatchSettings MatchSettings;
 		};
 
@@ -669,6 +670,7 @@ namespace CPPRP
 			bool bMatchEnded;
 			unsigned char ReplicatedServerPerformanceState;
 			uint32_t MaxScore;
+			bool bShouldSpawnGoalIndicators;
 		};
 
 		struct GameEvent_KnockOut_TA : public GameEvent_Soccar_TA
@@ -778,6 +780,11 @@ namespace CPPRP
 			bool bActive;
 		};
 
+
+		struct FreeplayCommands_TA : public Engine::Actor
+		{
+
+		};
 	};
 
 

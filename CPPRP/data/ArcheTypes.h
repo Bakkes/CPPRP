@@ -46,6 +46,7 @@ namespace CPPRP
 		{{"TAGame.SpecialPickup_HitForce_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_StrongHit", "Archetypes.SpecialPickups.BM.SpecialPickup_StrongHit_BM"}},
 		{{"TAGame.SpecialPickup_Batarang_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Batarang"}},
 		{{"TAGame.SpecialPickup_Football_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Football"}},
+		{{"TAGame.FreeplayCommands_TA"}, {"TAGame.Default__FreeplayCommands_TA"} },
 		//{{"TAGame.SpecialPickup_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Swapper"}},
 		//{{"TAGame.SpecialPickup_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_GravityWell"}},
 		//{{"TAGame.InMapScoreboard_TA"}, {"Neotokyo_p.TheWorld:PersistentLevel.InMapScoreboard_TA_1"}},

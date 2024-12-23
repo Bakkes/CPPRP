@@ -92,6 +92,7 @@ namespace CPPRP {
 		, {"TAGame.Cannon_TA","Engine.Actor"}
 		, {"TAGame.Stunlock_TA","Engine.Actor"}
 		, {"TAGame.PlayerStart_Platform_TA","Engine.Actor"}
+		, {"TAGame.FreeplayCommands_TA","Engine.Actor"}
 	};
 };
 

@@ -355,6 +355,7 @@ GAMEFIELD(TAGame, GameEvent_TA, ReplicatedStateIndex, struct ReplicatedStateInde
 GAMEFIELD(TAGame, GameEvent_TA, GameOwner, struct ActiveActor);
 GAMEFIELD(TAGame, GameEvent_TA, bIsBotMatch, bool);
 GAMEFIELD(TAGame, GameEvent_TA, MatchStartEpoch, uint64_t);
+GAMEFIELD(TAGame, GameEvent_TA, RichPresenceString, std::string);
 GAMECLASS(TAGame, GameEvent_Team_TA);
 GAMEFIELD(TAGame, GameEvent_Team_TA, MaxTeamSize, uint32_t);
 GAMEFIELD(TAGame, GameEvent_Team_TA, bForfeit, bool);
@@ -379,6 +380,7 @@ GAMEFIELD(TAGame, GameEvent_Soccar_TA, ReplicatedScoredOnTeam, unsigned char);
 GAMEFIELD(TAGame, GameEvent_Soccar_TA, bMatchEnded, bool);
 GAMEFIELD(TAGame, GameEvent_Soccar_TA, ReplicatedServerPerformanceState, unsigned char);
 GAMEFIELD(TAGame, GameEvent_Soccar_TA, MaxScore, uint32_t);
+GAMEFIELD(TAGame, GameEvent_Soccar_TA, bShouldSpawnGoalIndicators, bool);
 GAMECLASS(TAGame, GameEvent_KnockOut_TA);
 GAMEFIELD(TAGame, GameEvent_KnockOut_TA, PlayerLives, int);
 GAMECLASS(TAGame, GameEvent_Breakout_TA);
@@ -414,4 +416,5 @@ GAMEFIELD(TAGame, Stunlock_TA, MaxStunTime, float);
 GAMEFIELD(TAGame, Stunlock_TA, StunTimeRemaining, float);
 GAMECLASS(TAGame, PlayerStart_Platform_TA);
 GAMEFIELD(TAGame, PlayerStart_Platform_TA, bActive, bool);
+GAMECLASS(TAGame, FreeplayCommands_TA);
 
