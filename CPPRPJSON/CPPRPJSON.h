@@ -265,8 +265,13 @@ int SerializeReplay(Writer& writer, const std::shared_ptr<CPPRP::ReplayFile>& re
 
 				std::string name = replayFile->replayFile->names.at(created.nameId);
 				std::string className = replayFile->replayFile->objects.at(created.classNameId);
+				
 				writer.String("Name");
 				writer.String(name);
+
+				std::string& archetypeName = replayFile->replayFile->objects.at(created.typeId);
+				writer.String("Archetype");
+				writer.String(archetypeName);
 
 				writer.String("ClassName");
 				writer.String(className);
