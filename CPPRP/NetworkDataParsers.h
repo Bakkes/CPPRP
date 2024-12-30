@@ -285,6 +285,10 @@ namespace CPPRP
 		//Is always an unique ID
 		if (reinterpret_cast<UniqueId*>(&item.player_id)->platform == Platform_Unknown && (reader.licenseeVersion <= 18 || reader.netVersion != 0))
 		{
+			//Need to find out better conditions for this, when did this change?
+			//Doing it this way will break old replay parsing in some instances I think
+			//(reader.engineVersion >= 868 && reader.licenseeVersion >= 12) should work, and just ignore older rocket host replays?
+			item.player_name = reader.ReadNullTerminatedString();
 		}
 		else
 		{

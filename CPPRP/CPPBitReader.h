@@ -239,6 +239,21 @@ namespace CPPRP
 		void goback(int32_t num);
 		void skip(uint32_t num);
 
+		const std::string ReadNullTerminatedString() noexcept
+		{
+			//Very unoptimized, but only called once in very specific replays (rocket host) at the moment 
+			constexpr int ARBITRARY_MAX_NAME_LENGTH = 255;
+			std::string returnString;
+
+			while (canRead(sizeof(char)) && returnString.size() < ARBITRARY_MAX_NAME_LENGTH)
+			{
+				int charRead = read<char>();
+				if (charRead == 0) break;
+				returnString += charRead;
+			}
+			return returnString;
+		}
+
 		const size_t GetAbsoluteBytePosition() const noexcept;
 		const size_t GetAbsoluteBitPosition() const noexcept;
 	};
