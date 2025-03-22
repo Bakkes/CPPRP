@@ -226,6 +226,13 @@ namespace CPPRP
 			uint32_t TotalXP;
 			uint32_t MatchScore;
 			uint32_t MatchSaves;
+			int PossessionSteals;
+			int PossessionDenials;
+			int PossessionClears;
+			int BallDemolitionSaves;
+			int CarDemolitions;
+			int BallDemolitions;
+			int SelfDemolitions;
 			uint32_t Title;
 			uint64_t ClubID;
 			int MaxTimeTillItem;
@@ -262,7 +269,6 @@ namespace CPPRP
 			struct ReplicatedTitle SecondaryTitle;
 			struct HistoryKey PlayerHistoryKey;
 			bool bIdleBanned;
-
 			bool bIsDistracted;
 
 			//Unused
