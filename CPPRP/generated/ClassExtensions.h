@@ -96,6 +96,7 @@ namespace CPPRP {
 		, {"TAGame.FreeplayCommands_TA","Engine.Actor"}
 		, {"TAGame.DynamicMeshActor_TA","Engine.Actor"}
 		, {"TAGame.TrackerWallDynamicMeshActor_TA","TAGame.DynamicMeshActor_TA"}
+		, {"TAGame.ViralItemActor_TA","Engine.Actor"}
 	};
 };
 

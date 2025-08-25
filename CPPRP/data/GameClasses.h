@@ -274,6 +274,7 @@ namespace CPPRP
 			//Unused
 			ActiveActor ReplacingBotPRI;
 			std::string CurrentVoiceRoom;
+			ActiveActor ViralItemActor;
 			//PlayerReplicatedEventInfo_TA               PREI
 		};
 
@@ -649,6 +650,7 @@ namespace CPPRP
 			bool bIsBotMatch;
 			uint64_t MatchStartEpoch;
 			std::string RichPresenceString;
+			bool bAlwaysShowMatchTypeLabel;
 			//struct CustomMatchSettings MatchSettings;
 		};
 
@@ -683,6 +685,7 @@ namespace CPPRP
 			unsigned char ReplicatedServerPerformanceState;
 			uint32_t MaxScore;
 			bool bShouldSpawnGoalIndicators;
+			bool bReadyToStartGame;
 		};
 
 		struct GameEvent_KnockOut_TA : public GameEvent_Soccar_TA
@@ -806,6 +809,11 @@ namespace CPPRP
 		struct TrackerWallDynamicMeshActor_TA : public DynamicMeshActor_TA
 		{
 
+		};
+
+		struct ViralItemActor_TA : public Engine::Actor {
+			unsigned char InfectedStatus;
+			unsigned char ClientFXInfectedType;
 		};
 	};
 

@@ -72,6 +72,7 @@ namespace CPPRP
 		{{"TAGame.CarComponent_TerritoryDemolish_TA"}, {"Archetypes.CarComponents.CarComponent_TerritoryDemolish"}},
 
 		{{"TAGame.TrackerWallDynamicMeshActor_TA"}, {"TAGame.Default__TrackerWallDynamicMeshActor_TA"} },
-		{{"TAGame.Stunlock_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype.StunlockArchetype"}}
+		{{"TAGame.Stunlock_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype.StunlockArchetype"}},
+		{{"TAGame.ViralItemActor_TA" }, {"TAGame.Default__ViralItemActor_TA"} }
 	};
 }
