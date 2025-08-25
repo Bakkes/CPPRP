@@ -39,10 +39,10 @@ namespace CPPRP
 		{{"TAGame.SpecialPickup_BallLasso_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BallLasso", "Archetypes.SpecialPickups.BM.SpecialPickup_BallLasso_BM"}},
 		{{"TAGame.SpecialPickup_GrapplingHook_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BallGrapplingHook", "Archetypes.SpecialPickups.BM.SpecialPickup_BallGrapplingHook_BM"}},
 		{{"TAGame.SpecialPickup_Swapper_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Swapper", "Archetypes.SpecialPickups.BM.SpecialPickup_Swapper_BM"}},
-		{{"TAGame.SpecialPickup_BallFreeze_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BallFreeze", "Archetypes.SpecialPickups.BM.SpecialPickup_BallFreeze_BM"}},
+		{{"TAGame.SpecialPickup_BallFreeze_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BallFreeze", "Archetypes.SpecialPickups.BM.SpecialPickup_BallFreeze_BM", "Archetypes.Mutators.SubRules.ItemsMode_RPS:DispenserArchetype.ItemPool.Obj_2"}},
 		{{"TAGame.SpecialPickup_BoostOverride_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_BoostOverride", "Archetypes.SpecialPickups.BM.SpecialPickup_BoostOverride_BM"}},
 		{{"TAGame.SpecialPickup_Tornado_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Tornado", "Archetypes.SpecialPickups.BM.SpecialPickup_Tornado_BM"}},
-		{{"TAGame.SpecialPickup_BallCarSpring_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_CarSpring", "Archetypes.SpecialPickups.SpecialPickup_BallSpring", "Archetypes.SpecialPickups.BM.SpecialPickup_CarSpring_BM", "Archetypes.SpecialPickups.BM.SpecialPickup_BallSpring_BM"}},
+		{{"TAGame.SpecialPickup_BallCarSpring_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_CarSpring", "Archetypes.SpecialPickups.SpecialPickup_BallSpring", "Archetypes.SpecialPickups.BM.SpecialPickup_CarSpring_BM", "Archetypes.SpecialPickups.BM.SpecialPickup_BallSpring_BM", "Archetypes.Mutators.SubRules.ItemsMode_RPS:DispenserArchetype.ItemPool.Obj", "Archetypes.Mutators.SubRules.ItemsMode_RPS:DispenserArchetype.ItemPool.Obj_1"}},
 		{{"TAGame.SpecialPickup_HitForce_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_StrongHit", "Archetypes.SpecialPickups.BM.SpecialPickup_StrongHit_BM"}},
 		{{"TAGame.SpecialPickup_Batarang_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Batarang"}},
 		{{"TAGame.SpecialPickup_Football_TA"}, {"Archetypes.SpecialPickups.SpecialPickup_Football"}},
@@ -73,6 +73,7 @@ namespace CPPRP
 
 		{{"TAGame.TrackerWallDynamicMeshActor_TA"}, {"TAGame.Default__TrackerWallDynamicMeshActor_TA"} },
 		{{"TAGame.Stunlock_TA"}, {"Archetypes.KnockOut.GameEvent_Knockout:CarArchetype.StunlockArchetype"}},
-		{{"TAGame.ViralItemActor_TA" }, {"TAGame.Default__ViralItemActor_TA"} }
+		{{"TAGame.ViralItemActor_TA" }, {"TAGame.Default__ViralItemActor_TA"} },
+		{{"TAGame.SpecialPickup_BallFreeze_TA"}, {"Archetypes.Mutators.SubRules.ItemsMode_RPS:DispenserArchetype.ItemPool.Obj_2"}}
 	};
 }

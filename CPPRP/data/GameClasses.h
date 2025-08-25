@@ -398,6 +398,9 @@ namespace CPPRP
 			struct ReplicatedExplosionDataExtended ReplicatedExplosionDataExtended;
 			Vector3I MagnusCoefficient;
 			bool bWarnBallReset;
+			float AdditionalCarGroundBounceScaleXY;
+			float AdditionalCarGroundBounceScaleZ;
+			float MagnusMinSpeed;
 
 			//Unused
 			bool bEndOfGameHidden;
@@ -686,6 +689,8 @@ namespace CPPRP
 			uint32_t MaxScore;
 			bool bShouldSpawnGoalIndicators;
 			bool bReadyToStartGame;
+			bool bFullClubMatch;
+			int TotalGameBalls;
 		};
 
 		struct GameEvent_KnockOut_TA : public GameEvent_Soccar_TA

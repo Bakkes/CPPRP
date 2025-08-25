@@ -245,6 +245,9 @@ GAMEFIELD(TAGame, Ball_TA, ReplicatedBallMaxLinearSpeedScale, float);
 GAMEFIELD(TAGame, Ball_TA, ReplicatedExplosionDataExtended, struct ReplicatedExplosionDataExtended);
 GAMEFIELD(TAGame, Ball_TA, MagnusCoefficient, Vector3I);
 GAMEFIELD(TAGame, Ball_TA, bWarnBallReset, bool);
+GAMEFIELD(TAGame, Ball_TA, AdditionalCarGroundBounceScaleXY, float);
+GAMEFIELD(TAGame, Ball_TA, AdditionalCarGroundBounceScaleZ, float);
+GAMEFIELD(TAGame, Ball_TA, MagnusMinSpeed, float);
 GAMEFIELD(TAGame, Ball_TA, bEndOfGameHidden, bool);
 GAMECLASS(TAGame, Team_TA);
 GAMEFIELD(TAGame, Team_TA, LogoData, struct LogoData);
@@ -393,6 +396,8 @@ GAMEFIELD(TAGame, GameEvent_Soccar_TA, ReplicatedServerPerformanceState, unsigne
 GAMEFIELD(TAGame, GameEvent_Soccar_TA, MaxScore, uint32_t);
 GAMEFIELD(TAGame, GameEvent_Soccar_TA, bShouldSpawnGoalIndicators, bool);
 GAMEFIELD(TAGame, GameEvent_Soccar_TA, bReadyToStartGame, bool);
+GAMEFIELD(TAGame, GameEvent_Soccar_TA, bFullClubMatch, bool);
+GAMEFIELD(TAGame, GameEvent_Soccar_TA, TotalGameBalls, int);
 GAMECLASS(TAGame, GameEvent_KnockOut_TA);
 GAMEFIELD(TAGame, GameEvent_KnockOut_TA, PlayerLives, int);
 GAMECLASS(TAGame, GameEvent_Breakout_TA);
