@@ -270,7 +270,7 @@ namespace CPPRP
 			struct HistoryKey PlayerHistoryKey;
 			bool bIdleBanned;
 			bool bIsDistracted;
-
+			float TotalGameTimePlayed;
 			//Unused
 			ActiveActor ReplacingBotPRI;
 			std::string CurrentVoiceRoom;

@@ -177,6 +177,7 @@ GAMEFIELD(TAGame, PRI_TA, SecondaryTitle, struct ReplicatedTitle);
 GAMEFIELD(TAGame, PRI_TA, PlayerHistoryKey, struct HistoryKey);
 GAMEFIELD(TAGame, PRI_TA, bIdleBanned, bool);
 GAMEFIELD(TAGame, PRI_TA, bIsDistracted, bool);
+GAMEFIELD(TAGame, PRI_TA, TotalGameTimePlayed, float);
 GAMEFIELD(TAGame, PRI_TA, ReplacingBotPRI, ActiveActor);
 GAMEFIELD(TAGame, PRI_TA, CurrentVoiceRoom, std::string);
 GAMEFIELD(TAGame, PRI_TA, ViralItemActor, ActiveActor);
